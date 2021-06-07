@@ -1,0 +1,191 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.full-page {
+  width: 100%;
+  height: 100%;
+}
+
+.divider{
+  display: inline-block;
+  width: 1px;
+  height: 27px;
+  line-height: 70px;
+  background-color: #CFDAE3;
+  transform: scaleX(0.5);
+  vertical-align: middle;
+  margin: auto 20px;
+}
+
+.equ-tags{
+  .equ-logo{
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .equ-name{
+    vertical-align: middle;
+    padding-right: 11px;
+  }
+  .equ-option{
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    background: url("~assets/img/index/more.png") no-repeat;
+    background-size: 100%;
+    vertical-align: middle;
+    cursor: pointer;
+
+    &:hover{
+      background: url("~assets/img/index/more_active.png") no-repeat;
+      background-size: 100%;
+      vertical-align: middle;
+    }
+  }
+}
+.option-menu{
+  text-align: center;
+
+  .option-menu-item{
+    font-size: 14px;
+    padding: 0 32px;
+    line-height: 32px;
+
+    &:hover, &:active{
+      background: #E4EEF8;
+      color: #409EFF;
+    }
+  }
+}
+.hideLeft{
+  width: 0;
+}
+
+.logout{
+  display: inline-block;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  vertical-align: middle;
+  cursor: pointer;
+
+  &::before{
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    background: url("~assets/img/index/logout.png") no-repeat;
+    background-size: 100%;
+  }
+
+  &:hover{
+    &::before{
+      background: url("~assets/img/index/logout_active.png") no-repeat;
+      background-size: 100%;
+    }
+  }
+  &:active{
+    background: #D8E6F1;
+    &::before{
+      background: url("~assets/img/index/logout_active.png") no-repeat;
+      background-size: 100%;
+    }
+  }
+}
+
+.ant-btn{
+  padding: 0 24px;
+
+  &.ant-button-normal{
+    background: #F5AB3A;
+    color: #fff;
+  }
+
+  .btn-icon{
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+
+  &.ant-btn-opt-sm{
+    padding: 0 16px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 2px;
+  
+    .btn-icon{
+      margin: 0;
+    }
+  }
+  
+  &.ant-btn-opt-primary{
+    background: #E7F7EE;
+    border-color: #9BE8BC;
+  
+    &:hover{
+      background: #D3F3E0;
+    }
+    &:active{
+      background: #C5EAD5;
+    }
+  }
+  
+  &.ant-btn-opt-danger{
+    background: #FFF2F2;
+    border-color: #FEC5C5;
+  
+    &:hover{
+      background: #F8DADA;
+    }
+    &:active{
+      background: #EFCECE;
+    }
+  }
+  
+  &.ant-btn-opt-normal{
+    padding: 0 8px;
+    background: #E7F3FF;
+    border-color: #AFD6FF;
+  
+    &:hover{
+      background: #CEE3F7;
+    }
+    &:active{
+      background: #C7DBEF;
+    }
+  }
+}
+
+.btn-submint{
+  padding: 0 11px;
+}
+
+.ant-form-item{
+  &:last-child{
+    margin-bottom: 0;
+  }
+}
+
+.ant-modal-title{
+  text-align: center;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
