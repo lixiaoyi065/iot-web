@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Modal, Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 import "./index.less"
 
@@ -50,7 +49,8 @@ const AddEqu = (props) => {
     },
     //监听验证方式变化
     onChanguserIdentity = (e) => {
-      e === 1 ? setUserPane(true) : setUserPane(false)
+      console.log(e === 1)
+      e === "1" ? setUserPane(true) : setUserPane(false)
     },
   
     //监听协议名称的变化
@@ -367,7 +367,7 @@ const AddEqu = (props) => {
                   <Input/>
                 </Form.Item>
                 <Form.Item label="密码" className="Password">
-                  <Input prefix={<LockOutlined className="site-form-item-icon" />} type="password"/>
+                  <Input.Password />
                 </Form.Item>
               </>
             ):null
