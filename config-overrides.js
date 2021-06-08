@@ -46,7 +46,7 @@ module.exports = override(
       "@modal-heading-color": "#fff",
       "@modal-close-color": "#fff",
       "@modal-header-close-size": "50px",
-      "@modal-body-padding": "30px 44px 0",
+      "@modal-body-padding": "30px 44px 20px  ",
       "@modal-confirm-body-padding": "30px 44px 0",
       "@modal-footer-border-style": "none",
       "@modal-footer-padding-vertical": "20px",

@@ -62,9 +62,9 @@
     background-size: 100%;
   }
 }
-
 .ant-modal-content{
   .ant-btn{
+    margin-left: 20px;
     height: 32px;
     line-height: 32px;
     padding: 0 26px;
@@ -79,6 +79,18 @@
   }
   
   .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before{
-    content: "";
+    content: none;
+  }
+
+  .form-footer{
+    text-align: right;
+  }
+  .ant-form-item-label > label::after{
+    content: ':';
+    margin-right: 20px;
+  }
+
+  .ant-select,.ant-input,.ant-input-affix-wrapper{
+    width: 250px;
   }
 }

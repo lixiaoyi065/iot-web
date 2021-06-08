@@ -1,43 +1,68 @@
 import React, { PureComponent } from 'react'
-import { Dropdown, Modal, Form, Input, Select } from 'antd'
+import { Dropdown, Modal, Form, Input, Select, Button, message } from 'antd'
 
 import Ztree from 'components/common/Ztree'
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import DataTable from 'components/common/DataTable'
 
 import Search from './components/Search'
+import AddEqu from './components/AddEqu'
 
-import { getEquList } from 'api/variable/index'
+import { getEquList, addGroup } from 'api/variable/index'
 
 import './index.less'
+
+const { Option } = Select;
 
 class Variable extends PureComponent{
   state = {
     zNodes: [],
     loading: false,
     toogle: false,
-    isShow: false
+    isShowGroup: false,
+    isShowEqu: false,
   }
+  
 
   componentDidMount() {
+    //获取设备列表
     getEquList().then(res => {
       this.setState({ zNodes: res , loading: true})
     });
   }
   menuClick = (e) => {
-    console.log(e.key)
-    this.setState({isShow: true})
+    console.log(e.key, e.key === "addEqu")
+    if (e.key === "addEqu") {
+      this.setState({isShowGroup: true})
+    } else {
+      this.setState({isShowEqu: true})
+    }
   }
 
-  //提交表单
-  submint = () => {
-    
+  onCancel = () => {
+    this.setState({
+      isShowEqu: !this.state.isShowEqu
+    })
   }
+  //提交表单
   onFinish = (values) => {
+    //关闭弹窗
+    this.setState({isShowGroup: !this.state.isShowGroup})
+    // addGroup(values).then(res => {
+      
+    // })
     console.log('Success:', values);
+    message.info('提交成功！');
   }
   onFinishFailed = () => {
-    
+    message.error('提交失败！');
+  }
+  onFinishEqu = (val) => {
+    console.log('Success:', val);
+    message.info('提交成功！');
+  }
+  onFinishFailedEqu = () => {
+    message.error('提交失败！');
   }
   
   equMenu = (
@@ -87,32 +112,42 @@ class Variable extends PureComponent{
             <DataTable />
           </div>
         </div>
-        <Modal width='fit-content' title="添加/编辑分组" visible={this.state.isShow}
-          okText="确定" cancelText="取消"
-          onOk={this.submint} onCancel={() => { this.setState({ isShow: !this.state.isShow }) }}>
+
+        <Modal width='fit-content' title="添加分组" footer={null} visible={ this.state.isShowGroup }>
           <Form
             onFinish={this.onFinish}
             onFinishFailed={this.onFinishFailed}
             initialValues={{
-              equType: "内部变量"
+              Type: "2"
             }}
           >
-            <Form.Item label="所属设备" name="equType">
-              <Select style={{width: '250px'}}>
-                <Select.Option key="0">内部变量</Select.Option>
+            <Form.Item label="所属设备ID" name="DeviceId" hidden>
+              <Input value="1"/>
+            </Form.Item>
+            <Form.Item label="所属设备" name="Type">
+              <Select>
+                <Option value="2">内部变量</Option>
+                <Option value="4">系统变量</Option>
               </Select>
             </Form.Item>
-            <Form.Item label="分组名称" name="groupName" rules={[
+            <Form.Item label="分组名称" name="Name" rules={[
                 {
                   required: true,
                   message: '请输入分组名称!',
                 },
               ]}
             >
-              <Input placeholder="请输入设备描述" style={{width: '250px'}}/>
+              <Input placeholder="请输入设备描述"/>
+            </Form.Item>
+            <Form.Item className="form-footer">
+              <Button type="default" className="login-form-button" onClick={ ()=>{ this.setState({isShowGroup: !this.state.isShowGroup})} }>取消</Button>
+              <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
             </Form.Item>
           </Form>
         </Modal>
+
+        <AddEqu visible={this.state.isShowEqu} cancel={ this.onCancel }/>
+
       </div>
     )
   }
