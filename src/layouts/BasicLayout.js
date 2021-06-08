@@ -14,6 +14,10 @@ const { Content } = Layout;
 
 class BasicLayout extends PureComponent {
 
+  componentDidMount(){
+    console.log(this.props.history)
+  }
+
   render() {
     return (
       <Layout className="full-page">

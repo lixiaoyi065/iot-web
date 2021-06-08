@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react'
 import { Dropdown } from 'antd'
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
+import DrowDownMenu from 'components/common/DrowDownMenu'
+
 import equLogo from 'assets/img/index/equ.png'
 import './index.less'
 
@@ -13,8 +15,32 @@ class PageHeader extends PureComponent {
   }
 
   toggle = () => {
-
+    
   }
+
+  menu = (
+    <DrowDownMenu lists={[
+      {
+        name: "重新启动",
+        key: "restart",
+        onClick() {
+          console.log("重新启动")
+        }
+      }, {
+        name: "启动",
+        key: "start",
+        onClick() {
+          console.log("启动")
+        }
+      }, {
+        name: "停止",
+        key: "stop",
+        onClick() {
+          console.log("停止")
+        }
+      }
+    ]} />
+  )
 
   render() {
     return (

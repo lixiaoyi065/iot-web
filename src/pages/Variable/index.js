@@ -92,6 +92,7 @@ class Variable extends PureComponent{
 
   render() {
     const { zNodes, loading } = this.state;
+    console.log(this.props)
     return (
       <div className="antProPageContainer">
         <div className={`leftContent ${this.state.toogle ? 'hideLeft' : null}`}>

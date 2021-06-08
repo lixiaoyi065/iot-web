@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Layout } from 'antd'
+import PropTypes from "prop-types";
 
 import MyNavLink from 'components/common/MyNavLink'
 
@@ -13,11 +14,22 @@ import AuthorizationImg from 'assets/img/index/authorization.png'
 const { Sider } = Layout;
 
 export default class PageSider extends PureComponent {
+  static propTypes = {
+    location: PropTypes.object.isRequired,
+  };
+
   state = {
     collapsed: false
   }
 
+  componentDidMount() {
+    console.log(this.props)
+  }
+
   render() {
+    const { location } = this.props;
+    console.log(location)
+
     return (
       <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
         <div className="page-sider">
