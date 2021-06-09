@@ -32,7 +32,7 @@ class Search extends PureComponent {
         name: '导出当前点表',
       }
     ]}
-      onClick={ (e)=>{ this.menuClick(e) } }
+      onClick={(e) => { this.menuClick(e) }}
     >
     </DrowDownMenu>
   )
@@ -53,6 +53,7 @@ class Search extends PureComponent {
             label="数据类型"
             name="dataType"
             initialValue="不限"
+            width="70px"
           >
             <Select style={{ width: '150px' }}>
               <Select.Option value="unlimited">不限</Select.Option>
@@ -66,7 +67,7 @@ class Search extends PureComponent {
           </Form.Item>
         </Form>
         <div className="option-area">
-          <Button className="ant-button-normal" onClick={ this.saveList }>保存</Button>
+          <Button className="ant-button-normal" onClick={this.saveList}>保存</Button>
           <Button type="primary" style={{ margin: 0 }}>重置</Button>
           <span className="divider"></span>
           <Button className="ant-btn-opt-sm ant-btn-opt-primary"><img className="btn-icon" src={addOpt} alt="" /></Button>

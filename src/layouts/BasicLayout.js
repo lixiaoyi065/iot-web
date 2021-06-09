@@ -13,13 +13,16 @@ import Authorization from 'pages/Authorization'
 const { Content } = Layout;
 
 class BasicLayout extends PureComponent {
+  state = {
+    collapsed: false
+  }
 
   render() {
     return (
       <Layout className="full-page">
-        <Header/>
+        <Header collapsed={this.state.collapsed}/>
         <Layout className="site-layout">
-          <PageSider/>
+          <PageSider collapsed={ this.state.collapsed }/>
           <Content className="site-layout-background">
             <Switch>
               <Route path="/variable" component={Variable}/>

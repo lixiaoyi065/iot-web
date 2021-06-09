@@ -17,7 +17,7 @@ body {
   height: 100%;
 }
 
-.divider{
+.divider {
   display: inline-block;
   width: 1px;
   height: 27px;
@@ -28,18 +28,20 @@ body {
   margin: auto 20px;
 }
 
-.equ-tags{
-  .equ-logo{
+.equ-tags {
+  .equ-logo {
     width: 18px;
     height: 18px;
     margin-right: 4px;
     vertical-align: middle;
   }
-  .equ-name{
+
+  .equ-name {
     vertical-align: middle;
     padding-right: 11px;
   }
-  .equ-option{
+
+  .equ-option {
     display: inline-block;
     width: 26px;
     height: 26px;
@@ -48,32 +50,35 @@ body {
     vertical-align: middle;
     cursor: pointer;
 
-    &:hover{
+    &:hover {
       background: url("~assets/img/index/more_active.png") no-repeat;
       background-size: 100%;
       vertical-align: middle;
     }
   }
 }
-.option-menu{
+
+.option-menu {
   text-align: center;
 
-  .option-menu-item{
+  .option-menu-item {
     font-size: 14px;
     padding: 0 32px;
     line-height: 32px;
 
-    &:hover, &:active{
+    &:hover,
+    &:active {
       background: #E4EEF8;
       color: #409EFF;
     }
   }
 }
-.hideLeft{
+
+.hideLeft {
   width: 0;
 }
 
-.logout{
+.logout {
   display: inline-block;
   position: relative;
   width: 28px;
@@ -82,7 +87,7 @@ body {
   vertical-align: middle;
   cursor: pointer;
 
-  &::before{
+  &::before {
     content: "";
     position: absolute;
     left: 4px;
@@ -93,95 +98,117 @@ body {
     background-size: 100%;
   }
 
-  &:hover{
-    &::before{
+  &:hover {
+    &::before {
       background: url("~assets/img/index/logout_active.png") no-repeat;
       background-size: 100%;
     }
   }
-  &:active{
+
+  &:active {
     background: #D8E6F1;
-    &::before{
+
+    &::before {
       background: url("~assets/img/index/logout_active.png") no-repeat;
       background-size: 100%;
     }
   }
 }
 
-.ant-btn{
+.ant-btn {
   padding: 0 24px;
 
-  &.ant-button-normal{
+  &.ant-button-normal {
     background: #F5AB3A;
     color: #fff;
+    border: 0;
+
+    &:hover {
+      background: #F6B95D;
+      color: #fff;
+    }
+
+    &:active {
+      background: #EA9B23;
+      color: #fff;
+    }
   }
 
-  .btn-icon{
+  .btn-icon {
     width: 18px;
     height: 18px;
     margin-right: 4px;
   }
 
-  &.ant-btn-opt-sm{
+  &.ant-btn-opt-sm {
     padding: 0 16px;
     background: #fff;
     border: 1px solid #eee;
     border-radius: 2px;
-  
-    .btn-icon{
+
+    .btn-icon {
       margin: 0;
     }
   }
-  
-  &.ant-btn-opt-primary{
+
+  &.ant-btn-opt-primary {
     background: #E7F7EE;
     border-color: #9BE8BC;
-  
-    &:hover{
+
+    &:hover {
       background: #D3F3E0;
+      border-color: #9BE8BC;
     }
-    &:active{
+
+    &:active {
       background: #C5EAD5;
+      border-color: #98E0B7;
     }
   }
-  
-  &.ant-btn-opt-danger{
+
+  &.ant-btn-opt-danger {
     background: #FFF2F2;
     border-color: #FEC5C5;
-  
-    &:hover{
+
+    &:hover {
       background: #F8DADA;
+      border-color: #98E0B7;
     }
-    &:active{
+
+    &:active {
       background: #EFCECE;
+      border-color: #F6C2C2;
     }
   }
-  
-  &.ant-btn-opt-normal{
+
+  &.ant-btn-opt-normal {
     padding: 0 8px;
     background: #E7F3FF;
     border-color: #AFD6FF;
-  
-    &:hover{
+
+    &:hover {
       background: #CEE3F7;
+      border-color: #AFD6FF;
     }
-    &:active{
+
+    &:active {
       background: #C7DBEF;
+      border-color: #A7CEF5;
     }
   }
 }
 
-.btn-submint{
+.btn-submint {
   padding: 0 11px;
 }
 
-.ant-form-item{
-  &:last-child{
+.ant-form-item {
+  &:last-child {
     margin-bottom: 0;
   }
 }
 
-.ant-modal-title{
+.ant-modal-title {
   text-align: center;
 }
 

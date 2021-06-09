@@ -4,18 +4,21 @@ import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 
+import store from 'store/collapsed'
+
 import equLogo from 'assets/img/index/equ.png'
 import './index.less'
 
 class PageHeader extends PureComponent {
   state = {
-    collapsed: false,
     currentEqu: '定子线',
     userName: '工程师李子龙'
   }
 
   toggle = () => {
-    
+    store.dispatch({
+      type: "collapsed"
+    })
   }
 
   menu = (
@@ -51,7 +54,7 @@ class PageHeader extends PureComponent {
         </div>
         <div className="flexContent">
           {/* {this.props.flexChildren} */}
-          {React.createElement(this.state.collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+          {React.createElement(store.getState() ? MenuUnfoldOutlined : MenuFoldOutlined, {
             className: 'trigger',
             onClick: this.toggle,
           })}

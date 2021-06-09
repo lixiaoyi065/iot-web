@@ -15,14 +15,36 @@
       margin-right: 11px;
     }
 
+    .activeImg {
+      display: none;
+    }
+
     &.active-route {
       background: #F5F8FB;
       color: #409EFF;
     }
 
     &:hover {
-      background: #F5F8FB;
+      // background: #F5F8FB;
       color: #409EFF;
+
+      .normalImg {
+        display: none;
+      }
+
+      .activeImg {
+        display: inline-block;
+      }
+    }
+
+    &.active-route {
+      .normalImg {
+        display: none;
+      }
+
+      .activeImg {
+        display: inline-block;
+      }
     }
   }
 }
