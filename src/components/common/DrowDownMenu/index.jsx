@@ -7,7 +7,7 @@ export default class DrowDownMenu extends PureComponent {
     const { lists } = this.props
 
     return (
-      <Menu className="option-menu" onClick={this.props.menuClick}>
+      <Menu className="option-menu" {...this.props}>
         {
           lists.map(e => {
             return <Menu.Item className="option-menu-item" {...e}>{e.name}</Menu.Item>

@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 import { Modal, Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
 
+import store from 'store'
+
+import { addEqu } from 'api/variable/index'
+
 import "./index.less"
 
 const { Option } = Select;
@@ -75,14 +79,54 @@ const AddEqu = (props) => {
         Model: ModelLists[e][0],
       });
     },
-    //监听厂家列表的变化
-    onSupplierChange = e => {
-      setInitSupplier(e);
-      console.log(e, initSupplier)
-    },
+ 
     onFinishEqu = (val) => {
+      //将提交的数据对象进行处理
+      const list = ["Id","Name","Desc","ProtocolName","Supplier","Model"]
+      const equObj = {params:{}}
+      for (let key in val){
+        if (list.indexOf(key) < 0) {
+          equObj.params[key] = val[key]
+        } else {
+          equObj[key] = val[key]
+        }
+      }
+      addEqu(equObj).then(res => {
+        console.log(res)
+        const { code, msg } = res
+        if (code === 0) { //添加成功
+          //返回新增的设备ID：res.msg
+          const newEqu = {
+            nodeID: msg,
+            nodeName: res.nodeName,
+            // nodeType: res.nodeType,
+            canBeDeleted: true,
+            fatherNodeID: "",
+            children: [
+              {
+                nodeID: msg,
+                nodeName: "分组1",
+                // nodeType: res.nodeType,
+                canBeDeleted: true,
+                fatherNodeID: msg,
+              }
+            ]
+          }
+          //给设备树添加上新增的设备
+          store.dispatch({
+            type: "addNodes",
+            data: newEqu
+          });
+
+          props.cancel();
+          
+        } else if (code === 4005) {
+          message.error(msg)
+        }
+      })
+
       console.log('Success:', val);
-      message.info('提交成功！');
+      // message.info('提交成功！');
     },
     onFinishFailedEqu = () => {
       message.error('提交失败！');
@@ -96,7 +140,7 @@ const AddEqu = (props) => {
         onFinishFailed={onFinishFailedEqu}
         initialValues={{
           ProtocolName: activeProto,
-          Supplier: initSupplier,
+          Supplier: initSupplier[0],
           Model: activeModel
         }}>
         <div style={{padding: '0 27px'}}>
@@ -115,7 +159,10 @@ const AddEqu = (props) => {
           </Form.Item>
         </div>
         <Divider></Divider>
-        <div style={{padding: '0 27px'}}>
+        <div style={{ padding: '0 27px' }}>
+          <Form.Item label="树节点类型" name="NodeType" hidden={true}>
+            <Input value="3"/>
+          </Form.Item>
           <Form.Item label="协议名称" name="ProtocolName">
             <Select onChange={onProtocalNameChange}>
               {

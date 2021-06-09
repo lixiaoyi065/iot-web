@@ -60,8 +60,9 @@ module.exports = override(
     '@': path.resolve('./src'),
     ["assets"]: path.resolve(__dirname, './src/assets'),
     ["pages"]: path.resolve(__dirname, './src/pages'),
-    ["utils"]: path.resolve(__dirname, './src/utils'),
     ["api"]: path.resolve(__dirname, './src/api'),
-    ["components"]: path.resolve(__dirname, "src/components")
+    ["components"]: path.resolve(__dirname, "src/components"),
+    ["store"]: path.resolve(__dirname, './src/store'),
+    ["utils"]: path.resolve(__dirname, './src/utils')
   })
 );

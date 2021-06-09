@@ -7,22 +7,28 @@ export function getEquList() {
   })
 }
 
-export function addGroup(group) {
+export function addGroup(data) {
   return service({
-    url: '/api/VariableManage/AddGroup',
-    params: {
-      ...group
-    },
+    url: '/VariableManage/AddGroup',
+    data,
     method: 'post'
   })
 }
 
-export function addEqu(group) {
+export function addEqu(data) {
   return service({
-    url: '/api/VariableManage/AddEqu',
-    params: {
-      ...group
-    },
+    url: '/VariableManage/AddDevice',
+    data,
     method: 'post'
+  })
+}
+
+export function delEqu(DeviceId) {
+  return service({
+    url: '/VariableManage/DeleteDevice',
+    params: {
+      DeviceId
+    },
+    method: 'delete'
   })
 }

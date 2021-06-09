@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Dropdown, Modal, Form, Input, Select, Button, message } from 'antd'
+import { Dropdown, message } from 'antd'
 
 import Ztree from 'components/common/Ztree'
 import DrowDownMenu from 'components/common/DrowDownMenu'
@@ -7,41 +7,49 @@ import DataTable from 'components/common/DataTable'
 
 import Search from './components/Search'
 import AddEqu from './components/AddEqu'
+import AddGroup from './components/AddGroup'
+
+import store from 'store'
 
 import { getEquList, addGroup } from 'api/variable/index'
 
 import './index.less'
 
-const { Option } = Select;
+const storeState = store.getState()
 
 class Variable extends PureComponent{
   state = {
-    zNodes: [],
-    loading: false,
+    zNodes: storeState.zNodes,
+    loading: true,
     toogle: false,
+    visible: "false",
     isShowGroup: false,
     isShowEqu: false,
   }
   
-
   componentDidMount() {
     //获取设备列表
     getEquList().then(res => {
-      this.setState({ zNodes: res , loading: true})
+      store.dispatch({
+        type: "zNodes",
+        data: res.data
+      });
     });
   }
+
   menuClick = (e) => {
-    console.log(e.key, e.key === "addEqu")
+    this.setState({ visible: "false" })
+    console.log(e.key,e.key === "addEqu")
     if (e.key === "addEqu") {
-      this.setState({isShowGroup: true})
-    } else {
       this.setState({isShowEqu: true})
+    } else {
+      this.setState({isShowGroup: true})
     }
   }
 
-  onCancel = () => {
+  onCancel = (type) => {
     this.setState({
-      isShowEqu: !this.state.isShowEqu
+      [type]: !this.state[type]
     })
   }
   //提交表单
@@ -75,7 +83,9 @@ class Variable extends PureComponent{
         key: "addGroup",
         name: "添加分组",
       }
-    ]} menuClick={(key)=>{this.menuClick(key)}}
+    ]}
+      visible={this.state.visible}
+      onClick={(key) => { this.menuClick(key) }}
     >
     </DrowDownMenu>
   )
@@ -91,8 +101,7 @@ class Variable extends PureComponent{
   }
 
   render() {
-    const { zNodes, loading } = this.state;
-    console.log(this.props)
+    const { loading } = this.state;
     return (
       <div className="antProPageContainer">
         <div className={`leftContent ${this.state.toogle ? 'hideLeft' : null}`}>
@@ -101,7 +110,7 @@ class Variable extends PureComponent{
             <Ztree
                 title="设备列表"
                 opt={this.opt}
-                  zNodes={zNodes}
+                  zNodes={store.getState()}
                   loading = {loading}
                 /> : ''
           }
@@ -113,41 +122,9 @@ class Variable extends PureComponent{
             <DataTable />
           </div>
         </div>
-
-        <Modal width='fit-content' title="添加分组" footer={null} visible={ this.state.isShowGroup }>
-          <Form
-            onFinish={this.onFinish}
-            onFinishFailed={this.onFinishFailed}
-            initialValues={{
-              Type: "2"
-            }}
-          >
-            <Form.Item label="所属设备ID" name="DeviceId" hidden>
-              <Input value="1"/>
-            </Form.Item>
-            <Form.Item label="所属设备" name="Type">
-              <Select>
-                <Option value="2">内部变量</Option>
-                <Option value="4">系统变量</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item label="分组名称" name="Name" rules={[
-                {
-                  required: true,
-                  message: '请输入分组名称!',
-                },
-              ]}
-            >
-              <Input placeholder="请输入设备描述"/>
-            </Form.Item>
-            <Form.Item className="form-footer">
-              <Button type="default" className="login-form-button" onClick={ ()=>{ this.setState({isShowGroup: !this.state.isShowGroup})} }>取消</Button>
-              <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-
-        <AddEqu visible={this.state.isShowEqu} cancel={ this.onCancel }/>
+        
+        <AddGroup visible={ this.state.isShowGroup } cancel={()=>{this.onCancel("isShowGroup")}}/>
+        <AddEqu visible={this.state.isShowEqu} cancel={()=>{this.onCancel("isShowEqu")}}/>
 
       </div>
     )
