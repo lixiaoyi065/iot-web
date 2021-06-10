@@ -2,53 +2,68 @@ import React, { PureComponent } from 'react'
 import { Dropdown, Modal, message } from 'antd'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
+import EditEqu from 'pages/Variable/components/AddEqu'
 
 import store from 'store'
 
-import { delEqu } from 'api/variable'
+import { delEqu, modifyGroup, delGroup } from 'api/variable'
+import { getEquList, getEqu } from 'api/variable/index'
 
 import './index.less'
 
+const storeState = store.getState()
 class Ztree extends PureComponent {
   state = {
-    isShowModel: false
+    zNodes: storeState.zNodes,
+    isShowModel: false,
+    isShowEqu: false,
+    node: {},
   }
   componentDidMount() {
-    var setting = {
-      view: {
-        showIcon: false,
-        showLine: false, //不显示连接线
-        fontCss: { color: "#666", "font-size": '16px' }
-      },
-      data: {
-        simpleData: {
-          enable: true
-        }
-      },
-      async: {
-        enable: true,
-      }
-    };
-    Object.assign(setting, this.props.setting)
-    // $.fn.zTree.init($("#tree"), setting, this.props.zNodes);
+    //获取设备列表
+    getEquList().then(res => {
+      store.dispatch({
+        type: "zNodes",
+        data: res.data
+      });
+    });
+    store.subscribe(() => {
+      this.setState({ zNodes: store.getState() })
+    })
   }
   toogleChildrenList = (e) => {
     console.log(e.target.dataset.close)
   }
-  optGroup = (
-    <DrowDownMenu lists={[
-      {
-        key: "delGroup",
-        name: "删除分组"
-      },
-      {
-        key: "editGroup",
-        name: "编辑分组"
-      }
-    ]}
-    >
-    </DrowDownMenu>
-  )
+  optGroup = (el) => {
+    const nodeID = el.nodeID;
+    const that = this
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "delGroup",
+          name: "删除分组",
+          onClick() {
+            delGroup({groupId: nodeID}).then(res => {
+              console.log(res)
+            })
+            console.log(nodeID,"删除分组")
+          }
+        },
+        {
+          key: "editGroup",
+          name: "编辑分组",
+          onClick() {
+            modifyGroup({groupId: nodeID}).then(res => {
+              console.log(res)
+            })
+            console.log(nodeID,"编辑分组")
+          }
+        }
+      ]}
+      >
+      </DrowDownMenu>
+    )
+  }
   eqGroup = (el) => {
     const nodeID = el.nodeID;
     const that = this
@@ -56,11 +71,17 @@ class Ztree extends PureComponent {
       <DrowDownMenu lists={[
         {
           key: "start",
-          name: "启用"
+          name: "启用",
+          onClick() {
+            message.info("设备已启动")
+          }
         },
         {
           key: "stop",
-          name: "停止"
+          name: "停止",
+          onClick() {
+            message.info("设备已停止")
+          }
         },
         {
           key: "delEqu",
@@ -71,13 +92,19 @@ class Ztree extends PureComponent {
             } else {
               that.delGroup(nodeID)
               //更新store中的数据
-
             }
           }
         },
         {
           key: "editEqu",
-          name: "编辑设备"
+          name: "编辑设备",
+          onClick(e) {
+            getEqu(nodeID).then(res => {
+              that.setState({node: res.data}, () => {
+                that.setState({isShowEqu: true})
+              })
+            })
+          }
         }
       ]}
       >
@@ -110,20 +137,20 @@ class Ztree extends PureComponent {
   }
 
   render() {
-    const zNodes = this.props.zNodes;
+    const { title, opt } = this.props;
+    const { zNodes } = this.state;
+    console.log(zNodes)
     return (
       <div className="fullContain">
         <div className="title">
-          <span>{this.props.title}</span>
-          <div className="optGroup">
-            {this.props.opt}
-          </div>
+          <span>{title}</span>
+          <div className="optGroup"> {opt} </div>
         </div>
         {
           zNodes && zNodes.length>0 ? <ul className="ztree">
             {
               zNodes.map(element => {
-                return (
+                  return (
                   <>
                     <li key={ element.nodeID }>
                       <div className="ztree-list-item">
@@ -137,21 +164,11 @@ class Ztree extends PureComponent {
                         <span className="name">{element.nodeName}</span>
                         {
                           element.canBeDeleted ? (
-                            // parseInt(element.nodeType) === 3 ? (
-                              <Dropdown overlay={() => {
-                                return this.eqGroup(element)
-                              } } trigger={['click']} placement="bottomRight" arrow>
-                                <span className="more"></span>
-                              </Dropdown>
-                            // ) : (
-                            //   parseInt(element.nodeType) === 4 ? (
-                            //     <Dropdown overlay={ () => {
-                            //       return this.eqGroup(element)
-                            //     } } trigger={['click']} placement="bottomRight" arrow>
-                            //       <span className="more"></span>
-                            //     </Dropdown>
-                            //   ) : null
-                            // )
+                            <Dropdown overlay={() => {
+                              return this.eqGroup(element)
+                            } } trigger={['click']} placement="bottomRight" arrow>
+                              <span className="more"></span>
+                            </Dropdown>
                           ) : null
                         }
                         
@@ -174,21 +191,11 @@ class Ztree extends PureComponent {
                                       <span className="name">{child.nodeName}</span>
                                       {
                                         child.canBeDeleted ? (
-                                          // parseInt(child.nodeType) === 3 ? (
-                                          //   <Dropdown overlay={ () => {
-                                          //     return this.eqGroup(child)
-                                          //   } } trigger={['click']} placement="bottomRight" arrow>
-                                          //     <span className="more"></span>
-                                          //   </Dropdown>
-                                          // ) : (
-                                            // parseInt(child.nodeType) === 4 ? (
-                                              <Dropdown overlay={ () => {
-                                                return this.eqGroup(child)
-                                              } } trigger={['click']} placement="bottomRight" arrow>
-                                                <span className="more"></span>
-                                              </Dropdown>
-                                          //   ) : null
-                                          // )
+                                          <Dropdown overlay={ () => {
+                                            return this.optGroup(child)
+                                          } } trigger={['click']} placement="bottomRight" arrow>
+                                            <span className="more"></span>
+                                          </Dropdown>
                                         ) : null
                                       }
                                     </div>
@@ -209,6 +216,7 @@ class Ztree extends PureComponent {
             }
           </ul> : ""
         }
+        <EditEqu visible={this.state.isShowEqu} node={ this.state.node } cancel={()=>{ this.setState({isShowEqu: false}) }}/>
       </div>
     )
   }

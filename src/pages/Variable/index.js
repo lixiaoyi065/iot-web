@@ -9,32 +9,15 @@ import Search from './components/Search'
 import AddEqu from './components/AddEqu'
 import AddGroup from './components/AddGroup'
 
-import store from 'store'
-
-import { getEquList, addGroup } from 'api/variable/index'
-
 import './index.less'
-
-const storeState = store.getState()
 
 class Variable extends PureComponent{
   state = {
-    zNodes: storeState.zNodes,
-    loading: true,
+    // loading: true,
     toogle: false,
     visible: "false",
     isShowGroup: false,
     isShowEqu: false,
-  }
-  
-  componentDidMount() {
-    //获取设备列表
-    getEquList().then(res => {
-      store.dispatch({
-        type: "zNodes",
-        data: res.data
-      });
-    });
   }
 
   menuClick = (e) => {
@@ -101,18 +84,14 @@ class Variable extends PureComponent{
   }
 
   render() {
-    const { loading } = this.state;
     return (
       <div className="antProPageContainer">
         <div className={`leftContent ${this.state.toogle ? 'hideLeft' : null}`}>
           {
-            loading ? 
             <Ztree
-                title="设备列表"
-                opt={this.opt}
-                  zNodes={store.getState()}
-                  loading = {loading}
-                /> : ''
+              title="设备列表"
+              opt={this.opt}
+              />
           }
           <span className="arrowLeft" onClick={this.toggleLeft}></span>
         </div>

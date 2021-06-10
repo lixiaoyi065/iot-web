@@ -11,19 +11,31 @@ export default function countReducer(preState = initState, action) {
 	const {type,data} = action
 	//根据type决定如何加工数据
 	switch (type) {
-		case INITNODES: //初始化节点
-			return preState = data
+    case INITNODES: //初始化节点
+			return data
     case ADDNODES: //添加节点
-      preState.push(data)
-      return preState
+      let newAyy = [];
+      preState.forEach((e) => {
+        newAyy.push(e)
+      })
+      newAyy.push(data)
+      return newAyy
     case DELNODES: //删除节点
-      var newArr = [];
+      let newArr = [];
       preState.forEach((e) => {
         if (e.nodeID !== data) {
           newArr.push(e)
         }
       })
-      return preState = newArr
+      return newArr
+    case "addGroup": //删除节点的分组
+      let newArr2 = [];
+      preState.forEach((e) => {
+        if (e.nodeID !== data) {
+          newArr2.children.push(e)
+        }
+      })
+      return newArr2
 		default:
 			return preState
 	}

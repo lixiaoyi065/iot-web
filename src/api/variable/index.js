@@ -6,11 +6,22 @@ export function getEquList() {
     method: 'get'
   })
 }
+//获取设备
+export function getEqu(deviceId){
+  return service({
+    url: '/VariableManage/GetDevice',
+    params: {
+      deviceId
+    },
+    method: 'get'
+  })
+}
 //添加分组
 export function addGroup(data) {
+  console.log(data)
   return service({
     url: '/VariableManage/AddGroup',
-    data,
+    data: JSON.stringify(data),
     method: 'post'
   })
 }
@@ -20,6 +31,14 @@ export function addEqu(data) {
     url: '/VariableManage/AddDevice',
     data,
     method: 'post'
+  })
+}
+//修改设备
+export function modifyEqu(data) {
+  return service({
+    url: '​/VariableManage​/ModifyDevice',
+    data,
+    method: 'put'
   })
 }
 //删除设备
@@ -32,7 +51,25 @@ export function delEqu(DeviceId) {
     method: 'delete'
   })
 }
-//获取设备列表
+//修改分组
+export function modifyGroup(data) {
+  return service({
+    url: '/VariableManage/ModifyGroup',
+    data,
+    method: 'put'
+  })
+}
+//删除分组
+export function delGroup(nodeId) {
+  return service({
+    url: '/VariableManage/DeleteGroup',
+    params: {
+      nodeId
+    },
+    method: 'delete'
+  })
+}
+//获取变量列表
 export function getVariableList(nodeId,page){
   return service({
     url: "",
