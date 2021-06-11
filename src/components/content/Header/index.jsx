@@ -4,7 +4,7 @@ import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 
-import store from 'store/collapsed'
+import store from 'store'
 
 import equLogo from 'assets/img/index/equ.png'
 import './index.less'
@@ -12,7 +12,7 @@ import './index.less'
 class PageHeader extends PureComponent {
   state = {
     currentEqu: '定子线',
-    userName: '工程师李子龙'
+    userName: window.localStorage.getItem("userName")
   }
 
   toggle = () => {

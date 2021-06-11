@@ -1,4 +1,6 @@
 import service from 'utils/request'
+import qs from 'qs'
+
 //获取设备列表
 export function getEquList() {
   return service({
@@ -21,7 +23,7 @@ export function addGroup(data) {
   console.log(data)
   return service({
     url: '/VariableManage/AddGroup',
-    data: JSON.stringify(data),
+    data,
     method: 'post'
   })
 }
@@ -29,8 +31,8 @@ export function addGroup(data) {
 export function addEqu(data) {
   return service({
     url: '/VariableManage/AddDevice',
-    data,
-    method: 'post'
+    data, 
+    method: 'post',
   })
 }
 //修改设备
@@ -42,13 +44,13 @@ export function modifyEqu(data) {
   })
 }
 //删除设备
-export function delEqu(DeviceId) {
+export function delEqu(id) {
   return service({
-    url: '/VariableManage/DeleteDevice',
-    params: {
-      DeviceId
+    url: "/VariableManage/DeleteDevice",
+    data: {
+      id
     },
-    method: 'delete'
+    method: 'delete',
   })
 }
 //修改分组
@@ -60,11 +62,11 @@ export function modifyGroup(data) {
   })
 }
 //删除分组
-export function delGroup(nodeId) {
+export function delGroup(id) {
   return service({
     url: '/VariableManage/DeleteGroup',
-    params: {
-      nodeId
+    data: {
+      id
     },
     method: 'delete'
   })

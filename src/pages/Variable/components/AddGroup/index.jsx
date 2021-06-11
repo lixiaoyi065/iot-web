@@ -24,23 +24,27 @@ class AddGroup extends PureComponent {
 
   }
 
-
   onFinish = (val) => {
-    axios.post(`/VariableManage/AddGroup?DeviceId=${val.DeviceId}&Type=${val.Type}&Name=${val.Name}`).then(res =>{
-      console.log(res)
-    })
+    console.log(this.props.node)
+    if (this.props.node) {
+      
+    } else {
+      addGroup(val).then(res => {
+        console.log(res)
+      })
+    }
   }
   onFinishFailed = () => {
-    
   }
 
   changeType = (e) => {
-    let type = 2
-    if (e === "28e1ab1b-fd92-4200-806e-9a32bcf3e492") {
+    let type
+    if (e === "55ca2fbd-d950-4992-8642-bfa53867c88c") {
       type = 2
     } else {
       type = 4
     }
+    console.log(type)
     this.formRef.current.setFieldsValue({
       Type: type,
     });
@@ -55,7 +59,7 @@ class AddGroup extends PureComponent {
           initialValues={{
           }}
         >
-          <Form.Item label="所属设备ID" name="DeviceId">
+          <Form.Item label="所属设备" name="deviceId">
             <Select onChange={ this.changeType }>
               {
                 this.state.euqList.map(e => {
@@ -64,10 +68,10 @@ class AddGroup extends PureComponent {
               }
             </Select>
           </Form.Item>
-          <Form.Item label="所属设备" name="Type" hidden initialValue={ this.state.type }>
+          <Form.Item label="设备类型" name="type" hidden initialValue={ this.state.type }>
             <Input/>
           </Form.Item>
-          <Form.Item label="分组名称" name="Name" rules={[
+          <Form.Item label="分组名称" name="name" rules={[
               {
                 required: true,
                 message: '请输入分组名称!',

@@ -6,12 +6,15 @@ const service = axios.create({
   async: true,
   //允许跨域
   crossDomain: true, 
-  'Content-Type': 'application/x-www-form-urlencoded'
 })
 
 service.interceptors.request.use(
   config => {
-    return config
+    let token = window.localStorage.getItem("accessToken")
+    if (token) {
+        config.headers['Authorization'] = token;
+    }
+    return config;
   },
   error => {
     console.log(error)

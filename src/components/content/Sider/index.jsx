@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { Layout } from 'antd'
 import { withRouter } from "react-router-dom";
 
-import store from 'store/collapsed'
+import store from 'store'
 
 import MyNavLink from 'components/common/MyNavLink'
 
@@ -26,29 +26,29 @@ class PageSider extends PureComponent {
 
   componentDidMount() {
     console.log(store.getState())
-    this.setState({ collapsed: store.getState() })
+    this.setState({ collapsed: store.getState().collapsed })
   }
 
   render() {
     return (
       <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
         <div className="page-sider">
-          <MyNavLink to="/variable">
+          <MyNavLink to="/index/variable">
             <img className="activeImg" src={VariableActiveImg} alt="" />
             <img className="normalImg" src={VariableImg} alt="" />
             <span>变量管理</span>
           </MyNavLink>
-          <MyNavLink to="/realTime">
+          <MyNavLink to="/index/realTime">
             <img className="activeImg" src={RealTimeActiveImg} alt="" />
             <img className="normalImg" src={RealTimeImg} alt="" />
             <span>实时监测</span>
           </MyNavLink>
-          <MyNavLink to="/operations">
+          <MyNavLink to="/index/operations">
             <img className="activeImg" src={OperationsActiveImg} alt="" />
             <img className="normalImg" src={OperationsImg} alt="" />
             <span>远程运维</span>
           </MyNavLink>
-          <MyNavLink to="/authorization">
+          <MyNavLink to="/index/authorization">
             <img className="activeImg" src={AuthorizationActiveImg} alt="" />
             <img className="normalImg" src={AuthorizationImg} alt="" />
             <span>授权管理</span>

@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { Modal, Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
-
 import store from 'store'
 
 import { addEqu, getEqu } from 'api/variable/index'
@@ -24,11 +23,11 @@ class AddEqu extends PureComponent {
     ModelLists : {//设备型号列表
       'Modbus_TCP': ['通用'],
       'S7_TCP': ['S7-300/400/1200/1500', 'S7-200Smart'],
-      'OPC_DA': [],
-      'OPC_UA': [],
-      'MC3E_Binary_Ethernet': [],
-      'MCA1E_Binary_Ethernet': [],
-      'Fins_TCP': []
+      'OPC_DA': ['通用'],
+      'OPC_UA': ['通用'],
+      'MC3E_Binary_Ethernet': ['通用'],
+      'MCA1E_Binary_Ethernet': ['通用'],
+      'Fins_TCP': ['通用']
     },
     edit: false,
     activeProto: 'Modbus_TCP', // 当前选中的协议
@@ -36,11 +35,10 @@ class AddEqu extends PureComponent {
     initModel: ['通用'], //设备型号列表
     activeModel: '通用', //默认设备型号
     userPane: false, //默认设备型号
-    equLength: 0, //设备长度
     currenNode: {},//初始化
     isShowAttr : {
-      'Modbus_TCP': ["IPAddress","DeviceID","Port","TimeOut","ByteOrder","StrByteOrder"],
-      'S7_TCP': ["IPAddress", "Rack", "Slot"],
+      'Modbus_TCP': ["ModelLists","IPAddress","DeviceID","Port","TimeOut","ByteOrder","StrByteOrder"],
+      'S7_TCP': ["ModelLists","IPAddress", "Rack", "Slot"],
       'OPC_DA': ["IPAddress","ServerName","GroupName","UpdateRate","DeadBand","IsActive"],
       'OPC_UA': ["SessionName", "IPAddress", "SecurityMode", "SecurityPolicy", "UserIdentity", "UserName", "Password"],
       'MC3E_Binary_Ethernet': ["IPAddress","Port","StrByteOrder"],
@@ -61,12 +59,7 @@ class AddEqu extends PureComponent {
         }
       })
     }
-
-    store.subscribe(() => {
-      this.setState({equLength: store.getState().length})
-    })
   }
-
 
   //判断是否显示某个属性
   isShowFormItem = (att) => {
@@ -89,7 +82,7 @@ class AddEqu extends PureComponent {
       console.log(this.state.ModelLists[e])
       
       this.setState({
-        initModel: this.state.initModel[e],
+        initModel: this.state.ModelLists[e],
         //修改默认厂家
         activeModel: this.state.ModelLists[e][0]
       })
@@ -103,17 +96,16 @@ class AddEqu extends PureComponent {
       // }
     })
     
-    // //手动修改form.item的选中值
-    // this.formRef.current.setFieldsValue({
-    //   Supplier: this.state.Suppliers[e][0],
-    //   Model: this.state.ModelLists[e][0],
-    // });
+    //手动修改form.item的选中值
+    this.formRef.current.setFieldsValue({
+      Supplier: this.state.Suppliers[e][0],
+      Model: this.state.ModelLists[e][0],
+    });
   }
  
   onFinishEqu = (val) => {
-    console.log(val)
     //将提交的数据对象进行处理
-    const list = ["Id","Name","Desc","ProtocolName","Supplier","Model"]
+    const list = ["id","Name","Desc","ProtocolName","Supplier","Model"]
     const equObj = {params:{}}
     for (let key in val){
       if (list.indexOf(key) < 0) {
@@ -126,45 +118,44 @@ class AddEqu extends PureComponent {
         equObj[key] = val[key]
       }
     }
+    console.log(equObj)
     if (val.nodeID) {
       console.log("编辑")
     } else {
       console.log("新增")
     }
-    console.log(equObj)
+    
     addEqu(equObj).then(res => {
-      const { code, msg } = res
+      const { code,msg } = res
       if (val.nodeID) {
-
+        //编辑设备
       } else {
         //新增设备
         console.log(res)
         if (code === 0) { //添加成功
           this.formRef.current.resetFields();
-          //返回新增的设备ID：res.msg
-          const newEqu = {
-            nodeID: msg,
-            nodeName: val.Name,
-            nodeType: 3,
-            nodeNo: this.state.equLength + 1,
-            canBeDeleted: true,
-            fatherNodeID: "00000000-0000-0000-0000-000000000000",
-            children: [
-              {
-                nodeID: "",
-                nodeName: "分组1",
-                // nodeType: res.nodeType,
-                canBeDeleted: true,
-                fatherNodeID: msg,
-                nodeType: 4,
-                nodeNo: 1,
-              }
-            ]
-          }
           //给设备树添加上新增的设备
           store.dispatch({
             type: "addNodes",
-            data: newEqu
+            data: {
+              nodeID: res.data.deviceId,
+              nodeName: val.Name,
+              nodeType: 3,
+              nodeNo: this.state.equLength + 1,
+              canBeDeleted: true,
+              fatherNodeID: "00000000-0000-0000-0000-000000000000",
+              children: [
+                {
+                  nodeID: res.data.groupId,
+                  nodeName: res.data.groupName,
+                  // nodeType: res.nodeType,
+                  canBeDeleted: true,
+                  fatherNodeID: msg,
+                  nodeType: 4,
+                  nodeNo: 1,
+                }
+              ]
+            }
           });
           //关闭弹窗
           this.props.cancel();
@@ -189,7 +180,7 @@ class AddEqu extends PureComponent {
           onFinishFailed={this.onFinishFailedEqu}
           initialValues={this.currenNode}>
           <div style={{padding: '0 27px'}}>
-            <Form.Item label="设备名称" name="Name"
+            <Form.Item label="设备名称" name="Name" initialValue="测试设备"
               rules={[
                 {
                   required: true,
@@ -202,15 +193,15 @@ class AddEqu extends PureComponent {
             <Form.Item label="设备描述" name="Desc" placeholder="请输入设备描述" initialValue="">
               <Input/>
             </Form.Item>
-            {<Form.Item label="设备ID" name="NodeID" hidden={ true }>
+            <Form.Item label="设备ID" name="id" hidden={true} initialValue="00000000-0000-0000-0000-000000000000">
               <Input/>
-            </Form.Item>}
+            </Form.Item>
           </div>
           <Divider></Divider>
           <div style={{ padding: '0 27px' }}>
-            <Form.Item label="树节点类型" name="NodeType" hidden={true} initialValue="3">
+            {/* <Form.Item label="树节点类型" name="NodeType" hidden={true} initialValue="3">
               <Input/>
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item label="协议名称" name="ProtocolName">
               <Select onChange={this.onProtocalNameChange} disabled={ this.state.edit }>
                 {
@@ -229,15 +220,15 @@ class AddEqu extends PureComponent {
                 }
               </Select>
             </Form.Item>
-            <Form.Item label="设备型号" name="Model" hidden={ !this.state.activeModel }>
+            <Form.Item label="设备型号" name="Model" hidden={ this.isShowFormItem("ModelLists") }>
               <Select disabled={ this.state.edit }>
-                {
-                  this.state.activeModel ? (this.state.initModel.map((e,idx) => {
-                    return <Option value={e} key = {idx}>{e}</Option>
-                  })):null
-                }
-              </Select>
-            </Form.Item>
+                    {
+                      this.state.activeModel ? (this.state.initModel.map((e,idx) => {
+                        return <Option value={e} key = {idx}>{e}</Option>
+                      })):null
+                    }
+                  </Select>
+                </Form.Item>
             {
               this.isShowFormItem("SessionName") ? (
                 <Form.Item label="连接名" name="SessionName">
@@ -247,8 +238,8 @@ class AddEqu extends PureComponent {
             }
             {
               this.isShowFormItem("IPAddress") ? (
-                <>
-                  <Form.Item label={ this.state.activeProto === "OPC_UA" ? "连接地址" :"设备IP"} name="IPAddress"
+                // <>
+                  <Form.Item label={ this.state.activeProto === "OPC_UA" ? "连接地址" :"设备IP"} name="IPAddress" initialValue="127.0.0.1"
                     rules={[
                       {
                         required: true,
@@ -261,7 +252,11 @@ class AddEqu extends PureComponent {
                   >
                     <Input/>
                   </Form.Item>
-                  <Form.Item label="设备ID" name="DeviceID" placeholder="请输入设备ID"
+                ):null
+              }
+              {
+                this.isShowFormItem("DeviceID") ? (
+                  <Form.Item label="设备ID" name="DeviceID" placeholder="请输入设备ID" initialValue="123456"
                       rules={[
                         {
                           required: true,
@@ -274,12 +269,12 @@ class AddEqu extends PureComponent {
                     >
                     <Input/>
                   </Form.Item>
-                </>
+                // </>
               ) : null
             }
             {
               this.isShowFormItem("Port") ? (
-                <Form.Item label="端口号" name="Port" placeholder="请输入端口号"
+                <Form.Item label="端口号" name="Port" placeholder="请输入端口号" initialValue="5000"
                   rules={[
                     {
                       required: true,
@@ -296,7 +291,7 @@ class AddEqu extends PureComponent {
             }
             {
               this.isShowFormItem("TimeOut") ? (
-                <Form.Item label="超时时间" name="TimeOut" placeholder="请输入超时时间"
+                <Form.Item label="超时时间" name="TimeOut" placeholder="请输入超时时间" initialValue="5000"
                   rules={[
                     {
                       required: true,
@@ -397,18 +392,18 @@ class AddEqu extends PureComponent {
             }
             {
               this.isShowFormItem("SecurityMode") ? (
-                <Form.Item label="安全模式" name="SecurityMode" initialValue="0">
+                <Form.Item label="安全模式" name="SecurityMode" initialValue="不加密">
                   <Select>
-                    <Option value="0">不加密</Option>
+                    <Option value="不加密">不加密</Option>
                   </Select>
                 </Form.Item>
               ):null
             }
             {
               this.isShowFormItem("SecurityPolicy") ? (
-                <Form.Item label="安全策略" name="SecurityPolicy" initialValue="0">
+                <Form.Item label="安全策略" name="SecurityPolicy" initialValue="不加密">
                   <Select>
-                    <Option value="0">不加密</Option>
+                    <Option value="不加密">不加密</Option>
                   </Select>
                 </Form.Item>
               ):null

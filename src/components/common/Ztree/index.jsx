@@ -3,10 +3,11 @@ import { Dropdown, Modal, message } from 'antd'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import EditEqu from 'pages/Variable/components/AddEqu'
+import EditGroup from 'pages/Variable/components/AddGroup'
 
 import store from 'store'
 
-import { delEqu, modifyGroup, delGroup } from 'api/variable'
+import { delEqu, delGroup } from 'api/variable'
 import { getEquList, getEqu } from 'api/variable/index'
 
 import './index.less'
@@ -18,6 +19,8 @@ class Ztree extends PureComponent {
     isShowModel: false,
     isShowEqu: false,
     node: {},
+    delNodeID: "",
+    group:""
   }
   componentDidMount() {
     //获取设备列表
@@ -31,12 +34,13 @@ class Ztree extends PureComponent {
       this.setState({ zNodes: store.getState() })
     })
   }
+
   toogleChildrenList = (e) => {
     console.log(e.target.dataset.close)
   }
   optGroup = (el) => {
     const nodeID = el.nodeID;
-    const that = this
+    let that = this
     return (
       <DrowDownMenu lists={[
         {
@@ -53,10 +57,10 @@ class Ztree extends PureComponent {
           key: "editGroup",
           name: "编辑分组",
           onClick() {
-            modifyGroup({groupId: nodeID}).then(res => {
-              console.log(res)
+
+            that.setState({ group: nodeID }, () => {
+              that.setState({isShowGroup: true})
             })
-            console.log(nodeID,"编辑分组")
           }
         }
       ]}
@@ -87,12 +91,26 @@ class Ztree extends PureComponent {
           key: "delEqu",
           name: "删除设备",
           onClick(e) {
-            if (el.children.length>0) {
-              that.setState({isShowModel: true})
-            } else {
-              that.delGroup(nodeID)
-              //更新store中的数据
-            }
+            delEqu(nodeID).then(res => {
+              const { code, msg } = res
+              if (code===0) {
+                message.info("删除成功！")
+                // store.dispatch({
+                //   type: "delNodes",
+                //   data: nodeID
+                // })
+              } else {
+                message.error(msg)
+              }
+            })
+            // if (el.children.length>0) {
+            //   that.setState({ delNodeID: nodeID }, () => {
+            //     that.setState({ isShowModel: true })
+            //   })
+            // } else {
+            //   that.delEqu(nodeID)
+            //   //更新store中的数据
+            // }
           }
         },
         {
@@ -112,34 +130,24 @@ class Ztree extends PureComponent {
     )
   }
 
-  delGroup = (nodeID) => {
-    delEqu(nodeID).then(res=>{
-      const { code, msg } = res
-      if (code===0) {
-        message.info("删除成功！")
-        store.dispatch({
-          type: "delNodes",
-          data: nodeID
-        })
-      } else {
-        message.error(msg)
-      }
-    })
-  }
+  // delEqu = (deviceId) => {
+    
+  // }
 
-  handleOk = (nodeID) => {
-    // this.delGroup(nodeID)
+  handleOk = () => {
+    // this.delEqu(this.state.delNodeID)
     this.setState({isShowModel: false})
   }
 
   handleCancel = () => {
-    this.setState({isShowModel: false})
+    this.setState({ delNodeID: "" }, () => {
+      this.setState({isShowModel: false})
+    })
   }
 
   render() {
     const { title, opt } = this.props;
     const { zNodes } = this.state;
-    console.log(zNodes)
     return (
       <div className="fullContain">
         <div className="title">
@@ -216,6 +224,7 @@ class Ztree extends PureComponent {
             }
           </ul> : ""
         }
+        <EditGroup visible={this.state.isShowGroup} node={ this.state.group } cancel={()=>{ this.setState({isShowGroup: false}) }}></EditGroup>
         <EditEqu visible={this.state.isShowEqu} node={ this.state.node } cancel={()=>{ this.setState({isShowEqu: false}) }}/>
       </div>
     )

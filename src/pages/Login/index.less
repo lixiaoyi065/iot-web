@@ -40,7 +40,7 @@
       position: absolute;
       z-index: 9;
       width: 1.25vw;
-      height: 1.25vw;
+      height: auto;
       left: 2px;
       top: 1.3vh;
     }
@@ -59,18 +59,21 @@
     padding: 0 0.5vw 0 1.7vw;
     height: 5.27vh;
     line-height: 5.27vh;
-    font-size: 0.93vw;
+    // font-size: 0.93vw;
     color: #999;
     border: 0;
     border-bottom: 1px solid #DAE3EA;
+    box-shadow: none;
     border-radius: 0;
     outline: 0;
 
     &:hover {
+      border-radius: 0;
       border-bottom-color: #4799ED;
     }
   }
 }
+
 
 .login-form-button {
   margin-top: 3.6vh;
@@ -91,4 +94,51 @@
   &:active {
     background: #EAA438;
   }
+}
+
+.ant-popover-inner-content {
+  padding: 25px;
+  width: 379px;
+  height: 147px;
+  text-align: center;
+
+  .ant-popover-buttons{
+    text-align: center;
+  }
+  .ant-btn {
+    width: 80px;
+    height: 30px;
+    background: #4799ED;
+    border-radius: 4px;
+    color: #fff;
+  }
+  .ant-btn-hidden{
+    display: none;
+  }
+}
+
+ul {
+  list-style: disc;
+  padding-left: 0;
+  text-align: left;
+  color: #3267D0;
+
+  li {
+    font-size: 14px;
+    line-height: 25px;
+    color: #3267D0;
+
+    b {
+      color: #454545;
+    }
+
+    span {
+      padding-left: 5px;
+      color: #868686;
+    }
+  }
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 10000px white inset !important;
 }
