@@ -10,8 +10,8 @@ const { Option } = Select;
 
 class AddEqu extends PureComponent {
   state = {
-    ProtocolNames : ['Modbus_TCP', 'S7_TCP', 'OPC_DA', 'OPC_UA', 'MC3E_Binary_Ethernet', 'MCA1E_Binary_Ethernet', 'Fins_TCP'],//协议列表
-    Suppliers : {//厂家列表
+    ProtocolNames: ['Modbus_TCP', 'S7_TCP', 'OPC_DA', 'OPC_UA', 'MC3E_Binary_Ethernet', 'MCA1E_Binary_Ethernet', 'Fins_TCP'],//协议列表
+    Suppliers: {//厂家列表
       'Modbus_TCP': ['通用', '西门子Siemens'],
       'S7_TCP': ['西门子Siemens'],
       'OPC_DA': ['通用'],
@@ -20,7 +20,7 @@ class AddEqu extends PureComponent {
       'MCA1E_Binary_Ethernet': ['通用'],
       'Fins_TCP': ['欧姆龙Omron']
     },
-    ModelLists : {//设备型号列表
+    ModelLists: {//设备型号列表
       'Modbus_TCP': ['通用'],
       'S7_TCP': ['S7-300/400/1200/1500', 'S7-200Smart'],
       'OPC_DA': ['通用'],
@@ -36,14 +36,14 @@ class AddEqu extends PureComponent {
     activeModel: '通用', //默认设备型号
     userPane: false, //默认设备型号
     currenNode: {},//初始化
-    isShowAttr : {
-      'Modbus_TCP': ["ModelLists","IPAddress","DeviceID","Port","TimeOut","ByteOrder","StrByteOrder"],
-      'S7_TCP': ["ModelLists","IPAddress", "Rack", "Slot"],
-      'OPC_DA': ["IPAddress","ServerName","GroupName","UpdateRate","DeadBand","IsActive"],
+    isShowAttr: {
+      'Modbus_TCP': ["ModelLists", "IPAddress", "DeviceID", "Port", "TimeOut", "ByteOrder", "StrByteOrder"],
+      'S7_TCP': ["ModelLists", "IPAddress", "Rack", "Slot"],
+      'OPC_DA': ["IPAddress", "ServerName", "GroupName", "UpdateRate", "DeadBand", "IsActive"],
       'OPC_UA': ["SessionName", "IPAddress", "SecurityMode", "SecurityPolicy", "UserIdentity", "UserName", "Password"],
-      'MC3E_Binary_Ethernet': ["IPAddress","Port","StrByteOrder"],
-      'MCA1E_Binary_Ethernet': ["IPAddress","Port","StrByteOrder"],
-      'Fins_TCP': ["IPAddress","Port","StrByteOrder"]
+      'MC3E_Binary_Ethernet': ["IPAddress", "Port", "StrByteOrder"],
+      'MCA1E_Binary_Ethernet': ["IPAddress", "Port", "StrByteOrder"],
+      'Fins_TCP': ["IPAddress", "Port", "StrByteOrder"]
     },
   }
   formRef = React.createRef()
@@ -71,7 +71,7 @@ class AddEqu extends PureComponent {
   onChanguserIdentity = (e) => {
     e === "登录验证" ? this.setUserPane(true) : this.setUserPane(false)
   }
-  
+
   //监听协议名称的变化
   onProtocalNameChange = (e) => {
     console.log(e)
@@ -80,7 +80,7 @@ class AddEqu extends PureComponent {
       initSupplier: this.state.Suppliers[e][0]
     }, () => {
       console.log(this.state.ModelLists[e])
-      
+
       this.setState({
         initModel: this.state.ModelLists[e],
         //修改默认厂家
@@ -95,22 +95,22 @@ class AddEqu extends PureComponent {
       //   })
       // }
     })
-    
+
     //手动修改form.item的选中值
     this.formRef.current.setFieldsValue({
       Supplier: this.state.Suppliers[e][0],
       Model: this.state.ModelLists[e][0],
     });
   }
- 
+
   onFinishEqu = (val) => {
     //将提交的数据对象进行处理
-    const list = ["id","Name","Desc","ProtocolName","Supplier","Model"]
-    const equObj = {params:{}}
-    for (let key in val){
+    const list = ["id", "Name", "Desc", "ProtocolName", "Supplier", "Model"]
+    const equObj = { params: {} }
+    for (let key in val) {
       if (list.indexOf(key) < 0) {
         if (key === "StrByteOrder1") {
-          equObj.params.StrByteOrder = val[key]
+          equObj.params.StrByteOrder = val[key] ? "True" : "False"
         } else {
           equObj.params[key] = val[key]
         }
@@ -124,9 +124,9 @@ class AddEqu extends PureComponent {
     } else {
       console.log("新增")
     }
-    
+
     addEqu(equObj).then(res => {
-      const { code,msg } = res
+      const { code, msg } = res
       if (val.nodeID) {
         //编辑设备
       } else {
@@ -170,16 +170,16 @@ class AddEqu extends PureComponent {
     message.error('提交失败！');
   }
 
-    
-  render(){
+
+  render() {
     return (
-      <Modal width='fit-content' title={ this.props.nodeID ? "编辑设备" : "添加设备" } footer={null} visible={ this.props.visible }>
+      <Modal width='fit-content' title={this.props.nodeID ? "编辑设备" : "添加设备"} footer={null} visible={this.props.visible}>
         <Form
-          ref={ this.formRef }
+          ref={this.formRef}
           onFinish={this.onFinishEqu}
           onFinishFailed={this.onFinishFailedEqu}
           initialValues={this.currenNode}>
-          <div style={{padding: '0 27px'}}>
+          <div style={{ padding: '0 27px' }}>
             <Form.Item label="设备名称" name="Name" initialValue="测试设备"
               rules={[
                 {
@@ -188,13 +188,13 @@ class AddEqu extends PureComponent {
                 }
               ]}
             >
-              <Input/>
+              <Input />
             </Form.Item>
             <Form.Item label="设备描述" name="Desc" placeholder="请输入设备描述" initialValue="">
-              <Input/>
+              <Input />
             </Form.Item>
             <Form.Item label="设备ID" name="id" hidden={true} initialValue="00000000-0000-0000-0000-000000000000">
-              <Input/>
+              <Input />
             </Form.Item>
           </div>
           <Divider></Divider>
@@ -203,72 +203,72 @@ class AddEqu extends PureComponent {
               <Input/>
             </Form.Item> */}
             <Form.Item label="协议名称" name="ProtocolName">
-              <Select onChange={this.onProtocalNameChange} disabled={ this.state.edit }>
+              <Select onChange={this.onProtocalNameChange} disabled={this.state.edit}>
                 {
                   this.state.ProtocolNames.map(e => {
-                    return <Option value={ e } key={e}>{ e }</Option>
+                    return <Option value={e} key={e}>{e}</Option>
                   })
                 }
               </Select>
             </Form.Item>
             <Form.Item label="设备厂家" name="Supplier">
-              <Select disabled={ this.state.edit }>
+              <Select disabled={this.state.edit}>
                 {
                   this.state.Suppliers[this.state.activeProto] ? this.state.Suppliers[this.state.activeProto].map(e => {
                     return <Option value={e} key={e}>{e}</Option>
-                  }):null
+                  }) : null
                 }
               </Select>
             </Form.Item>
-            <Form.Item label="设备型号" name="Model" hidden={ this.isShowFormItem("ModelLists") }>
-              <Select disabled={ this.state.edit }>
-                    {
-                      this.state.activeModel ? (this.state.initModel.map((e,idx) => {
-                        return <Option value={e} key = {idx}>{e}</Option>
-                      })):null
-                    }
-                  </Select>
-                </Form.Item>
+            <Form.Item label="设备型号" name="Model" hidden={this.isShowFormItem("ModelLists")}>
+              <Select disabled={this.state.edit}>
+                {
+                  this.state.activeModel ? (this.state.initModel.map((e, idx) => {
+                    return <Option value={e} key={idx}>{e}</Option>
+                  })) : null
+                }
+              </Select>
+            </Form.Item>
             {
               this.isShowFormItem("SessionName") ? (
                 <Form.Item label="连接名" name="SessionName">
-                  <Input/>
+                  <Input />
                 </Form.Item>
-              ): null
+              ) : null
             }
             {
               this.isShowFormItem("IPAddress") ? (
                 // <>
-                  <Form.Item label={ this.state.activeProto === "OPC_UA" ? "连接地址" :"设备IP"} name="IPAddress" initialValue="127.0.0.1"
-                    rules={[
-                      {
-                        required: true,
-                        message: '请输入',
-                      }, {
-                        pattern: /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/,
-                        message: '请输入输入正确的地址',
-                      }
-                    ]}
-                  >
-                    <Input/>
-                  </Form.Item>
-                ):null
-              }
-              {
-                this.isShowFormItem("DeviceID") ? (
-                  <Form.Item label="设备ID" name="DeviceID" placeholder="请输入设备ID" initialValue="123456"
-                      rules={[
-                        {
-                          required: true,
-                          message: '请输入设备ID',
-                        }, {
-                          pattern: /^\+?[1-9][0-9]*$/,
-                          message: '请输入输入数字',
-                        }
-                      ]}
-                    >
-                    <Input/>
-                  </Form.Item>
+                <Form.Item label={this.state.activeProto === "OPC_UA" ? "连接地址" : "设备IP"} name="IPAddress" initialValue="127.0.0.1"
+                  rules={[
+                    {
+                      required: true,
+                      message: '请输入',
+                    }, {
+                      pattern: /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/,
+                      message: '请输入输入正确的地址',
+                    }
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              ) : null
+            }
+            {
+              this.isShowFormItem("DeviceID") ? (
+                <Form.Item label="设备ID" name="DeviceID" placeholder="请输入设备ID" initialValue="123456"
+                  rules={[
+                    {
+                      required: true,
+                      message: '请输入设备ID',
+                    }, {
+                      pattern: /^\+?[1-9][0-9]*$/,
+                      message: '请输入输入数字',
+                    }
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
                 // </>
               ) : null
             }
@@ -285,9 +285,9 @@ class AddEqu extends PureComponent {
                     }
                   ]}
                 >
-                  <Input type="Number"/>
+                  <Input type="Number" />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("TimeOut") ? (
@@ -302,9 +302,9 @@ class AddEqu extends PureComponent {
                     }
                   ]}
                 >
-                  <Input suffix="毫秒"/>
+                  <Input suffix="毫秒" />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("ByteOrder") ? (
@@ -316,7 +316,7 @@ class AddEqu extends PureComponent {
                     <Option value="4321">4321</Option>
                   </Select>
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("ServerName") ? (
@@ -328,9 +328,9 @@ class AddEqu extends PureComponent {
                     }
                   ]}
                 >
-                  <Input/>
+                  <Input />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("GroupName") ? (
@@ -342,9 +342,9 @@ class AddEqu extends PureComponent {
                     }
                   ]}
                 >
-                  <Input/>
+                  <Input />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("UpdateRate") ? (
@@ -359,9 +359,9 @@ class AddEqu extends PureComponent {
                     }
                   ]}
                 >
-                  <Input suffix="mSec"/>
+                  <Input suffix="mSec" />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("DeadBand") ? (
@@ -376,9 +376,9 @@ class AddEqu extends PureComponent {
                     }
                   ]}
                 >
-                  <Input type="number" suffix="%FS"/>
+                  <Input type="number" suffix="%FS" />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("IsActive") ? (
@@ -388,7 +388,7 @@ class AddEqu extends PureComponent {
                     <Option value="False">False</Option>
                   </Select>
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("SecurityMode") ? (
@@ -397,7 +397,7 @@ class AddEqu extends PureComponent {
                     <Option value="不加密">不加密</Option>
                   </Select>
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("SecurityPolicy") ? (
@@ -406,71 +406,71 @@ class AddEqu extends PureComponent {
                     <Option value="不加密">不加密</Option>
                   </Select>
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("UserIdentity") ? (
                 <Form.Item label="验证方式" name="UserIdentity" initialValue="匿名">
-                  <Select onChange={ this.onChanguserIdentity }>
+                  <Select onChange={this.onChanguserIdentity}>
                     <Option value="匿名">匿名</Option>
                     <Option value="登录验证">登录验证</Option>
                   </Select>
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("Rack") ? (
                 <Form.Item label="机架号" name="Rack">
-                  <Input/>
+                  <Input />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("Slot") ? (
                 <Form.Item label="CPU插槽" name="Slot">
-                  <Input/>
+                  <Input />
                 </Form.Item>
-              ):null
+              ) : null
             }
             {
               this.isShowFormItem("StrByteOrder") ?
                 (
                   this.state.activeProto === "Fins_TCP" || this.state.activeProto === "MCA1E_Binary_Ethernet" || this.state.activeProto === "MC3E_Binary_Ethernet" ?
-                  (
-                  <Form.Item valuePropName="checked" name="StrByteOrder1" initialValue={false}>
-                    <Checkbox>字符串字节顺序</Checkbox>
-                  </Form.Item>
-                ): (
+                    (
+                      <Form.Item valuePropName="checked" name="StrByteOrder1" initialValue={false}>
+                        <Checkbox>字符串字节顺序</Checkbox>
+                      </Form.Item>
+                    ) : (
                       <Form.Item label="字符串字节顺序" name="StrByteOrder" initialValue="1234"
-                        rules={ [{
+                        rules={[{
                           require: true
                         }]
                         }>
-                    <Select>
-                      <Option value="1234">1234</Option>
-                      <Option value="2134">2134</Option>
-                      <Option value="3412">3412</Option>
-                      <Option value="4321">4321</Option>
-                    </Select>
-                  </Form.Item>
-                )
-              ):null
+                        <Select>
+                          <Option value="1234">1234</Option>
+                          <Option value="2134">2134</Option>
+                          <Option value="3412">3412</Option>
+                          <Option value="4321">4321</Option>
+                        </Select>
+                      </Form.Item>
+                    )
+                ) : null
             }
             {
               this.state.userPane ? (
                 <>
                   <Form.Item label="用户名" className="UserName">
-                    <Input/>
+                    <Input />
                   </Form.Item>
                   <Form.Item label="密码" className="Password">
                     <Input.Password />
                   </Form.Item>
                 </>
-              ):null
+              ) : null
             }
-  
+
             <Form.Item className="form-footer">
-              <Button type="default" className="login-form-button" onClick={ this.props.cancel }>取消</Button>
+              <Button type="default" className="login-form-button" onClick={this.props.cancel}>取消</Button>
               <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
             </Form.Item>
           </div>

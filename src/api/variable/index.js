@@ -1,5 +1,4 @@
 import service from 'utils/request'
-import qs from 'qs'
 
 //获取设备列表
 export function getEquList() {
