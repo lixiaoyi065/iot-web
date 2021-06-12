@@ -2,5 +2,85 @@
   .ant-tree-treenode {
     height: 36px;
     line-height: 36px;
+    padding: 0 10px 0 45px;
+
+    &::before{
+      bottom: 0;
+    }
+
+    &:hover::after{
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 11px;
+      width: 14px;
+      height: 14px;
+      background: url("~assets/img/common/move2.png") no-repeat;
+      background-size: 100%;
+    }
+
+    &.ant-tree-treenode-selected{
+      background: #4270E4;
+
+      &::before{
+        background: none;
+      }
+
+      &:hover::after{
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 11px;
+        width: 14px;
+        height: 14px;
+        background: url("~assets/img/common/move2_active.png") no-repeat;
+        background-size: 100%;
+      }
+      
+      .ant-tree-title{
+        .ant-tree-title-operationNode{
+          background: url(~assets/img/variable/more_active.png) no-repeat;
+          background-size: 100%;
+        }
+      }
+    }
   }
+}
+.ant-tree {
+  .ant-tree-node-content-wrapper{
+    height: 36px;
+    line-height: 36px;
+
+    .ant-tree-iconEle{
+      height: 36px;
+      line-height: 36px;
+    }
+    .ant-tree-title{
+      position: relative;
+      display: block;
+
+      .ant-tree-title-operationNode{
+        position: absolute;
+        right: 0;
+        top: 09px;
+        display: none;
+        margin: auto;
+        width: 18px;
+        height: 18px;
+        line-height: 36px;
+        background: url(~assets/img/variable/more.png) no-repeat;
+        background-size: 100%;
+        cursor: pointer;
+      }
+    }
+
+    &:hover{
+      .ant-tree-title-operationNode{
+        display: inline-block;
+      }
+    }
+  }
+}
+.ant-tree-switcher{
+  line-height: 36px;
 }

@@ -7,14 +7,7 @@ import { addGroup } from 'api/variable/index'
 
 import "./index.less"
 
-const { Option } = Select;
 class AddGroup extends PureComponent {
-  state = {
-    euqList: [],
-    type: 2
-  }
-
-  formRef = React.createRef()
 
   componentDidMount() {
     console.log(this.props.node)
@@ -37,18 +30,6 @@ class AddGroup extends PureComponent {
   onFinishFailed = () => {
   }
 
-  changeType = (e) => {
-    let type
-    if (e === "55ca2fbd-d950-4992-8642-bfa53867c88c") {
-      type = 2
-    } else {
-      type = 4
-    }
-    console.log(type)
-    this.formRef.current.setFieldsValue({
-      Type: type,
-    });
-  }
   render() {
     return (
       <Modal width='fit-content' title="添加分组" footer={null} visible={this.props.visible}>
@@ -59,15 +40,6 @@ class AddGroup extends PureComponent {
           initialValues={{
           }}
         >
-          <Form.Item label="所属设备" name="deviceId">
-            <Select onChange={this.changeType}>
-              {
-                this.state.euqList.map(e => {
-                  return <Option value={e.nodeID} key={e.nodeID}>{e.nodeName}</Option>
-                })
-              }
-            </Select>
-          </Form.Item>
           <Form.Item label="设备类型" name="type" hidden initialValue={this.state.type}>
             <Input />
           </Form.Item>

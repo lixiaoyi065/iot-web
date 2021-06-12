@@ -1,6 +1,7 @@
 import React, {PureComponent} from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";//引入routerdom
 // import asyncComponent from 'utils/asyncComponent'
+import PrivateRoute from './PrivateRoute'
 
 import Login from 'pages/Login'//导入的组件
 import Index from "@/layouts/BasicLayout";
@@ -15,7 +16,7 @@ class Router extends PureComponent {
         <BrowserRouter>
           <Switch>
             <Route path="/login" component={Login}/>
-            <Route path="/index" component={Index}/>
+            <PrivateRoute path="/index" component={Index}/>
             <Redirect to="/login"/>
           </Switch>
         </BrowserRouter>

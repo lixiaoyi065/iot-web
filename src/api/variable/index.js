@@ -1,5 +1,13 @@
 import service from 'utils/request'
 
+//获取整棵设备列表树结构
+export function GetTreeStructure() {
+  return service({
+    url: '/VariableManage/GetTreeStructure',
+    method: 'get'
+  })
+}
+
 //获取设备列表
 export function getEquList() {
   return service({

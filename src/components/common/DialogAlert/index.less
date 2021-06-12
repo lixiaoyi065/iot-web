@@ -1,0 +1,76 @@
+.mask-layer{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 9999;
+  background-color: rgba(0,0,0,.4);
+}
+.dialog-wrap{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+
+  .dialog-title{
+    position: relative;
+    height: 50px;
+    line-height: 50px;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    background: #409EFF;
+
+    .close-dialog{
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 16px;
+      right: 16px;
+      background-image: url(~assets/img/common/close.png);
+      background-size: 100%;
+      background-repeat: no-repeat;
+      cursor: pointer;
+    }
+  }
+  .dialog-box{
+    padding: 30px 44px 20px;
+    font-size: 14px;
+    font-family: PingFang SC;
+    font-weight: 500;
+    color: #6F7374;
+  }
+
+  .dialog-btn{
+    padding: 0 26px;
+    height: 32px;
+    font-size: 14px;
+    font-family: PingFang SC;
+    font-weight: 500;
+    border-radius: 4px;
+    margin-left: 20px;
+    cursor: pointer;
+  }
+  .dialog-footer{
+    text-align: right;
+  }
+  .dialog-btn-cancel{
+    background: #ECF5FF;
+    border: 1px solid #B3D8FF;
+  }
+  .dialog-btn-confirm{
+    background: #409EFF;
+    border: 0;
+    color: #fff;
+
+    &:hover{
+      background: #66B1FF;
+    }
+    &:active{
+      background: #3A8EE6;
+    }
+  }
+}

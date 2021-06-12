@@ -1,0 +1,123 @@
+#root {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.App {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.divider {
+  display: inline-block;
+  width: 1px;
+  height: 27px;
+  line-height: 70px;
+  background-color: #CFDAE3;
+  transform: scaleX(0.5);
+  vertical-align: middle;
+  margin: auto 20px;
+}.antProPageContainer {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.leftContent {
+  position: relative;
+  padding-right: 25px;
+  width: 275px;
+  height: 100%;
+  background: #FFFFFF;
+  transition: all 0.3s ease;
+
+  .fullContain{
+    box-shadow: 1px 0 0 0 #DCE4EB;
+  }
+
+  .arrowLeft {
+    position: absolute;
+    padding: 0;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 37px;
+    background: url(~assets/img/common/move.png) no-repeat;
+    background-size: 100%;
+    cursor: pointer;
+    z-index: 9;
+  }
+}
+
+.tableList {
+  flex: 1;
+  height: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableContain {
+  flex: 1;
+  padding: 10px 0 0;
+  width: 100%;
+}
+
+.optAdd {
+  display: inline-block;
+  border: 0;
+  width: 18px;
+  height: 18px;
+  background: url("~assets/img/variable/add.png") no-repeat;
+  background-size: 100%;
+  vertical-align: middle;
+  cursor: pointer;
+
+  &:hover {
+    background: url("~assets/img/variable/add_hover.png") no-repeat;
+    background-size: 100%;
+  }
+
+  &:active {
+    background: url("~assets/img/variable/add_active.png") no-repeat;
+    background-size: 100%;
+  }
+}
+.ant-modal-content{
+  .ant-btn{
+    margin-left: 20px;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 26px;
+    background: #ECF5FF;
+    border: 1px solid #B3D8FF;
+    color: #409EFF;
+
+    &.ant-btn-primary{
+      background: #409EFF;
+      color: #fff;
+    }
+  }
+  
+  .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before{
+    content: none;
+  }
+
+  .form-footer{
+    text-align: right;
+  }
+  .ant-form-item-label > label::after{
+    content: ':';
+    margin-right: 20px;
+  }
+
+  .ant-select,.ant-input,.ant-input-affix-wrapper{
+    width: 250px;
+  }
+}
+

@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { Modal, Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
 import store from 'store'
 
-import { addEqu, getEqu } from 'api/variable/index'
+import { addEqu } from 'api/variable/index'
 
 import "./index.less"
 
@@ -49,6 +49,7 @@ class AddEqu extends PureComponent {
   formRef = React.createRef()
 
   componentDidMount() {
+    console.log(this.props.node)
     if (this.props.node) {
       this.setState({
         edit: true,

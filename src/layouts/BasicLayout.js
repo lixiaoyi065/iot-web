@@ -12,6 +12,8 @@ import RealTime from 'pages/RealTime'
 import Operations from 'pages/Operations'
 import Authorization from 'pages/Authorization'
 
+import './index.less'
+
 const { Content } = Layout;
 
 class BasicLayout extends PureComponent {

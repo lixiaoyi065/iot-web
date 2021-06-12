@@ -8,6 +8,28 @@ import user from 'assets/img/login/user.png'
 import password from 'assets/img/login/password.png'
 
 class Login extends Component {
+  state = {
+    isLogin: document.cookie.includes('login=true')
+  }
+
+  setCookie = (key, value, day) => {
+    let expires = day * 86400 * 1000  // 时间转化成 ms
+    let date = new Date( + new Date() + expires) // 当前时间加上要存储的时间
+    document.cookie = `${key}=${value};expires=${date.toUTCString()}`
+  }
+  jumpBack = () => {
+    // 打哪儿来回哪去
+    const { location } = this.props
+    const from = location.state && location.state.from
+    console.log(from)
+    //  const article = location.state && location.state.article
+    this.props.history.push({
+      pathname: from || "/index",
+      state: {
+          // article
+      }
+    })
+  }
   text = (<div>
     <ul>
       <li><b>普通用户</b><span>请联系超级管理员重置密码</span></li>
@@ -16,13 +38,29 @@ class Login extends Component {
   </div>)
 
   onFinish = (e) => {
+
     axios.get(`/Login/Login?argUserAccount=${e.user}&argUserPassword=${e.password}`).then(res => {
       console.log(res)
       if (res.code === 0) {
         localStorage.setItem("accessToken", res.data)
         localStorage.setItem("userName", e.user)
         console.log(localStorage.getItem("userName"))
-        this.props.history.replace("/index")
+        // this.props.history.replace("/index")
+
+        
+        let login = !this.state.isLogin
+        this.setState({
+            isLogin: login
+        })
+        if(login){
+            // 设置cookie之后跳转回来时的页面
+            this.setCookie('login', true, 15)
+            this.jumpBack()
+        } else {
+            // 设置时间为负数, 取消设置的 cookie
+            this.setCookie('login', '', -1)
+        }
+
       } else {
         message.error(res.msg)
       }

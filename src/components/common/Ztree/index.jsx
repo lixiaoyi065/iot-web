@@ -5,6 +5,8 @@ import DrowDownMenu from 'components/common/DrowDownMenu'
 import EditEqu from 'pages/Variable/components/AddEqu'
 import EditGroup from 'pages/Variable/components/AddGroup'
 
+import DialogAlert from "../DialogAlert"
+
 import store from 'store'
 
 import { delEqu, delGroup } from 'api/variable'
@@ -57,7 +59,6 @@ class Ztree extends PureComponent {
           key: "editGroup",
           name: "编辑分组",
           onClick() {
-
             that.setState({ group: nodeID }, () => {
               that.setState({isShowGroup: true})
             })
@@ -77,7 +78,13 @@ class Ztree extends PureComponent {
           key: "start",
           name: "启用",
           onClick() {
-            message.info("设备已启动")
+            DialogAlert.open({
+              alertTip:"加载失败，是否重新加载?",
+              confirmCallbackFn:()=>{
+                  //todo...
+              }
+            })
+            // message.info("设备已启动")
           }
         },
         {
