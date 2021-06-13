@@ -1,14 +1,29 @@
+.title {
+  display: flex;
+  padding: 0 12px 0 21px;
+  height: 50px;
+  line-height: 50px;
+  color: #333;
+  border-bottom: 1px solid #E4E4E4;
+  overflow: hidden;
+
+  .optGroup {
+    flex: 1;
+    text-align: right;
+  }
+}
+
 .ant-tree.ant-tree-directory {
   .ant-tree-treenode {
     height: 36px;
     line-height: 36px;
     padding: 0 10px 0 45px;
 
-    &::before{
+    &::before {
       bottom: 0;
     }
 
-    &:hover::after{
+    &:hover::after {
       content: "";
       position: absolute;
       left: 20px;
@@ -19,14 +34,14 @@
       background-size: 100%;
     }
 
-    &.ant-tree-treenode-selected{
+    &.ant-tree-treenode-selected {
       background: #4270E4;
 
-      &::before{
+      &::before {
         background: none;
       }
 
-      &:hover::after{
+      &:hover::after {
         content: "";
         position: absolute;
         left: 20px;
@@ -36,9 +51,9 @@
         background: url("~assets/img/common/move2_active.png") no-repeat;
         background-size: 100%;
       }
-      
-      .ant-tree-title{
-        .ant-tree-title-operationNode{
+
+      .ant-tree-title {
+        .ant-tree-title-operationNode {
           background: url(~assets/img/variable/more_active.png) no-repeat;
           background-size: 100%;
         }
@@ -46,20 +61,22 @@
     }
   }
 }
+
 .ant-tree {
-  .ant-tree-node-content-wrapper{
+  .ant-tree-node-content-wrapper {
     height: 36px;
     line-height: 36px;
 
-    .ant-tree-iconEle{
+    .ant-tree-iconEle {
       height: 36px;
       line-height: 36px;
     }
-    .ant-tree-title{
+
+    .ant-tree-title {
       position: relative;
       display: block;
 
-      .ant-tree-title-operationNode{
+      .ant-tree-title-operationNode {
         position: absolute;
         right: 0;
         top: 09px;
@@ -74,13 +91,14 @@
       }
     }
 
-    &:hover{
-      .ant-tree-title-operationNode{
+    &:hover {
+      .ant-tree-title-operationNode {
         display: inline-block;
       }
     }
   }
 }
-.ant-tree-switcher{
+
+.ant-tree-switcher {
   line-height: 36px;
 }

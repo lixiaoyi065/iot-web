@@ -20,6 +20,10 @@ class Variable extends PureComponent{
     isShowEqu: false,
   }
 
+  componentDidMount(){
+    console.log("----")
+  }
+
   menuClick = (e) => {
     this.setState({ visible: "false" })
     console.log(e.key,e.key === "addEqu")

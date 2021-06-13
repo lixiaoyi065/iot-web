@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'; 
+import React, { PureComponent } from 'react';
 import { Tree, Dropdown } from 'antd';
 
 import './index.less'
@@ -38,7 +38,7 @@ class ZTree extends PureComponent {
     if (data.canBeDeleted) {
       nodeData.title = (<>
         <span>{data.nodeName}</span>
-        <Dropdown overlay={this.props.optionDeviceMenu} placement="bottomCenter" arrow>
+        <Dropdown overlay={() => { return this.props.optionDeviceMenu(data.nodeID) }} placement="bottomCenter" arrow>
           <span className="ant-tree-title-operationNode"></span>
         </Dropdown>
       </>)
@@ -58,8 +58,8 @@ class ZTree extends PureComponent {
 
         if (data.canBeDeleted) {
           childNode.title = (<>
-            <span>{ child.nodeName }</span>
-            <Dropdown overlay={this.props.optionGroupMenu} placement="bottomCenter" arrow>
+            <span>{child.nodeName}</span>
+            <Dropdown overlay={() => { return this.props.optionGroupMenu(childNode.nodeID) }} placement="bottomCenter" arrow>
               <span className="ant-tree-title-operationNode"></span>
             </Dropdown>
           </>)
@@ -91,17 +91,17 @@ class ZTree extends PureComponent {
   onExpand = () => {
     // console.log('展开节点');
   };
-  
+
   render() {
     return (
-      <div className="fullContain">
+      <>
         {
           this.props.title ? (
             <div className="title">
               <span>{this.props.title}</span>
               {
                 this.props.zTreeOption ? <div className="optGroup"> {
-                  <Dropdown overlay={ this.state.zTreeOptionMenu } placement={ this.props.zTreeOption.placement } arrow>
+                  <Dropdown overlay={this.state.zTreeOptionMenu} placement={this.props.zTreeOption.placement} arrow>
                     <div className={this.props.zTreeOption.className}></div>
                   </Dropdown>
                 } </div> : null
@@ -109,16 +109,16 @@ class ZTree extends PureComponent {
             </div>
           ) : null
         }
-        
+
         <DirectoryTree
           showIcon={false}
-          autoExpandParent={ true}
+          autoExpandParent={true}
           onSelect={this.onSelect}
           onExpand={this.onExpand}
           treeData={this.treeData()}
           {...this.props}
         />
-      </div>
+      </>
     )
   }
 };

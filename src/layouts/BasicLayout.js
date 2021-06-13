@@ -35,12 +35,12 @@ class BasicLayout extends PureComponent {
           <PageSider collapsed={ this.state.collapsed }/>
           <Content className="site-layout-background">
             <Switch>
-              <Route path="/index/variable" component={Variable}/>
+              {/* <Route path="/index/variable" component={Variable}/> */}
               <Route path="/index/realTime" component={RealTime}/>
               <Route path="/index/operations" component={Operations}/>
               <Route path="/index/authorization" component={Authorization}/>
               {/* <Route path="/realtime" component={RealTime}/> */}
-              <Redirect to="/index/variable"/>
+              <Redirect to="/index/realTime"/>
             </Switch>
           </Content>
         </Layout>

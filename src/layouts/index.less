@@ -21,7 +21,9 @@
   transform: scaleX(0.5);
   vertical-align: middle;
   margin: auto 20px;
-}.antProPageContainer {
+}
+
+.antProPageContainer {
   display: flex;
   height: 100%;
   overflow: hidden;
@@ -34,9 +36,22 @@
   height: 100%;
   background: #FFFFFF;
   transition: all 0.3s ease;
+  overflow: hidden;
 
-  .fullContain{
+  &.foldToLeft {
+    width: 25px;
+  }
+
+  .fullContain {
+    height: 100%;
     box-shadow: 1px 0 0 0 #DCE4EB;
+    overflow: hidden;
+
+    .ant-tree {
+      width: 100%;
+      flex: 1;
+      overflow: auto;
+    }
   }
 
   .arrowLeft {
@@ -88,8 +103,9 @@
     background-size: 100%;
   }
 }
-.ant-modal-content{
-  .ant-btn{
+
+.ant-modal-content {
+  .ant-btn {
     margin-left: 20px;
     height: 32px;
     line-height: 32px;
@@ -98,26 +114,38 @@
     border: 1px solid #B3D8FF;
     color: #409EFF;
 
-    &.ant-btn-primary{
+    &.ant-btn-primary {
       background: #409EFF;
       color: #fff;
     }
   }
-  
-  .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before{
+
+  .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
     content: none;
   }
 
-  .form-footer{
+  .form-footer {
     text-align: right;
   }
-  .ant-form-item-label > label::after{
+
+  .ant-form-item-label>label::after {
     content: ':';
     margin-right: 20px;
   }
 
-  .ant-select,.ant-input,.ant-input-affix-wrapper{
+  .ant-select,
+  .ant-input,
+  .ant-input-affix-wrapper {
     width: 250px;
   }
 }
 
+.dialog-box {
+  .ant-form-horizontal .ant-form-item-control {
+    width: 250px;
+  }
+
+  .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+    content: none;
+  }
+}

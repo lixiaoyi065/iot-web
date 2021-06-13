@@ -1,20 +1,21 @@
-.mask-layer{
+.mask-layer {
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  z-index: 9999;
-  background-color: rgba(0,0,0,.4);
+  z-index: 99;
+  background-color: rgba(0, 0, 0, .4);
 }
-.dialog-wrap{
+
+.dialog-wrap {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: #fff;
 
-  .dialog-title{
+  .dialog-title {
     position: relative;
     height: 50px;
     line-height: 50px;
@@ -24,7 +25,7 @@
     font-weight: 400;
     background: #409EFF;
 
-    .close-dialog{
+    .close-dialog {
       position: absolute;
       width: 18px;
       height: 18px;
@@ -36,7 +37,8 @@
       cursor: pointer;
     }
   }
-  .dialog-box{
+
+  .dialog-box {
     padding: 30px 44px 20px;
     font-size: 14px;
     font-family: PingFang SC;
@@ -44,7 +46,7 @@
     color: #6F7374;
   }
 
-  .dialog-btn{
+  .dialog-btn {
     padding: 0 26px;
     height: 32px;
     font-size: 14px;
@@ -54,22 +56,26 @@
     margin-left: 20px;
     cursor: pointer;
   }
-  .dialog-footer{
+
+  .dialog-footer {
     text-align: right;
   }
-  .dialog-btn-cancel{
+
+  .dialog-btn-cancel {
     background: #ECF5FF;
     border: 1px solid #B3D8FF;
   }
-  .dialog-btn-confirm{
+
+  .dialog-btn-confirm {
     background: #409EFF;
     border: 0;
     color: #fff;
 
-    &:hover{
+    &:hover {
       background: #66B1FF;
     }
-    &:active{
+
+    &:active {
       background: #3A8EE6;
     }
   }
