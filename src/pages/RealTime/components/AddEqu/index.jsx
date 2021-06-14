@@ -28,13 +28,13 @@ export default class addDevice extends PureComponent {
       'Fins_TCP': ['通用']
     },
     isShowAttr: { //根据协议显示对应的字段
-      'Modbus_TCP': ["modelLists", "IPAddress", "deviceID", "port", "timeOut", "byteOrder", "strByteOrder"],
+      'Modbus_TCP': ["modelLists", "IPAddress", "DeviceID", "Port", "TimeOut", "ByteOrder", "StrByteOrder"],
       'S7_TCP': ["modelLists", "IPAddress", "Rack", "Slot"],
       'OPC_DA': ["IPAddress", "ServerName", "GroupName", "UpdateRate", "DeadBand", "IsActive"],
-      'OPC_UA': ["sessionName", "IPAddress", "securityMode", "securityPolicy", "userIdentity", "userName", "Password"],
-      'MC3E_Binary_Ethernet': ["IPAddress", "port", "strByteOrder"],
-      'MCA1E_Binary_Ethernet': ["IPAddress", "port", "strByteOrder"],
-      'Fins_TCP': ["IPAddress", "port", "strByteOrder"]
+      'OPC_UA': ["SessionName", "IPAddress", "SecurityMode", "SecurityPolicy", "UserIdentity", "userName", "Password"],
+      'MC3E_Binary_Ethernet': ["IPAddress", "Port", "StrByteOrder"],
+      'MCA1E_Binary_Ethernet': ["IPAddress", "Port", "StrByteOrder"],
+      'Fins_TCP': ["IPAddress", "Port", "StrByteOrder"]
     },
     activeProto: "Modbus_TCP", // 当前选中的协议
     initialValues: {
@@ -46,18 +46,18 @@ export default class addDevice extends PureComponent {
       supplier: "通用",//设备厂家
       model: "通用",
       IPAddress: "127.0.0.1",
-      deviceID: "1234",
-      port: "5000",
-      timeOut: "5000",
-      byteOrder: "1234",
+      DeviceID: "1234",
+      Port: "5000",
+      TimeOut: "5000",
+      ByteOrder: "1234",
       IsActive: "True",
-      securityMode: "不加密",
-      securityPolicy: "不加密",
-      userIdentity: "匿名",
-      strByteOrder1: "false",
-      strByteOrder: "1234"
+      SecurityMode: "不加密",
+      SecurityPolicy: "不加密",
+      UserIdentity: "匿名",
+      StrByteOrder1: "false",
+      StrByteOrder: "1234"
     },//初始化表单数据
-    checked: false
+    userPane: false
   }
   //判断是否显示某个属性
   isShowFormItem = item => {
@@ -76,14 +76,19 @@ export default class addDevice extends PureComponent {
       });
     })
   }
+  //监听验证方式变化
+  onChangUserIdentity = e => {
+    e === "登录验证" ? this.setState({ userPane: true }) : this.setState({ userPane: false })
+  }
   onFinish = val => {
+    console.log(val)
     const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
     //数据二次处理
     const equObj = { params: {} }
     for (let key in val) {
       if (list.indexOf(key) < 0) {
-        if (key === "strByteOrder1") {
-          equObj.params.strByteOrder = val[key]
+        if (key === "StrByteOrder1") {
+          equObj.params.StrByteOrder = val[key] ? "True" : "False"
         } else {
           equObj.params[key] = val[key]
         }
@@ -95,18 +100,26 @@ export default class addDevice extends PureComponent {
       console.log("新增设备", equObj)
       AddDevice(equObj).then(res => {
         console.log(res)
+        if (res.code === 0) {
+          message.info("新增成功")
+        } else {
+          message.error("新增失败。" + res.msg)
+        }
       })
     } else {
       ModifyDevice(equObj).then(res => {
         console.log(res)
+        if (res.code === 0) {
+          message.info("编辑成功")
+        } else {
+          message.error("编辑失败。" + res.msg)
+        }
       })
-      console.log("编辑设备", equObj)
     }
   }
   componentDidMount() {
     if (this.props.node) {
       // 将传过来的设备数据进行处理
-      const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"];
       const node = this.props.node,
         initValue = {
           id: node.id,
@@ -116,22 +129,24 @@ export default class addDevice extends PureComponent {
           protocolName: node.protocolName, //协议名称
           supplier: node.supplier,//设备厂家
           model: node.model,
-        },
-        { activeProto } = this.state;
+        };
       for (let i in node.params) {
-        if (i === "strByteOrder") {
-          if (activeProto === "Fins_TCP" || activeProto === "MCA1E_Binary_Ethernet" || activeProto === "MC3E_Binary_Ethernet") {
-            initValue.strByteOrder1 = node.params[i]
+        if (i === "StrByteOrder") {
+          if (node.protocolName === "Fins_TCP" || node.protocolName === "MCA1E_Binary_Ethernet" || node.protocolName === "MC3E_Binary_Ethernet") {
+            initValue.StrByteOrder1 = node.params[i] === "True" ? true : false
+            console.log(initValue.StrByteOrder1)
           } else {
-            initValue.strByteOrder = node.params[i]
+            initValue.StrByteOrder = node.params[i]
           }
         } else {
           initValue[i] = node.params[i]
         }
       }
+      if (node.params.UserIdentity === "登录验证") {
+        this.setState({ userPane: true })
+      }
       //更新表单中的值
       this.formRef.current.setFieldsValue(initValue);
-      console.log(initValue, node)
       this.setState({
         activeProto: node.protocolName,
         edit: true
@@ -198,8 +213,8 @@ export default class addDevice extends PureComponent {
             </Select>
           </Form.Item>
           {
-            this.isShowFormItem("sessionName") ? (
-              <Form.Item label="连接名" name="sessionName">
+            this.isShowFormItem("SessionName") ? (
+              <Form.Item label="连接名" name="SessionName">
                 <Input />
               </Form.Item>
             ) : null
@@ -222,8 +237,8 @@ export default class addDevice extends PureComponent {
             ) : null
           }
           {
-            this.isShowFormItem("deviceID") ? (
-              <Form.Item label="设备ID" name="deviceID" placeholder="请输入设备ID"
+            this.isShowFormItem("DeviceID") ? (
+              <Form.Item label="设备ID" name="DeviceID" placeholder="请输入设备ID"
                 rules={[
                   {
                     required: true,
@@ -239,8 +254,8 @@ export default class addDevice extends PureComponent {
             ) : null
           }
           {
-            this.isShowFormItem("port") ? (
-              <Form.Item label="端口号" name="port" placeholder="请输入端口号"
+            this.isShowFormItem("Port") ? (
+              <Form.Item label="端口号" name="Port" placeholder="请输入端口号"
                 rules={[
                   {
                     required: true,
@@ -256,8 +271,8 @@ export default class addDevice extends PureComponent {
             ) : null
           }
           {
-            this.isShowFormItem("timeOut") ? (
-              <Form.Item label="超时时间" name="timeOut" placeholder="请输入超时时间"
+            this.isShowFormItem("TimeOut") ? (
+              <Form.Item label="超时时间" name="TimeOut" placeholder="请输入超时时间"
                 rules={[
                   {
                     required: true,
@@ -273,8 +288,8 @@ export default class addDevice extends PureComponent {
             ) : null
           }
           {
-            this.isShowFormItem("byteOrder") ? (
-              <Form.Item label="32位字节顺序" name="byteOrder">
+            this.isShowFormItem("ByteOrder") ? (
+              <Form.Item label="32位字节顺序" name="ByteOrder">
                 <Select>
                   <Option value="1234">1234</Option>
                   <Option value="2134">2134</Option>
@@ -356,16 +371,16 @@ export default class addDevice extends PureComponent {
             ) : null
           }
           {
-            this.isShowFormItem("securityMode") ? (
-              <Form.Item label="安全模式" name="securityMode" initialValue="不加密">
+            this.isShowFormItem("SecurityMode") ? (
+              <Form.Item label="安全模式" name="SecurityMode">
                 <Select>
                   <Option value="不加密">不加密</Option>
                 </Select>
               </Form.Item>
             ) : null
           }{
-            this.isShowFormItem("securityPolicy") ? (
-              <Form.Item label="安全策略" name="securityPolicy" initialValue="不加密">
+            this.isShowFormItem("SecurityPolicy") ? (
+              <Form.Item label="安全策略" name="SecurityPolicy">
                 <Select>
                   <Option value="不加密">不加密</Option>
                 </Select>
@@ -373,12 +388,24 @@ export default class addDevice extends PureComponent {
             ) : null
           }
           {
-            this.isShowFormItem("userIdentity") ? (
-              <Form.Item label="验证方式" name="userIdentity" initialValue="匿名">
-                <Select onChange={this.onChanguserIdentity}>
+            this.isShowFormItem("UserIdentity") ? (
+              <Form.Item label="验证方式" name="UserIdentity">
+                <Select onChange={this.onChangUserIdentity}>
                   <Option value="匿名">匿名</Option>
                   <Option value="登录验证">登录验证</Option>
                 </Select>
+              </Form.Item>
+            ) : null
+          }{
+            this.state.userPane ? (
+              <Form.Item label="用户名" name="UserName">
+                <Input />
+              </Form.Item>
+            ) : null
+          }{
+            this.state.userPane ? (
+              <Form.Item label="密码" name="Password">
+                <Input.Password />
               </Form.Item>
             ) : null
           }
@@ -396,15 +423,15 @@ export default class addDevice extends PureComponent {
               </Form.Item>
             ) : null
           }{
-            this.isShowFormItem("strByteOrder") ?
+            this.isShowFormItem("StrByteOrder") ?
               (
                 this.state.activeProto === "Fins_TCP" || this.state.activeProto === "MCA1E_Binary_Ethernet" || this.state.activeProto === "MC3E_Binary_Ethernet" ?
                   (
-                    <Form.Item valuePropName="checked" name="strByteOrder1">
+                    <Form.Item valuePropName="checked" name="StrByteOrder1">
                       <Checkbox>字符串字节顺序</Checkbox>
                     </Form.Item>
                   ) : (
-                    <Form.Item label="字符串字节顺序" name="strByteOrder"
+                    <Form.Item label="字符串字节顺序" name="StrByteOrder"
                       rules={[{
                         require: true
                       }]
@@ -418,17 +445,6 @@ export default class addDevice extends PureComponent {
                     </Form.Item>
                   )
               ) : null
-          }{
-            this.state.userPane ? (
-              <>
-                <Form.Item label="用户名" className="userName">
-                  <Input />
-                </Form.Item>
-                <Form.Item label="密码" className="password">
-                  <Input.Password />
-                </Form.Item>
-              </>
-            ) : null
           }
           <Form.Item className="form-footer">
             <Button type="default" className="login-form-button" onClick={this.props.cancel}>取消</Button>

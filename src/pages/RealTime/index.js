@@ -6,9 +6,11 @@ import DialogAlert from "components/common/DialogAlert"
 import DataTable from 'components/common/DataTable'
 import ZTree from './components/ztree'
 import AddEqu from './components/AddEqu'
+import AddGroup from './components/AddGroup'
 import Search from './components/Search'
 
-import { GetTreeStructure, GetDevice, DeleteDevice, ModifyGroup, DelGroup } from 'api/variable'
+import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup } from 'api/variable'
+
 
 class RealTime extends PureComponent{
   state = {
@@ -41,7 +43,6 @@ class RealTime extends PureComponent{
           name: "添加分组",
         }
       ]}
-      // visible={this.state.visible}
       onClick={(e) => {
         e.domEvent.stopPropagation();
         this.menuClick(e)
@@ -49,8 +50,7 @@ class RealTime extends PureComponent{
     />
   )
   //操作设备菜单
-  optionDeviceMenu = (el)=> {
-    console.log(el);
+  optionDeviceMenu = (el, length)=> {
     return (
       <DrowDownMenu lists={[
         {
@@ -71,28 +71,29 @@ class RealTime extends PureComponent{
         }
       ]}
       onClick={(e) => {
-        this.menuClick(e, el)
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el, length)
       }}
     />
     )
   }
   //操作分组菜单
   optionGroupMenu = (el)=> {
-    console.log(el);
     return (
       <DrowDownMenu lists={[
         {
-          key: "delGroup",
+          key: "modifyGroup",
           name: "编辑分组",
         },
         {
-          key: "modifyGroup",
+          key: "delGroup",
           name: "删除分组",
         }
       ]}
-        onClick={(e, el) => {
-          console.log(e)
-        }}
+      onClick={(e) => {
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el)
+      }}
       />
     )
   }
@@ -102,11 +103,19 @@ class RealTime extends PureComponent{
   )
   modifyDeviceForm = (node={})=>{
     return (
-      <AddEqu node={ node } key="modifyDevice"/>
+      <AddEqu node={ node } key={ node.id }/>
+    )
+  }
+  addGroupForm = (
+    <AddGroup key="addGroup"/>
+  )
+  modifyGroupForm = (node={})=>{
+    return (
+      <AddGroup node={ node } key={ "-" + node.groupId }/>
     )
   }
 
-  menuClick = (e, id) => {
+  menuClick = (e, id, length) => {
     if (e.key === "addDevice") {
       DialogAlert.open({
         alertTitle: "添加设备",
@@ -114,29 +123,47 @@ class RealTime extends PureComponent{
       })
     } else if(e.key === "modifyDevice"){
       GetDevice(id).then(res=>{
-        console.log("-------------------",res.data)
         DialogAlert.open({
           alertTitle: "编辑设备",
           alertTip: this.modifyDeviceForm(res.data)
         })
       })
     } else if (e.key === "delDevice"){
-      DeleteDevice(id).then(res=>{
-        console.log(res)
-        if(res.code === 0){
-          message.info("删除成功") 
-        }else{
-          message.error(res.msg)
-        }
+      if(length > 0){
+        DialogAlert.open({
+          alertTitle: "提示",
+          alertTip: "节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?",
+          confirmCallbackFn(){
+            DeleteDevice(id).then(res=>{
+              if(res.code === 0){
+                message.info("删除成功") 
+              }else{
+                message.error(res.msg)
+              }
+            })
+          }
+        })
+      }else{
+        DeleteDevice(id).then(res=>{
+          if(res.code === 0){
+            message.info("删除成功") 
+          }else{
+            message.error(res.msg)
+          }
+        })
+      }
+    }else if(e.key === "addGroup"){
+      DialogAlert.open({
+        alertTitle: "编辑分组",
+        alertTip: this.addGroupForm
       })
     }else if(e.key === "modifyGroup"){
       DialogAlert.open({
-        alertTitle: "编辑设备",
-        alertTip: this.modifyDeviceForm(res.data)
+        alertTitle: "编辑分组",
+        alertTip: this.modifyGroupForm(id)
       })
     }else if(e.key === "delGroup"){
-      DelGroup(el).then(res=>{
-        console.log(res)
+      DelGroup(id.groupId).then(res=>{
         if(res.code === 0){
           message.info("删除成功") 
         }else{
@@ -148,17 +175,6 @@ class RealTime extends PureComponent{
   //选中设备下的分组回调
   selectCallbackFn = () => {
     console.log("选中回调")
-  }
-  //点击节点的操作按钮
-  operationNode = (type) => {
-    console.log(type)
-    //设备
-    if (type === 3) {
-      
-    } else {
-      //分组
-
-    }
   }
 
   render() {
@@ -179,7 +195,6 @@ class RealTime extends PureComponent{
                   optionGroupMenu={this.optionGroupMenu}
                   nodeDatas={this.state.treeData}
                   selectCallbackFn={this.selectCallbackFn}
-                  operationNode={this.operationNode}
                 />
                 : null
             }

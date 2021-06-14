@@ -38,7 +38,7 @@ class ZTree extends PureComponent {
     if (data.canBeDeleted) {
       nodeData.title = (<>
         <span>{data.nodeName}</span>
-        <Dropdown overlay={() => { return this.props.optionDeviceMenu(data.nodeID) }} placement="bottomCenter" arrow>
+        <Dropdown overlay={() => { return this.props.optionDeviceMenu(data.nodeID, data.children.length) }} placement="bottomCenter" arrow>
           <span className="ant-tree-title-operationNode"></span>
         </Dropdown>
       </>)
@@ -56,10 +56,17 @@ class ZTree extends PureComponent {
           canBeDeleted: child.canBeDeleted
         }
 
-        if (data.canBeDeleted) {
+        if (child.canBeDeleted) {
           childNode.title = (<>
             <span>{child.nodeName}</span>
-            <Dropdown overlay={() => { return this.props.optionGroupMenu(childNode.nodeID) }} placement="bottomCenter" arrow>
+            <Dropdown overlay={() => {
+              return this.props.optionGroupMenu({
+                groupId: child.nodeID,
+                name: child.nodeName,
+                deviceId: child.fatherNodeID,
+                type: child.nodeType
+              })
+            }} placement="bottomCenter" arrow>
               <span className="ant-tree-title-operationNode"></span>
             </Dropdown>
           </>)

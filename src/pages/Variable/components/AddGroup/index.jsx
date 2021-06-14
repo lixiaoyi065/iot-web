@@ -3,7 +3,7 @@ import { Modal, Form, Input, Select, Button } from 'antd'
 
 import store from 'store'
 
-import { addGroup } from 'api/variable/index'
+// import { addGroup } from 'api/variable/index'
 
 import "./index.less"
 
@@ -29,9 +29,9 @@ class AddGroup extends PureComponent {
     if (this.props.node) {
 
     } else {
-      addGroup(val).then(res => {
-        console.log(res)
-      })
+      // addGroup(val).then(res => {
+      //   console.log(res)
+      // })
     }
   }
   onFinishFailed = () => {

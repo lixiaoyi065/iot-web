@@ -28,7 +28,7 @@ export function AddDevice(data) {
 //修改设备信息
 export function ModifyDevice(data) {
   return service({
-    url: '​/VariableManage​/ModifyDevice',
+    url: '/VariableManage/ModifyDevice',
     data,
     method: 'put'
   })
@@ -70,55 +70,13 @@ export function DelGroup(id) {
     method: 'delete'
   })
 }
-
-
-
-//获取设备列表
-export function getEquList() {
+//查询变量
+export function QueryTags(group){
   return service({
-    url: '/VariableManage/GetTreeStructure',
-    method: 'get'
-  })
-}
-//获取设备
-export function getEqu(){
-  
-}
-//获取变量列表
-export function getVariableList(nodeId,page){
-  return service({
-    url: "",
-    data:{
-      nodeId,
-      page
-    },
-    method: "post"
-  })
-}
-//删除变量
-export function delVariable(nodeId){
-  return service({
-    url: "",
+    url: '/VariableManage/QueryTags',
     params:{
-      nodeId
+      group
     },
-    method: "delete"
-  })
-}
-//保存变量修改
-export function saveLists(nodeId){
-  return service({
-    url: "",
-    data:{
-      nodeId
-    },
-    method: "post"
-  })
-}
-//获取数据类型
-export function getDataType(){
-  return service({
-    url: "",
-    method: "get"
+    method: 'get'
   })
 }

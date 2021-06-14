@@ -68,7 +68,7 @@ class DialogBox extends Component {
             <span className="close-dialog" onClick={ ()=> this.cancel() }></span>
           </div>
           <div className="dialog-box">
-            {opts.alertTip}
+            <div style={{'paddingBottom': '20px'}}>{opts.alertTip}</div>
             {
               // opts.type !== "form" ? (
                 !opts.isShowCancel && !opts.isShowConfirm ? null : (
