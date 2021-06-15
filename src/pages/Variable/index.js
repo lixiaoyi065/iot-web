@@ -1,117 +1,235 @@
 import React, { PureComponent } from 'react'
-import { Dropdown, message } from 'antd'
+import { message } from "antd"
 
-import Ztree from 'components/common/Ztree'
 import DrowDownMenu from 'components/common/DrowDownMenu'
+import DialogAlert from "components/common/DialogAlert"
 import DataTable from 'components/common/DataTable'
-
-import Search from './components/Search'
+import ZTree from 'components/common/Ztree'
 import AddEqu from './components/AddEqu'
 import AddGroup from './components/AddGroup'
+import Search from './components/Search'
 
-import './index.less'
+import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup } from 'api/variable'
 
-class Variable extends PureComponent{
+
+class RealTime extends PureComponent{
   state = {
-    // loading: true,
-    toogle: false,
-    visible: "false",
-    isShowGroup: false,
-    isShowEqu: false,
+    treeData: [],
+    collasped: false
   }
 
-  componentDidMount(){
-    console.log("----")
-  }
-
-  menuClick = (e) => {
-    this.setState({ visible: "false" })
-    console.log(e.key,e.key === "addEqu")
-    if (e.key === "addEqu") {
-      this.setState({isShowEqu: true})
-    } else {
-      this.setState({isShowGroup: true})
-    }
-  }
-
-  onCancel = (type) => {
-    this.setState({
-      [type]: !this.state[type]
+  componentDidMount() {
+    //获取整棵设备列表树结构
+    GetTreeStructure().then(res => {
+      console.log(res.data)
+      this.setState({treeData: res.data})
     })
   }
-  //提交表单
-  onFinish = (values) => {
-    //关闭弹窗
-    this.setState({isShowGroup: !this.state.isShowGroup})
-    // addGroup(values).then(res => {
-      
-    // })
-    console.log('Success:', values);
-    message.info('提交成功！');
+  //收缩设备列表
+  toggleLeft = ()=>{
+    const collapsed = !this.state.collasped
+    this.setState({collasped: collapsed})
   }
-  onFinishFailed = () => {
-    message.error('提交失败！');
-  }
-  onFinishEqu = (val) => {
-    console.log('Success:', val);
-    message.info('提交成功！');
-  }
-  onFinishFailedEqu = () => {
-    message.error('提交失败！');
-  }
-  
-  equMenu = (
-    <DrowDownMenu lists={[
-      {
-        key: "addEqu",
-        name: "添加设备",
-      },
-      {
-        key: "addGroup",
-        name: "添加分组",
-      }
-    ]}
-      visible={this.state.visible}
-      onClick={(key) => { this.menuClick(key) }}
-    >
-    </DrowDownMenu>
-  )
 
-  opt = (
-    <Dropdown overlay={this.equMenu} trigger={['click']} placement="bottomCenter" arrow>
-      <div className="optAdd"></div>
-    </Dropdown>
+  //设备树操作菜单
+  zTreeOptionMenu = (
+    <DrowDownMenu lists={[
+        {
+          key: "addDevice",
+          name: "添加设备",
+        },
+        {
+          key: "addGroup",
+          name: "添加分组",
+        }
+      ]}
+      onClick={(e) => {
+        e.domEvent.stopPropagation();
+        this.menuClick(e)
+      }}
+    />
   )
-  toggleLeft = () => {
-    const toogle = !this.state.toogle
-    this.setState({toogle: toogle})
+  //操作设备菜单
+  optionDeviceMenu = (el, length)=> {
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "startDevice",
+          name: "启用",
+        },
+        {
+          key: "stopDevice",
+          name: "停止",
+        },
+        {
+          key: "modifyDevice",
+          name: "编辑设备",
+        },
+        {
+          key: "delDevice",
+          name: "删除设备",
+        }
+      ]}
+      onClick={(e) => {
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el, length)
+      }}
+    />
+    )
+  }
+  //操作分组菜单
+  optionGroupMenu = (el)=> {
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "modifyGroup",
+          name: "编辑分组",
+        },
+        {
+          key: "delGroup",
+          name: "删除分组",
+        }
+      ]}
+      onClick={(e) => {
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el)
+      }}
+      />
+    )
+  }
+
+  addDeviceForm = (
+    <AddEqu key="addDevice"/>
+  )
+  modifyDeviceForm = (node={})=>{
+    return (
+      <AddEqu node={ node } key={ node.id }/>
+    )
+  }
+  addGroupForm = (
+    <AddGroup key="addGroup"/>
+  )
+  modifyGroupForm = (node={})=>{
+    return (
+      <AddGroup node={ node } key={ "-" + node.groupId }/>
+    )
+  }
+
+  menuClick = (e, id, length) => {
+    if (e.key === "addDevice") {
+      DialogAlert.open({
+        alertTitle: "添加设备",
+        alertTip: this.addDeviceForm
+      })
+    } else if(e.key === "modifyDevice"){
+      GetDevice(id).then(res=>{
+        DialogAlert.open({
+          alertTitle: "编辑设备",
+          alertTip: this.modifyDeviceForm(res.data)
+        })
+      })
+    } else if (e.key === "delDevice"){
+      if(length > 0){
+        DialogAlert.open({
+          alertTitle: "提示",
+          alertTip: "节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?",
+          confirmCallbackFn(){
+            DeleteDevice(id).then(res=>{
+              if(res.code === 0){
+                message.info("删除成功") 
+              }else{
+                message.error(res.msg)
+              }
+            })
+          }
+        })
+      }else{
+        DeleteDevice(id).then(res=>{
+          if(res.code === 0){
+            message.info("删除成功") 
+          }else{
+            message.error(res.msg)
+          }
+        })
+      }
+    }else if(e.key === "addGroup"){
+      DialogAlert.open({
+        alertTitle: "编辑分组",
+        alertTip: this.addGroupForm
+      })
+    }else if(e.key === "modifyGroup"){
+      DialogAlert.open({
+        alertTitle: "编辑分组",
+        alertTip: this.modifyGroupForm(id)
+      })
+    } else if (e.key === "delGroup") {
+      DialogAlert.open({
+        alertTitle: "提示",
+        alertTip: "节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?",
+        confirmCallbackFn(){
+          DelGroup(id.groupId).then(res=>{
+            if(res.code === 0){
+              message.info("删除成功") 
+            }else{
+              message.error(res.msg)
+            }
+          })
+        }
+      })
+    }
+  }
+  //选中设备下的分组回调
+  selectCallbackFn = () => {
+    console.log("选中回调")
   }
 
   render() {
     return (
       <div className="antProPageContainer">
-        <div className={`leftContent ${this.state.toogle ? 'hideLeft' : null}`}>
-          {
-            <Ztree
-              title="设备列表"
-              opt={this.opt}
-              />
-          }
+        <div className={ `leftContent ${ this.state.collasped ? 'foldToLeft' : null }` }>
+          <div className="fullContain">
+            {
+              this.state.treeData ?
+                <ZTree
+                  title="设备列表"
+                  zTreeOption={{
+                    className: "optAdd",
+                    placement: "bottomCenter"
+                  }}
+                  move={true}
+                  option={ true }
+                  nodeDatas={this.state.treeData}
+                  zTreeOptionDropdown={true}
+                  zTreeOptionMenu={this.zTreeOptionMenu}
+                  optionDeviceMenu={this.optionDeviceMenu}
+                  optionGroupMenu={this.optionGroupMenu}
+                  selectCallbackFn={this.selectCallbackFn}
+                />
+                : null
+            }
+          </div>
           <span className="arrowLeft" onClick={this.toggleLeft}></span>
         </div>
         <div className="tableList">
           <Search />
           <div className="tableContain">
-            <DataTable />
+            <DataTable 
+              url='/api/VariableManage/InitTags'
+              cols={
+                [
+                  {field:'id', width:120, title: '变量名'}
+                  ,{field:'username', width:120, title: '变量描述'}
+                  ,{field:'sex', width:120, title: '数据类型'}
+                  ,{field:'city', width:180, title: '变量地址'}
+                  ,{field:'sign', title: '字符串长度'} 
+                ]
+               }
+            />
           </div>
         </div>
-        
-        <AddGroup visible={ this.state.isShowGroup } cancel={()=>{this.onCancel("isShowGroup")}}/>
-        <AddEqu visible={this.state.isShowEqu} cancel={()=>{this.onCancel("isShowEqu")}}/>
-
       </div>
     )
   }
 }
 
-export default Variable
+export default RealTime

@@ -4,6 +4,11 @@ import './index.less'
 
 
 export default class DataTable extends PureComponent {
+  componentDidMount() {
+    this.setState({
+      ...this.props
+    })
+  }
   change() {
     
   }
@@ -24,11 +29,11 @@ export default class DataTable extends PureComponent {
                     </td>
                   ) : null
                 }
-                <td>变量名</td>
-                <td>变量描述</td>
-                <td>数据类型</td>
-                <td>变量地址</td>
-                <td>字符长度</td>
+                {
+                  this.props.cols.map(el => {
+                    return <td style={{ width: el.width }} key={ el.field }>{el.title}</td>
+                  })
+                }
               </tr>
             </thead>
           </table>
@@ -45,45 +50,33 @@ export default class DataTable extends PureComponent {
                     </td>
                   ) : null
                 }
-                <td>变量名</td>
-                <td>变量描述</td>
-                <td>数据类型</td>
-                <td>变量地址</td>
-                <td>字符长度</td>
+                {
+                  this.props.cols.map(el => {
+                    return <td style={{ width: el.width }} key={ el.field }>{el.title}</td>
+                  })
+                }
               </tr>
             </thead>
             <tbody>
-              <tr>
-                {
-                  orderNum ? (
-                    <td className="order-col">
-                      {/* <span className={styles.orderNum}>1</span> */}
-                      <input type="checkbox" className="ant-checkbox" onChange={ this.change }/>
-                    </td>
-                  ) : null
-                }
-                <td><div className="td-grird">Tag_1</div></td>
-                <td></td>
-                <td><div className="td-grird">二进制</div></td>
-                <td><div className="td-grird">4000.2</div></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="order-col">2</td>
-                <td><div className="td-grird">Tag_1</div></td>
-                <td></td>
-                <td><div className="td-grird">二进制</div></td>
-                <td><div className="td-grird">4000.2</div></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="order-col">3</td>
-                <td><div className="td-grird">Tag_1</div></td>
-                <td></td>
-                <td><div className="td-grird">二进制</div></td>
-                <td><div className="td-grird">4000.2</div></td>
-                <td></td>
-              </tr>
+              {
+                this.props.cols.map((el, idx) => {
+                  return (
+                    <tr key={ idx }>
+                      <td className="order-col">{idx + 1}</td>
+                      {
+                        this.props.cols.map(el => {
+                          return (
+                            <td style={{ width: el.width }} key={el.field}>
+                              <div className="td-grird">{el.title}</div>
+                            </td>
+                          )
+                        })
+                      }
+                    </tr>
+                  )
+                  
+                })
+              }
             </tbody>
           </table>
         </div>

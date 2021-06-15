@@ -1,241 +1,145 @@
-// import React, { PureComponent } from 'react'
-// import { Dropdown, Modal, message } from 'antd'
+import React, { PureComponent } from 'react';
+import { Tree, Dropdown } from 'antd';
 
-// import DrowDownMenu from 'components/common/DrowDownMenu'
-// import EditEqu from 'pages/Variable/components/AddEqu'
-// import EditGroup from 'pages/Variable/components/AddGroup'
+import './index.less'
 
-// import DialogAlert from "../DialogAlert"
+const { DirectoryTree } = Tree;
 
-// import store from 'store'
+class ZTree extends PureComponent {
+  state = {
+    nodeDatas: [],
+    selectCallbackFn: function (keys) { },//选中节点 回调函数
+  }
 
-// import { delEqu, delGroup } from 'api/variable'
-// import { getEquList, getEqu } from 'api/variable/index'
+  componentDidMount() {
+    this.setState({
+      ...this.props
+    })
+    //将数据进行二次处理
+  }
 
-// import './index.less'
+  operationNode = (e, type) => {
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    this.state.operationNode(type)
+  }
 
-// const storeState = store.getState()
-// class Ztree extends PureComponent {
-//   state = {
-//     zNodes: storeState.zNodes,
-//     isShowModel: false,
-//     isShowEqu: false,
-//     node: {},
-//     delNodeID: "",
-//     group:""
-//   }
-//   componentDidMount() {
-//     //获取设备列表
-//     getEquList().then(res => {
-//       store.dispatch({
-//         type: "zNodes",
-//         data: res.data
-//       });
-//     });
-//     store.subscribe(() => {
-//       this.setState({ zNodes: store.getState() })
-//     })
-//   }
+  //数据处理
+  node = (data) => {
+    const nodeData = {
+      key: data.nodeID,
+      nodeNo: data.nodeNo,
+      fatherNodeID: data.fatherNodeID,
+      nodeType: data.nodeType,
+      canBeDeleted: data.canBeDeleted,
+      children: []
+    }
 
-//   toogleChildrenList = (e) => {
-//     console.log(e.target.dataset.close)
-//   }
-//   optGroup = (el) => {
-//     const nodeID = el.nodeID;
-//     let that = this
-//     return (
-//       <DrowDownMenu lists={[
-//         {
-//           key: "delGroup",
-//           name: "删除分组",
-//           onClick() {
-//             delGroup({groupId: nodeID}).then(res => {
-//               console.log(res)
-//             })
-//             console.log(nodeID,"删除分组")
-//           }
-//         },
-//         {
-//           key: "editGroup",
-//           name: "编辑分组",
-//           onClick() {
-//             that.setState({ group: nodeID }, () => {
-//               that.setState({isShowGroup: true})
-//             })
-//           }
-//         }
-//       ]}
-//       >
-//       </DrowDownMenu>
-//     )
-//   }
-//   eqGroup = (el) => {
-//     const nodeID = el.nodeID;
-//     const that = this
-//     return (
-//       <DrowDownMenu lists={[
-//         {
-//           key: "start",
-//           name: "启用",
-//           onClick() {
-//             DialogAlert.open({
-//               alertTip:"加载失败，是否重新加载?",
-//               confirmCallbackFn:()=>{
-//                   //todo...
-//               }
-//             })
-//             // message.info("设备已启动")
-//           }
-//         },
-//         {
-//           key: "stop",
-//           name: "停止",
-//           onClick() {
-//             message.info("设备已停止")
-//           }
-//         },
-//         {
-//           key: "delEqu",
-//           name: "删除设备",
-//           onClick(e) {
-//             delEqu(nodeID).then(res => {
-//               const { code, msg } = res
-//               if (code===0) {
-//                 message.info("删除成功！")
-//                 // store.dispatch({
-//                 //   type: "delNodes",
-//                 //   data: nodeID
-//                 // })
-//               } else {
-//                 message.error(msg)
-//               }
-//             })
-//             // if (el.children.length>0) {
-//             //   that.setState({ delNodeID: nodeID }, () => {
-//             //     that.setState({ isShowModel: true })
-//             //   })
-//             // } else {
-//             //   that.delEqu(nodeID)
-//             //   //更新store中的数据
-//             // }
-//           }
-//         },
-//         {
-//           key: "editEqu",
-//           name: "编辑设备",
-//           onClick(e) {
-//             getEqu(nodeID).then(res => {
-//               that.setState({node: res.data}, () => {
-//                 that.setState({isShowEqu: true})
-//               })
-//             })
-//           }
-//         }
-//       ]}
-//       >
-//       </DrowDownMenu>
-//     )
-//   }
+    //是否需要操作节点
+    if (this.props.option) {
+      if (data.canBeDeleted) {
+        nodeData.title = (<>
+          <span>{data.nodeName}</span>
+          <Dropdown overlay={() => { return this.props.optionDeviceMenu(data.nodeID, data.children.length) }} placement="bottomCenter" arrow>
+            <span className="ant-tree-title-operationNode"></span>
+          </Dropdown>
+        </>)
+      } else {
+        nodeData.title = data.nodeName
+      }
+    } else {
+      nodeData.title = data.nodeName
+    }
 
-//   // delEqu = (deviceId) => {
+    if (data.children.length > 0) {
+      data.children.map(child => {
+        const childNode = {
+          key: child.nodeID,
+          nodeNo: child.nodeNo,
+          fatherNodeID: child.fatherNodeID,
+          nodeType: child.nodeType,
+          canBeDeleted: child.canBeDeleted
+        }
 
-//   // }
+        if (this.props.option) {
+          if (child.canBeDeleted) {
+            childNode.title = (<>
+              <span>{child.nodeName}</span>
+              <Dropdown overlay={() => {
+                return this.props.optionGroupMenu({
+                  groupId: child.nodeID,
+                  name: child.nodeName,
+                  deviceId: child.fatherNodeID,
+                  type: child.nodeType
+                })
+              }} placement="bottomCenter" arrow>
+                <span className="ant-tree-title-operationNode"></span>
+              </Dropdown>
+            </>)
+          } else {
+            childNode.title = child.nodeName
+          }
+        } else {
+          childNode.title = child.nodeName
+        }
+        nodeData.children.push(childNode)
 
-//   handleOk = () => {
-//     // this.delEqu(this.state.delNodeID)
-//     this.setState({isShowModel: false})
-//   }
+        return ""
+      })
+    }
+    return nodeData
+  }
 
-//   handleCancel = () => {
-//     this.setState({ delNodeID: "" }, () => {
-//       this.setState({isShowModel: false})
-//     })
-//   }
+  //将数据进行二次处理
+  treeData = () => {
+    return this.props.nodeDatas.map(el => {
+      return this.node(el)
+    })
+  };
 
-//   render() {
-//     const { title, opt } = this.props;
-//     const { zNodes } = this.state;
-//     return (
-//       <div className="fullContain">
-//         <div className="title">
-//           <span>{title}</span>
-//           <div className="optGroup"> {opt} </div>
-//         </div>
-//         {
-//           zNodes && zNodes.length>0 ? <ul className="ztree">
-//             {
-//               zNodes.map(element => {
-//                   return (
-//                   <>
-//                     <li key={ element.nodeID }>
-//                       <div className="ztree-list-item">
-//                         <span className="switch">
-//                           {
-//                             element.children && element.children.length ? (
-//                               <span className='noline_open' data-close="true" onClick={this.toogleChildrenList}></span>
-//                             ) : null
-//                           }
-//                         </span>
-//                         <span className="name">{element.nodeName}</span>
-//                         {
-//                           element.canBeDeleted ? (
-//                             <Dropdown overlay={() => {
-//                               return this.eqGroup(element)
-//                             } } trigger={['click']} placement="bottomRight" arrow>
-//                               <span className="more"></span>
-//                             </Dropdown>
-//                           ) : null
-//                         }
+  onSelect = (keys, info) => {
+    if (info.node.nodeType === 4) {
+      console.log('选中节点', keys, info);
+      this.state.selectCallbackFn(keys, info.nodeType);
+    }
+  };
 
-//                       </div>
-//                       {
-//                         element.children && element.children.length ? (
-//                           <ul>
-//                             {
-//                               element.children.map(child => {
-//                                 return (
-//                                   <li key={ child.nodeID }>
-//                                     <div className="ztree-list-item">
-//                                       <span className="switch">
-//                                         {
-//                                           child.children && child.children.length ? (
-//                                             <span className="noline_close" data-close="true" onClick={this.toogleChildrenList}></span>
-//                                           ) : null
-//                                         }
-//                                       </span>
-//                                       <span className="name">{child.nodeName}</span>
-//                                       {
-//                                         child.canBeDeleted ? (
-//                                           <Dropdown overlay={ () => {
-//                                             return this.optGroup(child)
-//                                           } } trigger={['click']} placement="bottomRight" arrow>
-//                                             <span className="more"></span>
-//                                           </Dropdown>
-//                                         ) : null
-//                                       }
-//                                     </div>
-//                                   </li>
-//                                 )
-//                               })
-//                             }
-//                           </ul>
-//                         ) : null
-//                       }
-//                     </li>
-//                     <Modal title="提示" visible={this.state.isShowModel} okText="继续" cancelText="取消" onOk={this.handleOk} onCancel={this.handleCancel}>
-//                       <div>节点下有变量存在，删除将会跟随设备/分组一起删除，无法恢复，是否继续？</div>
-//                     </Modal>
-//                   </>
-//                 )
-//               })
-//             }
-//           </ul> : ""
-//         }
-//         <EditGroup visible={this.state.isShowGroup} node={ this.state.group } cancel={()=>{ this.setState({isShowGroup: false}) }}></EditGroup>
-//         <EditEqu visible={this.state.isShowEqu} node={ this.state.node } cancel={()=>{ this.setState({isShowEqu: false}) }}/>
-//       </div>
-//     )
-//   }
-// }
+  onExpand = (e) => {
+    console.log('展开节点',e);
+  };
 
-// export default Ztree
+  render() {
+    return (
+      <>
+        {
+          this.props.title ? (
+            <div className="title">
+              <span>{this.props.title}</span>
+              {
+                this.props.zTreeOptionDropdown ? <div className="optGroup"> {
+                  <Dropdown overlay={this.state.zTreeOptionMenu} placement={this.props.zTreeOption.placement} arrow>
+                    <div className={this.props.zTreeOption.className}></div>
+                  </Dropdown>
+                } </div> : (
+                  <div className="optGroup">{ this.props.zTreeOption }</div>
+                )
+              }
+            </div>
+          ) : null
+        }
+
+        <DirectoryTree
+          className={ this.props.move ? "moveNode": "" }
+          showIcon={false}
+          autoExpandParent={true}
+          onSelect={this.onSelect}
+          onExpand={this.onExpand}
+          treeData={this.treeData()}
+          {...this.props}
+        />
+      </>
+    )
+  }
+};
+
+export default ZTree

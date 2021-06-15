@@ -4,7 +4,8 @@ import { message } from "antd"
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import DialogAlert from "components/common/DialogAlert"
 import DataTable from 'components/common/DataTable'
-import ZTree from './components/ztree'
+import ZTree from 'components/common/Ztree'
+
 import AddEqu from './components/AddEqu'
 import AddGroup from './components/AddGroup'
 import Search from './components/Search'
@@ -15,14 +16,25 @@ import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup } from 'api/variabl
 class RealTime extends PureComponent{
   state = {
     treeData: [],
+    checkedKeys: [],
+    allNodeId: [],
     collasped: false
   }
 
   componentDidMount() {
     //获取整棵设备列表树结构
     GetTreeStructure().then(res => {
+      let allcheck = [];
+      res.data.forEach(data => {
+        if (data.children.length > 0) {
+          data.children.forEach(child => {
+            allcheck.push(child.nodeID)
+          })
+        }
+        allcheck.push(data.nodeID)
+      })
       console.log(res.data)
-      this.setState({treeData: res.data})
+      this.setState({treeData: res.data, allNodeId: allcheck})
     })
   }
   //收缩设备列表
@@ -30,151 +42,25 @@ class RealTime extends PureComponent{
     const collapsed = !this.state.collasped
     this.setState({collasped: collapsed})
   }
-
-  //设备树操作菜单
-  zTreeOptionMenu = (
-    <DrowDownMenu lists={[
-        {
-          key: "addDevice",
-          name: "添加设备",
-        },
-        {
-          key: "addGroup",
-          name: "添加分组",
-        }
-      ]}
-      onClick={(e) => {
-        e.domEvent.stopPropagation();
-        this.menuClick(e)
-      }}
-    />
-  )
-  //操作设备菜单
-  optionDeviceMenu = (el, length)=> {
+  zTreeOption = () => {
     return (
-      <DrowDownMenu lists={[
-        {
-          key: "startDevice",
-          name: "启用",
-        },
-        {
-          key: "stopDevice",
-          name: "停止",
-        },
-        {
-          key: "modifyDevice",
-          name: "编辑设备",
-        },
-        {
-          key: "delDevice",
-          name: "删除设备",
-        }
-      ]}
-      onClick={(e) => {
-        e.domEvent.stopPropagation();
-        this.menuClick(e, el, length)
-      }}
-    />
+      <>
+        <div className="all-checkbox all-check" onClick={this.allCheck}>全选</div>
+        <div className="all-checkbox all-uncheck" onClick={ this.allUnCheck }>不选</div>
+      </>
     )
   }
-  //操作分组菜单
-  optionGroupMenu = (el)=> {
-    return (
-      <DrowDownMenu lists={[
-        {
-          key: "modifyGroup",
-          name: "编辑分组",
-        },
-        {
-          key: "delGroup",
-          name: "删除分组",
-        }
-      ]}
-      onClick={(e) => {
-        e.domEvent.stopPropagation();
-        this.menuClick(e, el)
-      }}
-      />
-    )
+  allCheck = () => {
+    this.setState({ checkedKeys: this.state.allNodeId }, () => {
+      console.log(this.state.allNodeId)
+    })
+  }
+  allUnCheck = () => {
+    this.setState({checkedKeys: []})
   }
 
-  addDeviceForm = (
-    <AddEqu key="addDevice"/>
-  )
-  modifyDeviceForm = (node={})=>{
-    return (
-      <AddEqu node={ node } key={ node.id }/>
-    )
-  }
-  addGroupForm = (
-    <AddGroup key="addGroup"/>
-  )
-  modifyGroupForm = (node={})=>{
-    return (
-      <AddGroup node={ node } key={ "-" + node.groupId }/>
-    )
-  }
-
-  menuClick = (e, id, length) => {
-    if (e.key === "addDevice") {
-      DialogAlert.open({
-        alertTitle: "添加设备",
-        alertTip: this.addDeviceForm
-      })
-    } else if(e.key === "modifyDevice"){
-      GetDevice(id).then(res=>{
-        DialogAlert.open({
-          alertTitle: "编辑设备",
-          alertTip: this.modifyDeviceForm(res.data)
-        })
-      })
-    } else if (e.key === "delDevice"){
-      if(length > 0){
-        DialogAlert.open({
-          alertTitle: "提示",
-          alertTip: "节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?",
-          confirmCallbackFn(){
-            DeleteDevice(id).then(res=>{
-              if(res.code === 0){
-                message.info("删除成功") 
-              }else{
-                message.error(res.msg)
-              }
-            })
-          }
-        })
-      }else{
-        DeleteDevice(id).then(res=>{
-          if(res.code === 0){
-            message.info("删除成功") 
-          }else{
-            message.error(res.msg)
-          }
-        })
-      }
-    }else if(e.key === "addGroup"){
-      DialogAlert.open({
-        alertTitle: "编辑分组",
-        alertTip: this.addGroupForm
-      })
-    }else if(e.key === "modifyGroup"){
-      DialogAlert.open({
-        alertTitle: "编辑分组",
-        alertTip: this.modifyGroupForm(id)
-      })
-    }else if(e.key === "delGroup"){
-      DelGroup(id.groupId).then(res=>{
-        if(res.code === 0){
-          message.info("删除成功") 
-        }else{
-          message.error(res.msg)
-        }
-      })
-    }
-  }
-  //选中设备下的分组回调
-  selectCallbackFn = () => {
-    console.log("选中回调")
+  onCheck = (checkedKeysValue) => {
+    console.log('onCheck',checkedKeysValue)
   }
 
   render() {
@@ -185,16 +71,13 @@ class RealTime extends PureComponent{
             {
               this.state.treeData ?
                 <ZTree
+                  checkable
                   title="设备列表"
-                  zTreeOption={{
-                    className: "optAdd",
-                    placement: "bottomCenter"
-                  }}
-                  zTreeOptionMenu={this.zTreeOptionMenu}
-                  optionDeviceMenu={this.optionDeviceMenu}
-                  optionGroupMenu={this.optionGroupMenu}
                   nodeDatas={this.state.treeData}
-                  selectCallbackFn={this.selectCallbackFn}
+                  zTreeOption={this.zTreeOption()}
+                  onCheck={ this.onCheck }
+                  checkedKeys={this.state.checkedKeys}
+                  // expandedKeys={this.state.checkedKeys}
                 />
                 : null
             }
@@ -204,7 +87,18 @@ class RealTime extends PureComponent{
         <div className="tableList">
           <Search />
           <div className="tableContain">
-            <DataTable />
+            <DataTable
+              url='/demo/table/user'
+              cols={
+                [
+                  {field:'id', width:80, title: '变量名'}
+                  ,{field:'username', width:80, title: '变量描述'}
+                  ,{field:'sex', width:80, title: '数据类型'}
+                  ,{field:'city', width:80, title: '变量地址'}
+                  ,{field:'sign', title: '变量值', width: '30%', minWidth: 100} 
+                  ,{field:'experience', title: '时间戳'}
+                ]
+               }/>
           </div>
         </div>
       </div>

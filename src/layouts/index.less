@@ -149,3 +149,73 @@
     content: none;
   }
 }
+.all-checkbox{
+  position: relative;
+  padding-left: 22px;
+  margin-left: 18px;
+  display: inline-block;
+  cursor: pointer;
+  color: #666;
+
+  &::before{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 18px;
+    height: 18px;
+    background-size: 100%;
+  }
+
+  &:hover{
+    color: #4799ED;
+  }
+
+  &:active{
+    color: #1C77D4;
+  }
+}
+.all-check{
+  &::before{
+    content: "";
+    background: url(~assets/img/ztree/all-check.png) no-repeat;
+    background-size: 100%;
+  }
+
+  &:hover{
+    &::before{
+      content: "";
+      background: url(~assets/img/ztree/all-check_hover.png) no-repeat;
+      background-size: 100%;
+    }
+  }
+  &:active{
+    &::before{
+      content: "";
+      background: url(~assets/img/ztree/all-check_active.png) no-repeat;
+      background-size: 100%;
+    }
+  }
+}
+.all-uncheck{
+  &::before{
+    content: "";
+    background: url(~assets/img/ztree/all-uncheck.png) no-repeat;
+    background-size: 100%;
+  }
+
+  &:hover{
+    &::before{
+      content: "";
+      background: url(~assets/img/ztree/all-uncheck_hover.png) no-repeat;
+      background-size: 100%;
+    }
+  }
+  &:active{
+    &::before{
+      content: "";
+      background: url(~assets/img/ztree/all-uncheck_active.png) no-repeat;
+      background-size: 100%;
+    }
+  }
+}

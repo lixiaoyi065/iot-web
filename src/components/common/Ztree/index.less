@@ -1,118 +1,122 @@
-.fullContain {
-  width: 100%;
-  height: 100%;
+.title {
   display: flex;
-  flex-direction: column;
-  user-select: none;
+  padding: 0 12px 0 21px;
+  height: 50px;
+  line-height: 50px;
+  color: #333;
+  border-bottom: 1px solid #E4E4E4;
+  overflow: hidden;
+
+  .optGroup {
+    flex: 1;
+    text-align: right;
+  }
 }
-
-
-
-.ztree {
-  position: relative;
-  flex: 1;
-  padding: 10px 0;
-  overflow: auto;
-
-  li {
-    position: relative;
-    line-height: 36px;
-    padding: 0px;
-
-    .ztree-list-item {
-      display: flex;
-      padding: 0 10px 0 55px;
-      height: 36px;
-      line-height: 36px;
-      font-size: 16px;
-      cursor: default;
-
-      &:hover {
-        background: #E4EEFF;
-        text-decoration: none;
-
-        &::before {
+.moveNode{
+  &.ant-tree.ant-tree-directory {
+    .ant-tree-treenode {
+      &:hover::after {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 11px;
+        width: 14px;
+        height: 14px;
+        background: url("~assets/img/common/move2.png") no-repeat;
+        background-size: 100%;
+      }
+  
+      &.ant-tree-treenode-selected {
+        &:hover::after {
           content: "";
           position: absolute;
           left: 20px;
-          top: 10px;
+          top: 11px;
           width: 14px;
           height: 14px;
-          background: url("~assets/img/variable/move.png") no-repeat;
+          background: url("~assets/img/common/move2_active.png") no-repeat;
           background-size: 100%;
         }
+      }
+    }
+  }
+}
+.ant-tree.ant-tree-directory {
+  .ant-tree-treenode {
+    height: 36px;
+    line-height: 36px;
+    padding: 0 10px 0 45px;
 
-        .more {
-          display: inline-block;
-        }
+    &::before {
+      bottom: 0;
+    }
+
+    &.ant-tree-treenode-selected {
+      background: #4270E4;
+
+      &::before {
+        background: none;
       }
 
-      &:active {
-        cursor: move;
-      }
-
-      .name {
-        padding-left: 15px;
-        flex: 1;
-      }
-
-      &.curSelectedNode {
-        height: 36px;
-      }
-
-      .switch {
-        margin-top: 5px;
-        width: 20px;
-        height: 20px;
-
-        .noline_close {
-          display: inline-block;
-          width: 100%;
-          height: 100%;
-          background: url(~assets/img/ztree/switch.png) no-repeat;
+      .ant-tree-title {
+        .ant-tree-title-operationNode {
+          background: url(~assets/img/variable/more_active.png) no-repeat;
           background-size: 100%;
-          transform: rotate(-90deg);
-          transform-origin: center;
-          transition: all 0.3s;
-          cursor: pointer;
-        }
-
-        .noline_open {
-          display: inline-block;
-          width: 100%;
-          height: 100%;
-          background: url(~assets/img/ztree/switch.png) no-repeat;
-          background-size: 100%;
-          transform-origin: center;
-          transition: all 0.3s;
-          cursor: pointer;
         }
       }
+    }
 
-      .more {
+    .ant-tree-checkbox{
+      position: absolute;
+      left: 20px;
+      top: 10px;
+      margin-top: 0;
+      .ant-tree-checkbox-inner{
+        width: 18px;
+        height: 18px;
+        border-radius: 2px;
+      }
+    }
+  }
+}
+
+.ant-tree {
+  .ant-tree-node-content-wrapper {
+    height: 36px;
+    line-height: 36px;
+
+    .ant-tree-iconEle {
+      height: 36px;
+      line-height: 36px;
+    }
+
+    .ant-tree-title {
+      position: relative;
+      display: block;
+
+      .ant-tree-title-operationNode {
+        position: absolute;
+        right: 0;
+        top: 09px;
         display: none;
         margin: auto;
         width: 18px;
         height: 18px;
-        background: url("~assets/img/variable/more.png") no-repeat;
+        line-height: 36px;
+        background: url(~assets/img/variable/more.png) no-repeat;
         background-size: 100%;
         cursor: pointer;
       }
-
     }
 
-    span {
-      font-size: inherit;
-      color: #252525;
-    }
-
-    ul {
-      padding: 0;
-
-      .ztree-list-item {
-        padding-left: 70px;
-        font-size: 14px;
+    &:hover {
+      .ant-tree-title-operationNode {
+        display: inline-block;
       }
     }
   }
+}
+
+.ant-tree-switcher {
+  line-height: 36px;
 }
