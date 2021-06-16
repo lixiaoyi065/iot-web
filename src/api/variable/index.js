@@ -7,6 +7,13 @@ export function GetTreeStructure() {
     method: 'get'
   })
 }
+export function GetTreeStructure2() {
+  return service({
+    baseURL:"https://www.fastmock.site/mock/252af95046512548bd771bcf6a08b05b/src_iot",
+    url: '/equList',
+    method: 'get'
+  })
+}
 //获取设备
 export function GetDevice(deviceId){
   return service({
@@ -77,6 +84,14 @@ export function QueryTags(group){
     params:{
       group
     },
+    method: 'get'
+  })
+}
+//初次加载变量
+export function InitTags(data) {
+  return service({
+    url: "/VariableManage/InitTags",
+    params: data,
     method: 'get'
   })
 }

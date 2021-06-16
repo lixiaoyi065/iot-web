@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
+import { withRouter } from 'react-router-dom'
 import { Tree, Dropdown } from 'antd';
 
+import { stringToArray } from 'utils'
 import './index.less'
 
 const { DirectoryTree } = Tree;
@@ -8,14 +10,17 @@ const { DirectoryTree } = Tree;
 class ZTree extends PureComponent {
   state = {
     nodeDatas: [],
+    pathname: "",
+    defaultExpandedKeys:[],
     selectCallbackFn: function (keys) { },//选中节点 回调函数
   }
 
   componentDidMount() {
     this.setState({
-      ...this.props
+      // defaultExpandedKeys: stringToArray(localStorage.getItem(`${this.props.location.pathname }`)),
+      pathname: this.props.location.pathname,
+      ...this.props,
     })
-    //将数据进行二次处理
   }
 
   operationNode = (e, type) => {
@@ -98,43 +103,52 @@ class ZTree extends PureComponent {
   };
 
   onSelect = (keys, info) => {
-    if (info.node.nodeType === 4) {
-      console.log('选中节点', keys, info);
-      this.state.selectCallbackFn(keys, info.nodeType);
-    }
+    console.log("onSelect", keys)
+    this.state.selectCallbackFn(keys, info);
   };
 
   onExpand = (e) => {
-    console.log('展开节点',e);
+    // console.log("onExpand", e)
+    // localStorage.setItem(`${this.state.pathname}`, e)
   };
-
+  
+  defaultExpandedKeys = () => {
+    return ["371dc6de-1264-4e39-999f-83ceacc29322","b87aa8b3-d9a0-4b83-a218-5a748726dd5e"]
+  }
   render() {
     return (
       <>
         {
           this.props.title ? (
             <div className="title">
-              <span>{this.props.title}</span>
-              {
-                this.props.zTreeOptionDropdown ? <div className="optGroup"> {
-                  <Dropdown overlay={this.state.zTreeOptionMenu} placement={this.props.zTreeOption.placement} arrow>
-                    <div className={this.props.zTreeOption.className}></div>
-                  </Dropdown>
-                } </div> : (
-                  <div className="optGroup">{ this.props.zTreeOption }</div>
-                )
-              }
+              <div className="title-contain">
+                <span>{this.props.title}</span>
+                {
+                  this.props.zTreeOptionDropdown ? <div className="optGroup"> {
+                    <Dropdown overlay={this.state.zTreeOptionMenu} placement={this.props.zTreeOption.placement} arrow>
+                      <div className={this.props.zTreeOption.className}></div>
+                    </Dropdown>
+                  } </div> : (
+                    <div className="optGroup">{ this.props.zTreeOption }</div>
+                  )
+                }
+              </div>
             </div>
           ) : null
         }
 
         <DirectoryTree
-          className={ this.props.move ? "moveNode": "" }
+          ref="tree"
+          blockNode
+          draggable
+          className={this.props.move ? "moveNode" : ""}
+          // autoExpandParent={ true }
           showIcon={false}
-          autoExpandParent={true}
           onSelect={this.onSelect}
           onExpand={this.onExpand}
+          onCheck={this.props.onCheck}
           treeData={this.treeData()}
+          defaultExpandedKeys={this.state.defaultExpandedKeys}
           {...this.props}
         />
       </>
@@ -142,4 +156,4 @@ class ZTree extends PureComponent {
   }
 };
 
-export default ZTree
+export default withRouter(ZTree)

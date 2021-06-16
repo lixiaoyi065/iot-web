@@ -5,21 +5,12 @@ import './index.less'
 import searchLogo from 'assets/img/common/search.png'
 
 class Search extends PureComponent {
-
-  saveList = () => {
-  }
-
-  menuClick = (e) => {
-    console.log(e.key)
-  }
-
   render() {
     return (
       <div className="search-contain">
         <Form
           layout="inline"
-          onFinish={this.onFinish}
-          onFinishFailed={this.onFinishFailed}
+          onFinish={this.props.onFinish}
         >
           <Form.Item
             label="数据类型"
@@ -31,7 +22,7 @@ class Search extends PureComponent {
               <Select.Option value="unlimited">不限</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item>
+          <Form.Item name="keyword">
             <Input placeholder="请输入关键字" style={{ width: '240px' }} />
           </Form.Item>
           <Form.Item>

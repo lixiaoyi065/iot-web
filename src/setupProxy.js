@@ -8,14 +8,9 @@ module.exports = function(app){
 			pathRewrite:{'^/api1':''} //重写请求路径(必须)
 		}),
 		// proxy('/api2',{
-		// 	target:'http://localhost:5001',
-		// 	changeOrigin:true,
+		// 	target:'https://www.fastmock.site/mock/252af95046512548bd771bcf6a08b05b/src_iot',
+		// 	changeOrigin:true,  
 		// 	pathRewrite:{'^/api2':''}
-		// }),
-		// proxy('/api3',{
-		// 	target:'http://localhost:8801',
-		// 	changeOrigin:true,
-		// 	pathRewrite:{'^/api3':''}
 		// }),
 	)
 }

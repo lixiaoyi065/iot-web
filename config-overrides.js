@@ -53,7 +53,15 @@ module.exports = override(
       "@modal-footer-padding-horizontal": "44px",
 
       //Form
-      "@form-item-margin-bottom": "20px"
+      "@form-item-margin-bottom": "20px",
+
+      //Table
+      "@table-header-bg": "#4799ED",
+      "@table-header-color": "#fff",
+      "@table-selected-row-bg": "transparent",
+      "@table-row-hover-bg": "#E4EEFF",
+      "@table-border-radius-base": 0,
+      "@table-selected-row-hover-bg": "initial"
     }    
   }),
   addWebpackAlias({

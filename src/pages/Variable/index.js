@@ -3,19 +3,24 @@ import { message } from "antd"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import DialogAlert from "components/common/DialogAlert"
-import DataTable from 'components/common/DataTable'
+import DataTable from 'components/common/Table'
+
 import ZTree from 'components/common/Ztree'
 import AddEqu from './components/AddEqu'
 import AddGroup from './components/AddGroup'
 import Search from './components/Search'
 
-import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup } from 'api/variable'
+import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup, InitTags } from 'api/variable'
 
 
 class RealTime extends PureComponent{
   state = {
     treeData: [],
-    collasped: false
+    dataSource: [],
+    dataTypes: [],
+    count: 0,
+    collasped: false,
+    selectedRowKeys: []
   }
 
   componentDidMount() {
@@ -178,15 +183,48 @@ class RealTime extends PureComponent{
       })
     }
   }
-  //选中设备下的分组回调
-  selectCallbackFn = () => {
-    console.log("选中回调")
+  //选中设备列表的回调
+  selectCallbackFn = (res, info) => {
+    // let tags = {
+    //   groupId: info.node.key,
+    //   type: info.node.nodeType
+    // }
+    // InitTags(tags).then(res => {
+    //   let dataList = [];
+    //   console.log(res)
+    //   if (res.code === 0) {
+    //     res.data.tags.forEach(element => {
+    //       element.key = element.id
+    //       dataList.push(element)
+    //     });
+    //     this.setState({
+    //       dataSource: dataList,
+    //       count: res.data.total,
+    //       dataTypes: res.data.dataTypes
+    //     })
+    //   } else {
+    //     this.setState({
+    //       dataSource: [],
+    //       count: 0
+    //     })
+    //   }
+    // })
+  }
+  //加载更多
+  loadMore = () => {
+    
+  }
+  //数据表格选中的项
+  onSelectChange = (selectedRowKeys) => {
+    this.setState({ selectedRowKeys });
+    // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
+    console.log(`selectedRowKeys: ${selectedRowKeys}`);
   }
 
   render() {
     return (
-      <div className="antProPageContainer">
-        <div className={ `leftContent ${ this.state.collasped ? 'foldToLeft' : null }` }>
+      <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
+        <div className="leftContent">
           <div className="fullContain">
             {
               this.state.treeData ?
@@ -213,17 +251,50 @@ class RealTime extends PureComponent{
         <div className="tableList">
           <Search />
           <div className="tableContain">
-            <DataTable 
-              url='/api/VariableManage/InitTags'
-              cols={
-                [
-                  {field:'id', width:120, title: '变量名'}
-                  ,{field:'username', width:120, title: '变量描述'}
-                  ,{field:'sex', width:120, title: '数据类型'}
-                  ,{field:'city', width:180, title: '变量地址'}
-                  ,{field:'sign', title: '字符串长度'} 
-                ]
-               }
+            <DataTable
+              rowSelection={{
+                selectedRowKeys: this.state.selectedRowKeys,
+                onChange: this.onSelectChange,
+              }}
+              dataSource={this.state.dataSource}
+              loadMore={this.loadMore}
+              count={this.state.count}
+              rowKey={record => {
+                console.length(record)
+                return record.id
+              }}
+              columns={[
+              {
+                title: '变量名',
+                dataIndex: 'name',
+                  width: '150px',
+                ellipsis: true,
+              },
+              {
+                title: '变量描述',
+                dataIndex: 'desc',
+                width: '200px',
+                ellipsis: true,
+              },
+              {
+                title: '数据类型',
+                dataIndex: 'dataType',
+                width: '200px',
+                ellipsis: true,
+              },
+              {
+                title: '变量地址',
+                dataIndex: 'address',
+                width: '150px',
+                ellipsis: true,
+              },
+              {
+                title: '字符长度',
+                dataIndex: 'characterLength',
+                width: '150px',
+                ellipsis: true,
+              }
+            ] }
             />
           </div>
         </div>

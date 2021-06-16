@@ -3,6 +3,7 @@
   margin: 0;
   width: 100%;
   height: 100%;
+  user-select: none;
 }
 
 .App {
@@ -24,28 +25,36 @@
 }
 
 .antProPageContainer {
-  display: flex;
-  height: 100%;
-  overflow: hidden;
-}
-
-.leftContent {
   position: relative;
-  padding-right: 25px;
-  width: 275px;
   height: 100%;
-  background: #FFFFFF;
-  transition: all 0.3s ease;
   overflow: hidden;
 
   &.foldToLeft {
-    width: 25px;
+    .leftContent{
+      width: 0;
+    }
+    .tableList{
+      padding-left: 25px;
+    }
   }
+}
+
+.leftContent {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  bottom: 0;
+  z-index: 8;
+  width: 250px;
+  height: 100%;
+  background: #FFFFFF;
+  transition: all 0.3s ease;
+  box-shadow: 1px 0 0 0 #DCE4EB;
 
   .fullContain {
     height: 100%;
-    box-shadow: 1px 0 0 0 #DCE4EB;
-    overflow: hidden;
+    display: flex;
+    flex-flow: column;
 
     .ant-tree {
       width: 100%;
@@ -57,7 +66,7 @@
   .arrowLeft {
     position: absolute;
     padding: 0;
-    right: 5px;
+    right: -20px;
     top: 50%;
     transform: translateY(-50%);
     width: 20px;
@@ -70,17 +79,41 @@
 }
 
 .tableList {
-  flex: 1;
-  height: 100%;
+  // flex: 1;
+  // width: 1425px;
+  // height: 725px;
   padding: 10px;
+  height: 100%;
+  padding-left: 275px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
 }
 
 .tableContain {
   flex: 1;
+  display: flex;
+  flex-flow: column;
   padding: 10px 0 0;
   width: 100%;
+  overflow: hidden;
+}
+.table-contain{
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid #EAEAEA;
+}
+
+.paging{
+  height: 35px;
+  line-height: 45px;
+  color: #4799ED;
+
+  .load-more{
+    cursor: pointer;
+  }
 }
 
 .optAdd {
@@ -218,4 +251,69 @@
       background-size: 100%;
     }
   }
+}
+
+.ant-table-thead{
+  .ant-table-cell{
+    padding: 0 10px;
+    line-height: 42px;
+    height: 42px;
+    font-family: "微软雅黑";
+  }
+  .ant-table-selection-column{
+    padding: 0 10px;
+    width: 50px;
+  }
+}
+.ant-table-tbody{
+  border-bottom: 0;
+  tr{
+    .ant-table-cell{
+      height: 42px;
+      line-height: 42px;
+      padding: 0 10px;
+    }
+
+    &:nth-child(2n){
+      background: #F5F7FC;
+    }
+    &:nth-child(2n-1){
+      background: #fff;
+    }
+  }
+}
+.ant-table .ant-table-container::before, 
+.ant-table .ant-table-container::after{
+  width: 40px;
+}
+.ant-table-selection-column{
+  width: 50px;
+
+  .ant-checkbox-inner{
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid #B1B1B1;
+
+    &::after{
+      top: 48%;
+      height: 12.142857px;
+    }
+  }
+  .ant-checkbox-indeterminate{
+    .ant-checkbox-inner{
+      &::after{
+        top: 50%;
+        height: 8px;
+      }
+    }
+  }
+}
+.ant-table-wrapper,
+.ant-spin-nested-loading,
+.ant-spin-container,
+.ant-table,
+.ant-table-container,
+.ant-table-body{
+  height: 100%;
 }
