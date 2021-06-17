@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Select, Button, message } from 'antd'
+import { LoadingOutlined } from '@ant-design/icons'
 
 import { GetTreeStructure, AddGroup, ModifyGroup } from 'api/variable/index'
 
@@ -15,7 +16,8 @@ class AddGroups extends PureComponent {
       type: 2,
       name: "",
     },
-    hidden: false
+    hidden: false,
+    loading: false
   }
 
   formRef = React.createRef()
@@ -57,9 +59,12 @@ class AddGroups extends PureComponent {
   }
 
   onFinish = (val) => {
+    this.setState({ loading: true })
     if (this.props.node) {
       ModifyGroup(val).then(res => {
+        this.setState({ loading: false })
         if (res.code === 0) {
+          this.props.onCancel();
           message.info("编辑成功")
         } else {
           message.error("编辑失败。" + res.msg)
@@ -67,7 +72,9 @@ class AddGroups extends PureComponent {
       })
     } else {
       AddGroup(val).then(res => {
+        this.setState({ loading: false })
         if (res.code === 0) {
+          this.props.onCancel();
           message.info("新增成功")
         } else {
           message.error("新增失败。" + res.msg)
@@ -122,7 +129,7 @@ class AddGroups extends PureComponent {
           <Input placeholder="请输入分组名称" />
         </Form.Item>
         <Form.Item className="form-footer">
-          <Button type="default" className="login-form-button">取消</Button>
+          <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
           <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
         </Form.Item>
       </Form>

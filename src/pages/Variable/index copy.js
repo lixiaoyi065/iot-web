@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react'
-import { Modal, message } from "antd"
+import { message } from "antd"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
+import DialogAlert from "components/common/DialogAlert"
 import DataTable from 'components/common/Table'
 
 import ZTree from 'components/common/Ztree'
@@ -18,12 +19,9 @@ class RealTime extends PureComponent{
     dataTypes: [],
     count: 0,
     collasped: false,
-    selectedRowKeys: [],
-    //添加设备
-    visible: false,
-    title: "",
-    modalContent:""
+    selectedRowKeys: []
   }
+  child =  React.createRef()
 
   componentDidMount() {
     //获取整棵设备列表树结构
@@ -105,43 +103,53 @@ class RealTime extends PureComponent{
     )
   }
 
-  handleCancel = ()=>{
-    this.setState({visible: false})
+  addDeviceForm = (
+    <AddEqu key="addDevice" ref={ this.child }/>
+  )
+  modifyDeviceForm = (node={})=>{
+    return (
+      <AddEqu node={ node } key={ node.id }/>
+    )
   }
-  confirm = (content,callback)=> {
-    Modal.confirm({
-      title: '注意',
-      content: content,
-      okText: '确认',
-      cancelText: '取消',
-      onOk: callback
-    });
+  addGroupForm = (
+    <AddGroup key="addGroup"/>
+  )
+  modifyGroupForm = (node={})=>{
+    return (
+      <AddGroup node={ node } key={ "-" + node.groupId }/>
+    )
   }
-  menuClick = (e, id, length)=>{
+
+  menuClick = (e, id, length) => {
     if (e.key === "addDevice") {
-      this.setState({
-        visible: true, 
-        title: "新增设备", 
-        modalContent: <AddEqu key="addDevice" onCancel={this.handleCancel}/>
+      DialogAlert.open({
+        alertTitle: "添加设备",
+        alertTip: this.addDeviceForm,
+        confirmCallbackFn: () => {
+          this.child.current.formRef.current.submit()
+        }
       })
     } else if(e.key === "modifyDevice"){
       GetDevice(id).then(res=>{
-        this.setState({
-          visible: true, 
-          title: "编辑设备", 
-          modalContent: <AddEqu key="modifyDevice" node={ res.data } onCancel={this.handleCancel}/>
+        DialogAlert.open({
+          alertTitle: "编辑设备",
+          alertTip: this.modifyDeviceForm(res.data)
         })
       })
-    } else if(e.key === "delDevice"){
+    } else if (e.key === "delDevice"){
       if(length > 0){
-        this.confirm('节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?',()=>{
-          DeleteDevice(id).then(res=>{
-            if(res.code === 0){
-              message.info("删除成功") 
-            }else{
-              message.error(res.msg)
-            }
-          })
+        DialogAlert.open({
+          alertTitle: "提示",
+          alertTip: "节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?",
+          confirmCallbackFn(){
+            DeleteDevice(id).then(res=>{
+              if(res.code === 0){
+                message.info("删除成功") 
+              }else{
+                message.error(res.msg)
+              }
+            })
+          }
         })
       }else{
         DeleteDevice(id).then(res=>{
@@ -153,33 +161,35 @@ class RealTime extends PureComponent{
         })
       }
     }else if(e.key === "addGroup"){
-      this.setState({
-        visible: true, 
-        title: "新增分组", 
-        modalContent: <AddGroup key="addGroup" onCancel={this.handleCancel}/>
+      DialogAlert.open({
+        alertTitle: "编辑分组",
+        alertTip: this.addGroupForm
       })
     }else if(e.key === "modifyGroup"){
-      this.setState({
-        visible: true, 
-        title: "编辑分组", 
-        modalContent: <AddGroup key="modifyGroup" node={ id } onCancel={this.handleCancel}/>
+      DialogAlert.open({
+        alertTitle: "编辑分组",
+        alertTip: this.modifyGroupForm(id)
       })
     } else if (e.key === "delGroup") {
-      this.confirm('节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?',()=>{
-        DelGroup(id.groupId).then(res=>{
-          if(res.code === 0){
-            message.info("删除成功")
-          }else{
-            message.error(res.msg)
-          }
-        })
+      DialogAlert.open({
+        alertTitle: "提示",
+        alertTip: "节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?",
+        confirmCallbackFn(){
+          DelGroup(id.groupId).then(res=>{
+            if(res.code === 0){
+              message.info("删除成功") 
+            }else{
+              message.error(res.msg)
+            }
+          })
+        }
       })
     }
   }
-  //点击节点触发函数
-  onSelect = (res, info)=>{
+  //选中设备列表的回调
+  selectCallbackFn = (res, info) => {
     let tags = {
-      nodeId: info.node.key,
+      groupId: info.node.key,
       type: info.node.nodeType
     }
     InitTags(tags).then(res => {
@@ -189,18 +199,29 @@ class RealTime extends PureComponent{
           element.key = element.id
           dataList.push(element)
         });
-        console.log(dataList, res.data.total, res.data.dataTypes)
         this.setState({
           dataSource: dataList,
           count: res.data.total,
           dataTypes: res.data.dataTypes
         })
       } else {
-        message.info(res.msg)
+        this.setState({
+          dataSource: [],
+          count: 0
+        })
       }
     })
   }
- 
+  //加载更多
+  loadMore = () => {
+    
+  }
+  //数据表格选中的项
+  onSelectChange = (selectedRowKeys) => {
+    this.setState({ selectedRowKeys });
+    // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
+    console.log(`selectedRowKeys: ${selectedRowKeys}`);
+  }
 
   render() {
     return (
@@ -224,7 +245,7 @@ class RealTime extends PureComponent{
                   defaultExpandAll={true}
                   defaultExpandedKeys={ ["371dc6de-1264-4e39-999f-83ceacc29322"] }
                   optionGroupMenu={this.optionGroupMenu}
-                  onSelect={this.onSelect}
+                  selectCallbackFn={this.selectCallbackFn}
                 />
                 : null
             }
@@ -232,10 +253,20 @@ class RealTime extends PureComponent{
           <span className="arrowLeft" onClick={this.toggleLeft}></span>
         </div>
         <div className="tableList">
-          <Search dataTypes={this.state.dataTypes}/>
+          <Search />
           <div className="tableContain">
             <DataTable
+              rowSelection={{
+                selectedRowKeys: this.state.selectedRowKeys,
+                onChange: this.onSelectChange,
+              }}
               dataSource={this.state.dataSource}
+              loadMore={this.loadMore}
+              count={this.state.count}
+              rowKey={record => {
+                console.length(record)
+                return record.id
+              }}
               columns={[
               {
                 title: '变量名',
@@ -271,17 +302,6 @@ class RealTime extends PureComponent{
             />
           </div>
         </div>
-          {/* 新增编辑模态框 */}
-          <Modal 
-            title={this.state.title}
-            visible={this.state.visible}
-            onCancel={this.handleCancel}
-            footer={null}
-            >
-            {
-              this.state.modalContent
-            }
-          </Modal>
       </div>
     )
   }

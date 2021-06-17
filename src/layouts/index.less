@@ -30,10 +30,11 @@
   overflow: hidden;
 
   &.foldToLeft {
-    .leftContent{
+    .leftContent {
       width: 0;
     }
-    .tableList{
+
+    .tableList {
       padding-left: 25px;
     }
   }
@@ -98,7 +99,8 @@
   width: 100%;
   overflow: hidden;
 }
-.table-contain{
+
+.table-contain {
   flex: 1;
   width: 100%;
   overflow: hidden;
@@ -106,12 +108,12 @@
   border: 1px solid #EAEAEA;
 }
 
-.paging{
+.paging {
   height: 35px;
   line-height: 45px;
   color: #4799ED;
 
-  .load-more{
+  .load-more {
     cursor: pointer;
   }
 }
@@ -162,20 +164,20 @@
     margin-right: 20px;
   }
 
-  .ant-select,
-  .ant-input,
-  .ant-input-affix-wrapper {
-    width: 250px;
+  .ant-divider-horizontal {
+    width: unset;
+    max-width: unset;
+    margin: 24px -29px;
   }
 }
 
 .form-footer {
-  margin-top: 10px;
+  margin-top: 20px;
 
-  .ant-form-item-control-input-content{
+  .ant-form-item-control-input-content {
     text-align: right;
 
-    .ant-btn{
+    .ant-btn {
       padding: 0 26px;
       height: 32px;
       font-size: 14px;
@@ -185,7 +187,7 @@
       margin-left: 20px;
       cursor: pointer;
 
-      &.ant-btn-default{
+      &.ant-btn-default {
         background: #ECF5FF;
         color: #409EFF;
         border: 1px solid #B3D8FF;
@@ -203,7 +205,8 @@
     content: none;
   }
 }
-.all-checkbox{
+
+.all-checkbox {
   position: relative;
   padding-left: 22px;
   margin-left: 18px;
@@ -211,7 +214,7 @@
   cursor: pointer;
   color: #666;
 
-  &::before{
+  &::before {
     content: "";
     position: absolute;
     left: 0;
@@ -221,52 +224,56 @@
     background-size: 100%;
   }
 
-  &:hover{
+  &:hover {
     color: #4799ED;
   }
 
-  &:active{
+  &:active {
     color: #1C77D4;
   }
 }
-.all-check{
-  &::before{
+
+.all-check {
+  &::before {
     content: "";
     background: url(~assets/img/ztree/all-check.png) no-repeat;
     background-size: 100%;
   }
 
-  &:hover{
-    &::before{
+  &:hover {
+    &::before {
       content: "";
       background: url(~assets/img/ztree/all-check_hover.png) no-repeat;
       background-size: 100%;
     }
   }
-  &:active{
-    &::before{
+
+  &:active {
+    &::before {
       content: "";
       background: url(~assets/img/ztree/all-check_active.png) no-repeat;
       background-size: 100%;
     }
   }
 }
-.all-uncheck{
-  &::before{
+
+.all-uncheck {
+  &::before {
     content: "";
     background: url(~assets/img/ztree/all-uncheck.png) no-repeat;
     background-size: 100%;
   }
 
-  &:hover{
-    &::before{
+  &:hover {
+    &::before {
       content: "";
       background: url(~assets/img/ztree/all-uncheck_hover.png) no-repeat;
       background-size: 100%;
     }
   }
-  &:active{
-    &::before{
+
+  &:active {
+    &::before {
       content: "";
       background: url(~assets/img/ztree/all-uncheck_active.png) no-repeat;
       background-size: 100%;
@@ -274,73 +281,81 @@
   }
 }
 
-.ant-table-thead{
-  .ant-table-cell{
+.ant-table-thead {
+  .ant-table-cell {
     padding: 0 10px;
     line-height: 42px;
     height: 42px;
     font-family: "微软雅黑";
   }
-  .ant-table-selection-column{
+
+  .ant-table-selection-column {
     padding: 0 10px;
     width: 50px;
   }
 }
-.ant-table-tbody{
+
+.ant-table-tbody {
   border-bottom: 0;
-  tr{
-    .ant-table-cell{
+
+  tr {
+    .ant-table-cell {
       height: 42px;
       line-height: 42px;
       padding: 0 10px;
     }
 
-    &:nth-child(2n){
+    &:nth-child(2n) {
       background: #F5F7FC;
     }
-    &:nth-child(2n-1){
+
+    &:nth-child(2n-1) {
       background: #fff;
     }
   }
 }
-.ant-table .ant-table-container::before, 
-.ant-table .ant-table-container::after{
+
+.ant-table .ant-table-container::before,
+.ant-table .ant-table-container::after {
   width: 40px;
 }
-.ant-table-selection-column{
+
+.ant-table-selection-column {
   width: 50px;
 
-  .ant-checkbox-inner{
+  .ant-checkbox-inner {
     width: 20px;
     height: 20px;
     border-radius: 3px;
     border: 1px solid #B1B1B1;
 
-    &::after{
+    &::after {
       top: 48%;
       height: 12.142857px;
     }
   }
-  .ant-checkbox-indeterminate{
-    .ant-checkbox-inner{
-      &::after{
+
+  .ant-checkbox-indeterminate {
+    .ant-checkbox-inner {
+      &::after {
         top: 50%;
         height: 8px;
       }
     }
   }
 }
+
 .ant-table-wrapper,
 .ant-spin-nested-loading,
 .ant-spin-container,
 .ant-table,
 .ant-table-container,
-.ant-table-body{
+.ant-table-body {
   height: 100%;
 }
 
-.form-table{
-  .ant-form-item-label{
+.form-table {
+  .ant-form-item-label {
     width: 121px;
     text-align: left;
   }
