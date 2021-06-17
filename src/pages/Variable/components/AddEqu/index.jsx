@@ -4,7 +4,6 @@ import { Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
 import { AddDevice, ModifyDevice } from 'api/variable'
 
 const { Option } = Select;
-
 export default class addDevice extends PureComponent {
   formRef = React.createRef()
   state = {
@@ -80,7 +79,7 @@ export default class addDevice extends PureComponent {
   onChangUserIdentity = e => {
     e === "登录验证" ? this.setState({ userPane: true }) : this.setState({ userPane: false })
   }
-  onFinish = val => {
+  onFinish = async val => {
     console.log(val)
     const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
     //数据二次处理
@@ -97,7 +96,6 @@ export default class addDevice extends PureComponent {
       }
     }
     if (val.id === "00000000-0000-0000-0000-000000000000") {
-      console.log("新增设备", equObj)
       AddDevice(equObj).then(res => {
         console.log(res)
         if (res.code === 0) {
@@ -162,7 +160,7 @@ export default class addDevice extends PureComponent {
         onFinish={this.onFinish}
         initialValues={initialValues}
       >
-        <div style={{ padding: '0 27px' }}>
+        <div className="form-table" style={{width: "362px"}}>
           <Form.Item label="设备ID" name="id" hidden={true}>
             <Input />
           </Form.Item>
@@ -181,7 +179,7 @@ export default class addDevice extends PureComponent {
           </Form.Item>
         </div>
         <Divider></Divider>
-        <div style={{ padding: '0 27px' }}>
+        <div className="form-table">
           {/* <Form.Item label="树节点类型" name="nodeType" hidden={true} >
             <Input />
           </Form.Item> */}
@@ -427,7 +425,7 @@ export default class addDevice extends PureComponent {
               (
                 this.state.activeProto === "Fins_TCP" || this.state.activeProto === "MCA1E_Binary_Ethernet" || this.state.activeProto === "MC3E_Binary_Ethernet" ?
                   (
-                    <Form.Item valuePropName="checked" name="StrByteOrder1">
+                    <Form.Item valuePropName="checked" name="StrByteOrder1" className="form-block">
                       <Checkbox>字符串字节顺序</Checkbox>
                     </Form.Item>
                   ) : (
@@ -446,11 +444,11 @@ export default class addDevice extends PureComponent {
                   )
               ) : null
           }
-          <Form.Item className="form-footer">
-            <Button type="default" className="login-form-button" onClick={this.props.cancel}>取消</Button>
-            <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
-          </Form.Item>
         </div>
+        <Form.Item className="form-footer" hidden={true}>
+          <Button type="default" className="login-form-button" onClick={this.props.cancel}>取消</Button>
+          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">确认</Button>
+        </Form.Item>
       </Form>
     )
   }

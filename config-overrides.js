@@ -61,7 +61,12 @@ module.exports = override(
       "@table-selected-row-bg": "transparent",
       "@table-row-hover-bg": "#E4EEFF",
       "@table-border-radius-base": 0,
-      "@table-selected-row-hover-bg": "initial"
+      "@table-selected-row-hover-bg": "initial",
+
+      //tree
+      "@tree-directory-selected-bg": "initial",
+      "@tree-node-hover-bg": "#E4EEFF",
+      "@tree-node-selected-bg": "initial"
     }    
   }),
   addWebpackAlias({

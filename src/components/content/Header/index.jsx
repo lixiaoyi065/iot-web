@@ -1,9 +1,10 @@
 import React, { PureComponent } from 'react'
 import { Dropdown } from 'antd'
+import { withRouter } from "react-router-dom";
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-
+import {getCookie} from 'utils'
 import store from 'store'
 
 import equLogo from 'assets/img/index/equ.png'
@@ -12,13 +13,17 @@ import './index.less'
 class PageHeader extends PureComponent {
   state = {
     currentEqu: '定子线',
-    userName: window.localStorage.getItem("userName")
+    userName: getCookie("userName")
   }
 
   toggle = () => {
     store.dispatch({
       type: "collapsed"
     })
+  }
+
+  logout = () => {
+    this.props.history.push('/')
   }
 
   menu = (
@@ -70,11 +75,11 @@ class PageHeader extends PureComponent {
         {<div className="userComp">
           <span className="userName">{this.state.userName}</span>
           <span className="divider"></span>
-          <div className="logout"></div>
+          <div className="logout" onClick={ this.logout }></div>
         </div>}
       </div>
     )
   }
 }
 
-export default PageHeader
+export default withRouter(PageHeader)

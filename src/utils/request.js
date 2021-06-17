@@ -1,4 +1,5 @@
 import axios from 'axios'
+import {getCookie} from 'utils'
 
 const service = axios.create({
   baseURL: "http://localhost:3000/api1/api",
@@ -10,7 +11,7 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    let token = window.localStorage.getItem("accessToken")
+    let token = getCookie("accessToken")
     if (token) {
         config.headers['Authorization'] = token;
     }

@@ -15,24 +15,8 @@
   }
 }
 .moveNode{
-  .ant-tree-treenode {
-    &:hover::after {
-      content: "";
-      position: absolute;
-      left: 20px;
-      top: 11px;
-      width: 14px;
-      height: 14px;
-      background: url("~assets/img/common/move2.png") no-repeat;
-      background-size: 100%;
-    }
-    &:active::after {
-      content: "";
-      background: url("~assets/img/common/move2_active.png") no-repeat;
-      background-size: 100%;
-    }
-
-    &.ant-tree-treenode-selected {
+  // &.ant-tree.ant-tree-directory {
+    .ant-tree-treenode {
       &:hover::after {
         content: "";
         position: absolute;
@@ -43,69 +27,34 @@
         background: url("~assets/img/common/move2.png") no-repeat;
         background-size: 100%;
       }
-      &:active::after {
-        content: "";
-        background: url("~assets/img/common/move2_active.png") no-repeat;
-        background-size: 100%;
-      }
-    }
-  }
-}
-.ant-tree {
-  .ant-tree-treenode {
-    position: relative;
-    height: 36px;
-    line-height: 36px;
-    padding: 0 10px 0 45px;
-    font-family: PingFang SC;
-    font-weight: 500;
-    color: #252525;
-
-    &:hover{
-      background: #E4EEFF;
-    }
-
-    &:active{
-      background: #4270E4;
-      color: #fff;
-      
-      .ant-tree-title {
-        .ant-tree-title-operationNode {
-          background: url(~assets/img/variable/more_active.png) no-repeat;
+  
+      &.ant-tree-treenode-selected {
+        &:hover::after {
+          content: "";
+          position: absolute;
+          left: 20px;
+          top: 11px;
+          width: 14px;
+          height: 14px;
+          background: url("~assets/img/common/move2_active.png") no-repeat;
           background-size: 100%;
         }
       }
     }
-
-    .ant-tree-node-content-wrapper{
-      &:hover{
-        background: none;
-      }
-    }
+  // }
+}
+.ant-tree.ant-tree-directory {
+  .ant-tree-treenode {
+    height: 36px;
+    line-height: 36px;
+    padding: 0 10px 0 45px;
 
     &::before {
       bottom: 0;
     }
 
     &.ant-tree-treenode-selected {
-      &:hover{
-        background: #E4EEFF;
-      }
-      &:active{
-        background: #4270E4;
-        color: #fff;
-
-        .ant-tree-title {
-          .ant-tree-title-operationNode {
-            background: url(~assets/img/variable/more_active.png) no-repeat;
-            background-size: 100%;
-          }
-        }
-      }
-
-      .ant-tree-node-selected{
-        background: none;
-      }
+      background: #4270E4;
 
       &::before {
         background: none;
@@ -113,7 +62,7 @@
 
       .ant-tree-title {
         .ant-tree-title-operationNode {
-          background: url(~assets/img/variable/more.png) no-repeat;
+          background: url(~assets/img/variable/more_active.png) no-repeat;
           background-size: 100%;
         }
       }

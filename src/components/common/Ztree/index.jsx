@@ -2,10 +2,7 @@ import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom'
 import { Tree, Dropdown } from 'antd';
 
-import { stringToArray } from 'utils'
 import './index.less'
-
-const { DirectoryTree } = Tree;
 
 class ZTree extends PureComponent {
   state = {
@@ -137,7 +134,7 @@ class ZTree extends PureComponent {
           ) : null
         }
 
-        <DirectoryTree
+        <Tree
           ref="tree"
           blockNode
           draggable

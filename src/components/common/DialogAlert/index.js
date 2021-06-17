@@ -13,7 +13,6 @@ class DialogBox extends Component {
       alertTip:'网络错误', //提示
       cancelText:'取消',
       confirmText:'确认',
-
       isShortTip:false, //是否为短提示，短提示的情况下不显示'取消''确认'（且2s后消失），且优先级最高，其他配置无效
 
       isShowCancel:true, //是否显示确认按钮
@@ -50,7 +49,7 @@ class DialogBox extends Component {
   //确认
   confirm = () => {
     this.state.confirmCallbackFn();
-    this.close()
+    // this.close()
   }
   close = () => {
     this.setState({
@@ -61,14 +60,14 @@ class DialogBox extends Component {
   render(){
     let opts = this.state;
     return (
-      <div className="mask-layer" style={opts.alertStatus ? { display: 'block' } : { display: 'none' }}>
+      <div className="mask-layer" ref="dialog" style={opts.alertStatus ? { display: 'block' } : { display: 'none' }}>
         <div className="dialog-wrap">
           <div className="dialog-title">
             <span>{opts.alertTitle}</span>
             <span className="close-dialog" onClick={ ()=> this.cancel() }></span>
           </div>
           <div className="dialog-box">
-            <div style={{'paddingBottom': '20px'}}>{opts.alertTip}</div>
+            <div>{opts.alertTip}</div>
             {
               // opts.type !== "form" ? (
                 !opts.isShowCancel && !opts.isShowConfirm ? null : (

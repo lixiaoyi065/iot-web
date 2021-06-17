@@ -157,10 +157,6 @@
     content: none;
   }
 
-  .form-footer {
-    text-align: right;
-  }
-
   .ant-form-item-label>label::after {
     content: ':';
     margin-right: 20px;
@@ -170,6 +166,31 @@
   .ant-input,
   .ant-input-affix-wrapper {
     width: 250px;
+  }
+}
+
+.form-footer {
+  margin-top: 10px;
+
+  .ant-form-item-control-input-content{
+    text-align: right;
+
+    .ant-btn{
+      padding: 0 26px;
+      height: 32px;
+      font-size: 14px;
+      font-family: PingFang SC;
+      font-weight: 500;
+      border-radius: 4px;
+      margin-left: 20px;
+      cursor: pointer;
+
+      &.ant-btn-default{
+        background: #ECF5FF;
+        color: #409EFF;
+        border: 1px solid #B3D8FF;
+      }
+    }
   }
 }
 
@@ -316,4 +337,11 @@
 .ant-table-container,
 .ant-table-body{
   height: 100%;
+}
+
+.form-table{
+  .ant-form-item-label{
+    width: 121px;
+    text-align: left;
+  }
 }

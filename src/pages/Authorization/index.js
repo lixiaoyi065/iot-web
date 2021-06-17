@@ -4,8 +4,11 @@ import React, { PureComponent } from 'react'
 class Authorization extends PureComponent{
   render() {
     return (
-      <div>
-        <div>授权管理</div>
+      <div style={{padding: "20px"}}>
+        <div>
+          <div>授权管理</div>
+
+        </div>
       </div>
     )
   }

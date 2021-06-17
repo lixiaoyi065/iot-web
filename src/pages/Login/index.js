@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Form, Input, Popconfirm, Button, message } from "antd"
 import { withRouter } from "react-router-dom";
 import axios from 'utils/request'
+import {setCookie} from 'utils'
 import "./index.less"
 
 import user from 'assets/img/login/user.png'
@@ -12,16 +13,17 @@ class Login extends Component {
     isLogin: document.cookie.includes('login=true')
   }
 
-  setCookie = (key, value, day) => {
-    let expires = day * 86400 * 1000  // 时间转化成 ms
-    let date = new Date( + new Date() + expires) // 当前时间加上要存储的时间
-    document.cookie = `${key}=${value};expires=${date.toUTCString()}`
+  componentDidMount() {
+    // 设置时间为负数, 取消设置的 cookie
+    setCookie('login', '', -1)
+    setCookie('accessToken', '', -1)
+    setCookie('userName', '', -1)
   }
+  
   jumpBack = () => {
     // 打哪儿来回哪去
     const { location } = this.props
     const from = location.state && location.state.from
-    console.log(from)
     //  const article = location.state && location.state.article
     this.props.history.push({
       pathname: from || "/index",
@@ -38,29 +40,14 @@ class Login extends Component {
   </div>)
 
   onFinish = (e) => {
-
     axios.get(`/Login/Login?argUserAccount=${e.user}&argUserPassword=${e.password}`).then(res => {
-      console.log(res)
+      console.log(e,res)
       if (res.code === 0) {
-        localStorage.setItem("accessToken", res.data)
-        localStorage.setItem("userName", e.user)
-        console.log(localStorage.getItem("userName"))
-        // this.props.history.replace("/index")
-
-        
-        let login = !this.state.isLogin
-        this.setState({
-            isLogin: login
-        })
-        if(login){
-            // 设置cookie之后跳转回来时的页面
-            this.setCookie('login', true, 15)
-            this.jumpBack()
-        } else {
-            // 设置时间为负数, 取消设置的 cookie
-            this.setCookie('login', '', -1)
-        }
-
+          // 设置cookie之后跳转回来时的页面
+          setCookie('login', true, 0.1)
+          setCookie('accessToken', res.data, 0.1)
+          setCookie('userName', e.user, 0.1)
+          this.jumpBack()
       } else {
         message.error(res.msg)
       }

@@ -12,7 +12,6 @@ import Search from './components/Search'
 
 import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup, InitTags } from 'api/variable'
 
-
 class RealTime extends PureComponent{
   state = {
     treeData: [],
@@ -22,6 +21,7 @@ class RealTime extends PureComponent{
     collasped: false,
     selectedRowKeys: []
   }
+  child =  React.createRef()
 
   componentDidMount() {
     //获取整棵设备列表树结构
@@ -104,7 +104,7 @@ class RealTime extends PureComponent{
   }
 
   addDeviceForm = (
-    <AddEqu key="addDevice"/>
+    <AddEqu key="addDevice" ref={ this.child }/>
   )
   modifyDeviceForm = (node={})=>{
     return (
@@ -124,7 +124,10 @@ class RealTime extends PureComponent{
     if (e.key === "addDevice") {
       DialogAlert.open({
         alertTitle: "添加设备",
-        alertTip: this.addDeviceForm
+        alertTip: this.addDeviceForm,
+        confirmCallbackFn: () => {
+          this.child.current.formRef.current.submit()
+        }
       })
     } else if(e.key === "modifyDevice"){
       GetDevice(id).then(res=>{
@@ -185,30 +188,29 @@ class RealTime extends PureComponent{
   }
   //选中设备列表的回调
   selectCallbackFn = (res, info) => {
-    // let tags = {
-    //   groupId: info.node.key,
-    //   type: info.node.nodeType
-    // }
-    // InitTags(tags).then(res => {
-    //   let dataList = [];
-    //   console.log(res)
-    //   if (res.code === 0) {
-    //     res.data.tags.forEach(element => {
-    //       element.key = element.id
-    //       dataList.push(element)
-    //     });
-    //     this.setState({
-    //       dataSource: dataList,
-    //       count: res.data.total,
-    //       dataTypes: res.data.dataTypes
-    //     })
-    //   } else {
-    //     this.setState({
-    //       dataSource: [],
-    //       count: 0
-    //     })
-    //   }
-    // })
+    let tags = {
+      groupId: info.node.key,
+      type: info.node.nodeType
+    }
+    InitTags(tags).then(res => {
+      let dataList = [];
+      if (res.code === 0) {
+        res.data.tags.forEach(element => {
+          element.key = element.id
+          dataList.push(element)
+        });
+        this.setState({
+          dataSource: dataList,
+          count: res.data.total,
+          dataTypes: res.data.dataTypes
+        })
+      } else {
+        this.setState({
+          dataSource: [],
+          count: 0
+        })
+      }
+    })
   }
   //加载更多
   loadMore = () => {
@@ -240,6 +242,8 @@ class RealTime extends PureComponent{
                   zTreeOptionDropdown={true}
                   zTreeOptionMenu={this.zTreeOptionMenu}
                   optionDeviceMenu={this.optionDeviceMenu}
+                  defaultExpandAll={true}
+                  defaultExpandedKeys={ ["371dc6de-1264-4e39-999f-83ceacc29322"] }
                   optionGroupMenu={this.optionGroupMenu}
                   selectCallbackFn={this.selectCallbackFn}
                 />
