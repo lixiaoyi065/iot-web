@@ -52,7 +52,6 @@ export function DeleteDevice(id) {
 }
 //添加分组
 export function AddGroup(data) {
-  console.log(data)
   return service({
     url: '/VariableManage/AddGroup',
     data,
@@ -78,12 +77,18 @@ export function DelGroup(id) {
   })
 }
 //查询变量
-export function QueryTags(group){
+export function QueryTags(data) {
   return service({
-    url: '/VariableManage/QueryTags',
-    params:{
-      group
-    },
+    url: "/VariableManage/QueryTags",
+    params: data,
+    method: 'get'
+  })
+}
+//导出
+export function ExportTags(data){
+  return service({
+    url: '/VariableManage/ExportTags',
+    params: data,
     method: 'get'
   })
 }
@@ -93,5 +98,63 @@ export function InitTags(data) {
     url: "/VariableManage/InitTags",
     params: data,
     method: 'get'
+  })
+}
+//校验变量名是否格式正确、重复
+//params: object
+export function VerifyTagName(params) {
+  return service({
+    url: "/VariableManage/VerifyTagName",
+    params,
+    method: 'get'
+  })
+}
+//校验IO变量地址是否合法
+//params: object
+export function VerifyAddress(params) {
+  return service({
+    url: "/VariableManage/VerifyAddress",
+    params,
+    method: 'get'
+  })
+}
+//获取地址编辑信息
+//params: object
+export function GetAddressEditInfo(params) {
+  return service({
+    url: "/VariableManage/GetAddressEditInfo",
+    params,
+    method: 'get'
+  })
+}
+//保存变量
+//data: object
+export function SaveTags(data) {
+  return service({
+    url: "/VariableManage/SaveTags",
+    data,
+    method: 'post'
+  })
+}
+//获取保存变量任务状态
+//id: string
+export function GetSaveTagsTaskProgress(id) {
+  return service({
+    url: "/VariableManage/GetSaveTagsTaskProgress",
+    params: {
+      id
+    },
+    method: 'get'
+  })
+}
+//删除分组
+//ids: Array
+export function DeleteTags(ids) {
+  return service({
+    url: '/VariableManage/DeleteTags',
+    data: {
+      ids
+    },
+    method: 'delete'
   })
 }

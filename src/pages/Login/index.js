@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Input, Popconfirm, Button, message } from "antd"
+import { LoadingOutlined } from '@ant-design/icons'
 import { withRouter } from "react-router-dom";
 import axios from 'utils/request'
 import {setCookie} from 'utils'
@@ -10,7 +11,8 @@ import password from 'assets/img/login/password.png'
 
 class Login extends Component {
   state = {
-    isLogin: document.cookie.includes('login=true')
+    isLogin: document.cookie.includes('login=true'),
+    loading: false
   }
 
   componentDidMount() {
@@ -40,8 +42,10 @@ class Login extends Component {
   </div>)
 
   onFinish = (e) => {
+    this.setState({loading: true})
     axios.get(`/Login/Login?argUserAccount=${e.user}&argUserPassword=${e.password}`).then(res => {
       console.log(e,res)
+      this.setState({loading: false})
       if (res.code === 0) {
           // 设置cookie之后跳转回来时的页面
           setCookie('login', true, 0.1)
@@ -89,7 +93,12 @@ class Login extends Component {
               </Popconfirm>
             </div>
             <div className="card-item">
-              <Button className="login-form-button" htmlType="submit">登录</Button>
+              <Button className="login-form-button" htmlType="submit" disabled={this.state.loading ? true : false}>
+                {
+                  this.state.loading ? <LoadingOutlined /> : <></>
+                }
+                登录
+              </Button>
             </div>
             <div>
               <span></span>

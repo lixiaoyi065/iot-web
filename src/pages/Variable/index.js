@@ -1,28 +1,38 @@
 import React, { PureComponent } from 'react'
-import { Modal, message } from "antd"
+import { Modal, message, Select, Input } from "antd"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-import DataTable from 'components/common/Table'
-
+import EditableTable from 'components/common/EditDataTable/index.jsx'
 import ZTree from 'components/common/Ztree'
+
 import AddEqu from './components/AddEqu'
 import AddGroup from './components/AddGroup'
 import Search from './components/Search'
 
-import { GetTreeStructure, GetDevice, DeleteDevice, DelGroup, InitTags } from 'api/variable'
+import { downFile } from "utils";
 
+import {
+  GetTreeStructure, GetDevice, DeleteDevice, DelGroup, 
+  InitTags, QueryTags, ExportTags
+} from 'api/variable'
+
+const { Option } = Select
 class RealTime extends PureComponent{
   state = {
-    treeData: [],
-    dataSource: [],
-    dataTypes: [],
+    treeData: [],//设备树数据
+    dataSource: [], //表格的变量列表数据
+    dataTypes: [], //查询的数据类型
     count: 0,
     collasped: false,
     selectedRowKeys: [],
     //添加设备
-    visible: false,
-    title: "",
-    modalContent:""
+    visible: false, //弹窗显示隐藏
+    title: "",//弹窗标题
+    modalContent: "",//弹窗内容
+    activeNode: "", //当前显示变量列表的节点
+    activeNodeType: 0, //当前显示变量列表的节点类型
+    tableDataTypes: ["二进制变量", "有符号8位整型", "无符号8位整型", "有符号16位整型", "无符号16位整型", "有符号32位整型", "无符号32位整型",
+      "有符号64位整型", "无符号64位整型", "F32位浮点数IEEE754","F64位浮点数IEEE754", "日期","时间", "日期时间","字符串"],
   }
 
   componentDidMount() {
@@ -185,15 +195,17 @@ class RealTime extends PureComponent{
     InitTags(tags).then(res => {
       let dataList = [];
       if (res.code === 0) {
+        console.log(res.data.tags)
         res.data.tags.forEach(element => {
           element.key = element.id
           dataList.push(element)
         });
-        console.log(dataList, res.data.total, res.data.dataTypes)
         this.setState({
           dataSource: dataList,
           count: res.data.total,
-          dataTypes: res.data.dataTypes
+          dataTypes: res.data.dataTypes,
+          activeNode: info.node.key,
+          activeNodeType: info.node.nodeType
         })
       } else {
         message.info(res.msg)
@@ -201,8 +213,154 @@ class RealTime extends PureComponent{
     })
   }
  
+  //变量查询
+  searchForm = (res) => {
+    let queryCondition = {
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType,
+      dataType: res.dataType,
+      key: res.key
+    }
+    QueryTags(queryCondition).then(res => {
+      if (res.code === 0) {
+        this.setState({dataSource: res.data.tags, count: res.data.total})
+      } else {
+        message.error(res.msg)
+      }
+    })
+  }
+  //数据表格选中的项
+  onSelectChange = (selectedRowKeys) => {
+    console.log(`selectedRowKeys: ${selectedRowKeys}`);
+    this.setState({ selectedRowKeys });
+    // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
+  }
+  //加载更多
+  loadMore = () => {
+    
+  }
+  
+  //导入导出菜单
+  importMenu = (e) => {
+    if (e.key === "currentTableExport") { //导出当前点表
+      if (this.state.activeNode === "") {
+        message.error("请选择要导出的节点")
+      } else {
+        let tags = {
+          id: this.state.activeNode,
+          type: this.state.activeNodeType
+        }
+        ExportTags(tags).then(res => {
+          downFile(res, "变量列表.xls");
+        })
+      }
+    } else if (e.key === "overallExport") { //整体导出
+      ExportTags({
+        id: "00000000-0000-0000-0000-000000000000",
+        type: "-1"
+      }).then(res => {
+        downFile(res, "变量列表.xls");
+      })
+    } else if (e.key === "currentTableImport") { //导入当前点表
+      if (this.state.activeNode === "") {
+        message.error("请选择要导出的节点")
+      } else {
+        let tags = {
+          id: this.state.activeNode,
+          type: this.state.activeNodeType
+        }
+        
+      }
+    } else if (e.key === "currentTableExport") { //整体导入
+      
+    }
+  }
+  //保存变量列表
+  saveList = () => {
+
+  }
+  //重置变量列表
+  resetTags = () => {
+    
+  }
+  //新增变量
+  addTags = () => {
+    const { dataSource, count } = this.state;
+    console.log("新增",dataSource, count)
+    let tagObj = {
+      key: count+1,
+      id: "00000000-0000-0000-0000-000000000000",
+      no: count+1,
+      name: "",
+      desc: "",
+      dataType: "",
+      max: "",
+      min: "",
+      address: "",
+      stringLength: "",
+      zoom: "",
+      editable: true
+    }
+    this.setState({ dataSource: [...dataSource, tagObj], count: count+1})
+  }
+  //删除变量
+  delTags = () => {
+    
+  }
+  //
+  inputChange = (el) => {
+    console.log(el)
+  }
+  tableColums = (activeNodeType) => {
+    let columArr = [
+      {
+        title: '变量名',
+        dataIndex: 'name'
+      }, {
+        title: '变量描述',
+        dataIndex: 'desc'
+      }, {
+        title: '数据类型',
+        dataIndex: 'dataType',
+        type: "select",
+        content: this.state.tableDataTypes
+      }
+    ]
+    if (activeNodeType === 0 || activeNodeType === 2) {
+      //内部变量或者内部变量组
+      columArr.push({
+        title: '最大值',
+        dataIndex: 'zoom',
+        width: '100px'
+      },
+      {
+        title: '最小值',
+        dataIndex: 'zoom',
+        width: '100px'
+      })
+    } else if (activeNodeType === 3 || activeNodeType === 4) {
+      //设备或者设备变量组
+      columArr.push({
+        title: '变量地址',
+        dataIndex: 'address'
+      },
+      {
+        title: '字符串长度',
+        dataIndex: 'stringLength',
+        width: '100px'
+      },
+      {
+        title: '缩放比',
+        dataIndex: 'zoom',
+        width: '100px'
+      })
+    }
+
+    return columArr; 
+  }
 
   render() {
+    const {activeNodeType} = this.state
     return (
       <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
         <div className="leftContent">
@@ -232,42 +390,47 @@ class RealTime extends PureComponent{
           <span className="arrowLeft" onClick={this.toggleLeft}></span>
         </div>
         <div className="tableList">
-          <Search dataTypes={this.state.dataTypes}/>
+          <Search
+            dataTypes={this.state.dataTypes}
+            type={this.state.activeNodeType}
+            searchForm={this.searchForm}
+            saveList={this.saveList}
+            resetTags={this.resetTags}
+            addTags={this.addTags}
+            delTags={this.delTags}
+            menuClick={this.importMenu}
+          />
           <div className="tableContain">
-            <DataTable
+            <EditableTable
+              rowSelection={{
+                columnWidth: 50,
+                columnTitle: "序号",
+                selectedRowKeys: this.state.selectedRowKeys,
+                onChange: this.onSelectChange,
+                // renderCell: (idx) => {
+                //   return <div><Input type="checkbox"/></div>
+                // }
+              }}
               dataSource={this.state.dataSource}
-              columns={[
-              {
-                title: '变量名',
-                dataIndex: 'name',
-                  width: '150px',
-                ellipsis: true,
-              },
-              {
-                title: '变量描述',
-                dataIndex: 'desc',
-                width: '200px',
-                ellipsis: true,
-              },
-              {
-                title: '数据类型',
-                dataIndex: 'dataType',
-                width: '200px',
-                ellipsis: true,
-              },
-              {
-                title: '变量地址',
-                dataIndex: 'address',
-                width: '150px',
-                ellipsis: true,
-              },
-              {
-                title: '字符长度',
-                dataIndex: 'characterLength',
-                width: '150px',
-                ellipsis: true,
-              }
-            ] }
+              tableDataTypes={this.state.tableDataTypes}
+              loadMore={this.loadMore}
+              count={this.state.count}
+              rowKey={record => {
+                console.length(record)
+                return record.id
+              }}
+              columns={this.tableColums(this.state.activeNodeType).map(el => {
+                return {
+                  title: el.title,
+                  dataIndex: el.dataIndex,
+                  width: el.width || '150px',
+                  ellipsis: true,
+                  editable: true,
+                  type: el.type || "",
+                  content: el.content || "",
+                  render: el.render
+                }
+              })}
             />
           </div>
         </div>

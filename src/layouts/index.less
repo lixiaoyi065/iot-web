@@ -283,7 +283,7 @@
 
 .ant-table-thead {
   .ant-table-cell {
-    padding: 0 10px;
+    padding: 0 19px;
     line-height: 42px;
     height: 42px;
     font-family: "微软雅黑";
@@ -299,10 +299,18 @@
   border-bottom: 0;
 
   tr {
+
     .ant-table-cell {
       height: 42px;
       line-height: 42px;
-      padding: 0 10px;
+      padding: 0 19px;
+
+      .ant-input,.ant-select-selector{
+        margin: 0 -9px;
+        border-radius: 3px;
+        border: 1px solid transparent;
+        background: transparent;
+      }
     }
 
     &:nth-child(2n) {
@@ -312,7 +320,36 @@
     &:nth-child(2n-1) {
       background: #fff;
     }
+
+    &:hover{
+      .ant-input,.ant-select-selector{
+        background: #F5F8FE;
+        border: 1px solid #DEE2E9;
+        border-radius: 3px;
+
+        &:hover{
+          background: #F5F8FE;
+          border: 1px solid #4799ED;
+          border-radius: 3px;
+        }
+
+      }
+    }
+    .ant-input,.ant-select-selector{
+      height: 32px;
+
+      &:focus{
+        background: #FFFFFF;
+        border: 1px solid #4799ED;
+        border-radius: 3px;
+        box-shadow: none;
+      }
+    }
+    .ant-select-arrow{
+      right: 16px;
+    }
   }
+
 }
 
 .ant-table .ant-table-container::before,

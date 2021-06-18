@@ -23,3 +23,13 @@ export function getCookie(cname){
   }
   return "";
 }
+
+export function downFile(res, fileName) {
+  const blob = new Blob([res], { type: 'text/plain;charset=utf-8' });
+  const url = window.URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}

@@ -1,0 +1,112 @@
+
+.table-body{
+  flex: 1;
+  height: 100%;
+
+  .data-table{
+    margin-top: -44px;
+  }
+}
+.data-table{
+  width: 100%;
+
+  thead{
+    background: #4799ED;
+    tr{
+      border: 1px solid #EAEAEA;
+      border-top: 0;
+      line-height: 42px;
+      td{
+        padding: 0 19px;
+        color: #fff;
+
+        .ant-checkbox{
+          width: 20px;
+          height: 20px;
+        }
+      }
+      .order-col{
+        padding: 0;
+      }
+    }
+  }
+
+  tbody{
+    tr{
+      line-height: 42px;
+      border-bottom: 1px solid #EAEAEA;
+      cursor: pointer;
+
+      &:nth-child(2n){
+        background: #F5F7FC;
+      }
+      &:nth-child(2n-1){
+        background: #fff;
+      }
+
+      &:hover{
+        background: #E4EEFF;
+
+        .td-grird{
+          background: #F5F8FE;
+          border: 1px solid #DEE2E9;
+
+          &:hover{
+            background: #F5F8FE;
+            border: 1px solid #4799ED;
+          }
+
+          &:active{
+            background: #FFFFFF;
+            border: 1px solid #4799ED;
+          }
+        }
+      }
+      
+      td{
+        color: #666;
+
+        .td-grird{
+          padding: 0 14px;
+          height: 32px;
+          line-height: 32px;
+          background: transparent;
+          border: 1px solid transparent;
+          border-radius: 3px;
+          box-sizing: border-box;
+        }
+      }
+    }
+  }
+  td{
+    padding: 0 5px;
+    text-overflow: ellipsis;
+    word-break: keep-all;
+    word-spacing: inherit;
+  }
+
+  .order-col{
+    width: 50px;
+    text-align: center;
+  }
+}
+
+.ant-checkbox{
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border: 1px solid #B1B1B1;
+  border-radius: 3px;
+  vertical-align: middle;
+  outline: 0;
+
+  &:hover{
+    background: #FFFEFE;
+    border: 1px solid #409EFF;
+  }
+
+  &:checked{
+    background: #409EFF;
+    border: 1px solid #409EFF;
+  }
+}

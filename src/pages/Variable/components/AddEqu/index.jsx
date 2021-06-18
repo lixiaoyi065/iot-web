@@ -454,7 +454,7 @@ export default class addDevice extends PureComponent {
         </div>
         <Form.Item className="form-footer">
           <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
-          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">
+          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit" disabled={this.state.loading ? true : false}>
             {
               this.state.loading ? <LoadingOutlined /> : <></>
             }
