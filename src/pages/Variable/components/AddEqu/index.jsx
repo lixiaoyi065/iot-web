@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
+import { LoadingOutlined } from '@ant-design/icons'
 
 import { AddDevice, ModifyDevice } from 'api/variable'
 
@@ -56,7 +57,8 @@ export default class addDevice extends PureComponent {
       StrByteOrder1: "false",
       StrByteOrder: "1234"
     },//初始化表单数据
-    userPane: false
+    userPane: false,
+    loading: false
   }
   //判断是否显示某个属性
   isShowFormItem = item => {
@@ -79,8 +81,9 @@ export default class addDevice extends PureComponent {
   onChangUserIdentity = e => {
     e === "登录验证" ? this.setState({ userPane: true }) : this.setState({ userPane: false })
   }
-  onFinish = async val => {
+  onFinish = val => {
     console.log(val)
+    this.setState({ loading: true })
     const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
     //数据二次处理
     const equObj = { params: {} }
@@ -97,18 +100,22 @@ export default class addDevice extends PureComponent {
     }
     if (val.id === "00000000-0000-0000-0000-000000000000") {
       AddDevice(equObj).then(res => {
+        this.setState({ loading: false })
         console.log(res)
         if (res.code === 0) {
           message.info("新增成功")
+          this.props.onCancel();
         } else {
           message.error("新增失败。" + res.msg)
         }
       })
     } else {
       ModifyDevice(equObj).then(res => {
+        this.setState({ loading: false })
         console.log(res)
         if (res.code === 0) {
           message.info("编辑成功")
+          this.props.onCancel();
         } else {
           message.error("编辑失败。" + res.msg)
         }
@@ -160,7 +167,7 @@ export default class addDevice extends PureComponent {
         onFinish={this.onFinish}
         initialValues={initialValues}
       >
-        <div className="form-table" style={{width: "362px"}}>
+        <div className="form-table">
           <Form.Item label="设备ID" name="id" hidden={true}>
             <Input />
           </Form.Item>
@@ -445,9 +452,14 @@ export default class addDevice extends PureComponent {
               ) : null
           }
         </div>
-        <Form.Item className="form-footer" hidden={true}>
-          <Button type="default" className="login-form-button" onClick={this.props.cancel}>取消</Button>
-          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">确认</Button>
+        <Form.Item className="form-footer">
+          <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
+          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">
+            {
+              this.state.loading ? <LoadingOutlined /> : <></>
+            }
+            确认
+          </Button>
         </Form.Item>
       </Form>
     )

@@ -8,7 +8,7 @@ class ZTree extends PureComponent {
   state = {
     nodeDatas: [],
     pathname: "",
-    defaultExpandedKeys:[],
+    defaultExpandedKeys: [],
     selectCallbackFn: function (keys) { },//选中节点 回调函数
   }
 
@@ -108,9 +108,9 @@ class ZTree extends PureComponent {
     // console.log("onExpand", e)
     // localStorage.setItem(`${this.state.pathname}`, e)
   };
-  
+
   defaultExpandedKeys = () => {
-    return ["371dc6de-1264-4e39-999f-83ceacc29322","b87aa8b3-d9a0-4b83-a218-5a748726dd5e"]
+    return ["371dc6de-1264-4e39-999f-83ceacc29322", "b87aa8b3-d9a0-4b83-a218-5a748726dd5e"]
   }
   render() {
     return (
@@ -126,7 +126,7 @@ class ZTree extends PureComponent {
                       <div className={this.props.zTreeOption.className}></div>
                     </Dropdown>
                   } </div> : (
-                    <div className="optGroup">{ this.props.zTreeOption }</div>
+                    <div className="optGroup">{this.props.zTreeOption}</div>
                   )
                 }
               </div>
