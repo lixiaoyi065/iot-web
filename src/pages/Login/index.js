@@ -44,7 +44,6 @@ class Login extends Component {
   onFinish = (e) => {
     this.setState({loading: true})
     axios.get(`/Login/Login?argUserAccount=${e.user}&argUserPassword=${e.password}`).then(res => {
-      console.log(e,res)
       this.setState({loading: false})
       if (res.code === 0) {
           // 设置cookie之后跳转回来时的页面

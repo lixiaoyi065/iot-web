@@ -4,6 +4,8 @@ import { Tree, Dropdown } from 'antd';
 
 import './index.less'
 
+import { stringToArray } from 'utils'
+
 class ZTree extends PureComponent {
   state = {
     nodeDatas: [],
@@ -14,7 +16,7 @@ class ZTree extends PureComponent {
 
   componentDidMount() {
     this.setState({
-      // defaultExpandedKeys: stringToArray(localStorage.getItem(`${this.props.location.pathname }`)),
+      defaultExpandedKeys: stringToArray(localStorage.getItem(`${this.props.location.pathname}`)),
       pathname: this.props.location.pathname,
       ...this.props,
     })
@@ -106,12 +108,9 @@ class ZTree extends PureComponent {
 
   onExpand = (e) => {
     // console.log("onExpand", e)
-    // localStorage.setItem(`${this.state.pathname}`, e)
+    localStorage.setItem(`${this.state.pathname}`, e)
   };
 
-  defaultExpandedKeys = () => {
-    return ["371dc6de-1264-4e39-999f-83ceacc29322", "b87aa8b3-d9a0-4b83-a218-5a748726dd5e"]
-  }
   render() {
     return (
       <>
@@ -133,21 +132,25 @@ class ZTree extends PureComponent {
             </div>
           ) : null
         }
+        {
+          this.treeData().length > 0 ? (
+            <Tree
+              ref="tree"
+              blockNode
+              draggable
+              className={this.props.move ? "moveNode" : ""}
+              // autoExpandParent={ true }
+              showIcon={false}
+              onSelect={this.onSelect}
+              onExpand={this.onExpand}
+              onCheck={this.props.onCheck}
+              treeData={this.treeData()}
+              defaultExpandedKeys={this.state.defaultExpandedKeys}
+              {...this.props}
+            />
+          ) : <></>
+        }
 
-        <Tree
-          ref="tree"
-          blockNode
-          draggable
-          className={this.props.move ? "moveNode" : ""}
-          // autoExpandParent={ true }
-          showIcon={false}
-          onSelect={this.onSelect}
-          onExpand={this.onExpand}
-          onCheck={this.props.onCheck}
-          treeData={this.treeData()}
-          defaultExpandedKeys={this.state.defaultExpandedKeys}
-          {...this.props}
-        />
       </>
     )
   }

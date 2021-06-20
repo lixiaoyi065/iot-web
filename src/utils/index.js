@@ -3,8 +3,7 @@ export function depClone() {
   
 }
 export function stringToArray(arr) {
-  console.log("=======")
-  return arr.split(','); 
+  return arr && arr.length > 0 ? arr.split(',') : null
 }
 
 export function setCookie (key, value, day) {
@@ -24,6 +23,7 @@ export function getCookie(cname){
   return "";
 }
 
+//下载文件
 export function downFile(res, fileName) {
   const blob = new Blob([res], { type: 'text/plain;charset=utf-8' });
   const url = window.URL.createObjectURL(blob);
@@ -32,4 +32,21 @@ export function downFile(res, fileName) {
   a.download = fileName;
   a.click();
   window.URL.revokeObjectURL(url);
+}
+
+/**
+ * 判断是否为有效编辑
+ * gist: 依据
+ * key：判断对象的key
+ * dataIndex: 判断字段
+ * val: 判断的字段值
+ * return bool
+ */
+export function isEffectiveEditor(gist, key, dataIndex, val){
+  return gist.some(item => {
+    if(item.key === key){
+      console.log(item[dataIndex] === val)
+      return item[dataIndex] === val
+    }
+  })
 }

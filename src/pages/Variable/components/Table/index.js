@@ -1,12 +1,9 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
-import { Table, Input, Form, Select } from 'antd';
-import "./index.less"
+import React, { useContext, useState, useEffect, useRef } from "react";
 
-import { isEffectiveEditor } from 'utils'
+import { Table, Input, Button, Popconfirm, Form, Select, AutoComplete } from "antd";
 
 const EditableContext = React.createContext(null);
 const { Option } = Select;
-
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -19,22 +16,21 @@ const EditableRow = ({ index, ...props }) => {
 };
 
 const EditableCell = ({
-  gist,
   title,
+  type,
+  selectList,
   editable,
   children,
   dataIndex,
   record,
   handleSave,
-  type,
-  content,
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
   useEffect(() => {
-    if (editing && type !== "select") {
+    if (editing) {
       inputRef.current.focus();
     }
   }, [editing]);
@@ -46,51 +42,50 @@ const EditableCell = ({
     });
   };
 
-  const check = async () => {
+  const save = async () => {
     try {
       const values = await form.validateFields();
       toggleEdit();
-      console.log(isEffectiveEditor(gist, record.key, dataIndex, values[dataIndex]))
-      handleSave(dataIndex, values[dataIndex], { ...record, ...values });
+      handleSave({ ...record, ...values });
     } catch (errInfo) {
-      console.log('Save failed:', errInfo);
+      console.log("Save failed:", errInfo);
     }
   };
 
   let childNode = children;
 
-  if (editable && record.editable) {
+  if (editable) {
     childNode = editing ? (
-      childNode = type === "select" ? (
-        <Form.Item
-          name={dataIndex} defaultValue={content[0]}
-        >
-          <Select onChange={check}>
-            {
-              content.map((el, idx) => {
-                return <Option value={el} key={el + idx}>{el}</Option>
-              })
-            }
-          </Select>
-        </Form.Item>
-      ) : (
-        <Form.Item name={dataIndex}>
-          <Input ref={inputRef} onBlur={check} autoComplete='off' />
-        </Form.Item>
-      )
-    ) : <div
-      className="editable-cell-value-wrap"
-      onClick={toggleEdit}
-    >
-      {children}
-    </div>
-  } else {
-    <div
-      className="editable-cell-value-wrap"
-      onClick={toggleEdit}
-    >
-      {children}
-    </div>
+      childNode =
+        type === "select" ? (
+          <Form.Item name={dataIndex}>
+            <Input ref={inputRef} onBlur={save} autoComplete="off" />
+            {/* <Select onChange={save}>
+              {selectList.map((el, idx) => {
+                return (
+                  <Option value={el} key={el + idx}>
+                    {el}
+                  </Option>
+                );
+              })}
+            </Select> */}
+          </Form.Item>
+        ) : (
+          <Form.Item name={dataIndex}>
+            <Input ref={inputRef} onBlur={save} autoComplete="off" />
+          </Form.Item>
+        )
+    ) : (
+      <div
+        className="editable-cell-value-wrap"
+        style={{
+          paddingRight: 24
+        }}
+        onClick={toggleEdit}
+      >
+        {children}
+      </div>
+    );
   }
 
   return <td {...restProps}>{childNode}</td>;
@@ -106,67 +101,68 @@ class EditableTable extends React.Component {
     };
   }
 
-  componentDidMount() {
+  componentDidMount(){
+    // this.setState({dataSource: this.props.dataSource})
     setTimeout(() => {
       this.setState({ height: this.ref.current.getBoundingClientRect().height - 50 })
     })
   }
+
   static getDerivedStateFromProps(props, state) {
+    console.log("-----",props.dataSource)
     state.dataSource = props.dataSource
     return null
   }
 
-  handleSave = (dataIndex, val, row) => {
-    this.setState((state) => {
-      for (let i = 0; i < state.dataSource.length; i++) {
-        if (state.dataSource[i].key === row.key) {
-          state.dataSource[i][dataIndex] = val
-          return {
-            dataSource: state.dataSource,
-          }
-        }
-      }
-    })
+  handleSave = (row) => {
+    const newData = [...this.state.dataSource];
+    const index = newData.findIndex((item) => row.key === item.key);
+    const item = newData[index];
+    newData.splice(index, 1, { ...item, ...row });
+    this.setState({
+      dataSource: newData
+    });
   };
 
   render() {
     const { dataSource } = this.state;
-    console.log(this.state.dataSource)
+    console.log("============",dataSource)
     const components = {
       body: {
         row: EditableRow,
-        cell: EditableCell,
-      },
+        cell: EditableCell
+      }
     };
     const columns = this.props.columns.map((col) => {
       if (!col.editable) {
         return col;
       }
+
       return {
         ...col,
         onCell: (record) => ({
-          gist: this.props.gist,
           record,
+          type: col.type || null,
+          selectList: col.selectList || [],
           editable: col.editable,
           dataIndex: col.dataIndex,
           title: col.title,
-          type: col.type,
-          content: col.content,
           handleSave: this.handleSave
-        }),
+        })
       };
     });
     return (
-      <>
-        <div className="table-contain" ref={this.ref}>
+      <div className="table-contain" ref={this.ref}>
+        {
+          dataSource.length > 0 ? 
           <Table
             components={components}
-            rowClassName={() => 'editable-row'}
+            rowClassName={() => "editable-row"}
             dataSource={dataSource}
             columns={columns}
             pagination={false} scroll={{ y: this.state.height }}
-          />
-        </div>
+          /> : <></>
+        }
         <div className="paging">
           {
             dataSource.length > 0 ? (
@@ -186,7 +182,7 @@ class EditableTable extends React.Component {
             ) : <></>
           }
         </div>
-      </>
+      </div>
     );
   }
 }

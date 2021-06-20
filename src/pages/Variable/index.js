@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
-import { Modal, message, Select, Input } from "antd"
+import { Modal, message } from "antd"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-import EditableTable from 'components/common/EditDataTable/index.jsx'
 import ZTree from 'components/common/Ztree'
 
+import EditableTable from 'components/common/EditDataTable/index.jsx'
 import AddEqu from './components/AddEqu'
 import AddGroup from './components/AddGroup'
 import Search from './components/Search'
@@ -16,7 +16,6 @@ import {
   InitTags, QueryTags, ExportTags
 } from 'api/variable'
 
-const { Option } = Select
 class RealTime extends PureComponent{
   state = {
     treeData: [],//设备树数据
@@ -242,14 +241,14 @@ class RealTime extends PureComponent{
   
   //导入导出菜单
   importMenu = (e) => {
+    let tags = {
+      id: this.state.activeNode,
+      type: this.state.activeNodeType
+    }
     if (e.key === "currentTableExport") { //导出当前点表
       if (this.state.activeNode === "") {
         message.error("请选择要导出的节点")
       } else {
-        let tags = {
-          id: this.state.activeNode,
-          type: this.state.activeNodeType
-        }
         ExportTags(tags).then(res => {
           downFile(res, "变量列表.xls");
         })
@@ -265,10 +264,6 @@ class RealTime extends PureComponent{
       if (this.state.activeNode === "") {
         message.error("请选择要导出的节点")
       } else {
-        let tags = {
-          id: this.state.activeNode,
-          type: this.state.activeNodeType
-        }
         
       }
     } else if (e.key === "currentTableExport") { //整体导入
@@ -330,12 +325,12 @@ class RealTime extends PureComponent{
       //内部变量或者内部变量组
       columArr.push({
         title: '最大值',
-        dataIndex: 'zoom',
+        dataIndex: 'max',
         width: '100px'
       },
       {
         title: '最小值',
-        dataIndex: 'zoom',
+        dataIndex: 'min',
         width: '100px'
       })
     } else if (activeNodeType === 3 || activeNodeType === 4) {
@@ -360,13 +355,13 @@ class RealTime extends PureComponent{
   }
 
   render() {
-    const {activeNodeType} = this.state
+    const {activeNodeType, collasped, treeData, dataSource} = this.state
     return (
-      <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
+      <div className={`antProPageContainer ${ collasped ? 'foldToLeft' : "" }`}>
         <div className="leftContent">
           <div className="fullContain">
             {
-              this.state.treeData ?
+              treeData ?
                 <ZTree
                   title="设备列表"
                   zTreeOption={{
@@ -375,12 +370,11 @@ class RealTime extends PureComponent{
                   }}
                   move={true}
                   option={ true }
-                  nodeDatas={this.state.treeData}
+                  nodeDatas={ treeData}
                   zTreeOptionDropdown={true}
                   zTreeOptionMenu={this.zTreeOptionMenu}
                   optionDeviceMenu={this.optionDeviceMenu}
-                  defaultExpandAll={true}
-                  defaultExpandedKeys={ ["371dc6de-1264-4e39-999f-83ceacc29322"] }
+                  // defaultExpandAll={true}
                   optionGroupMenu={this.optionGroupMenu}
                   onSelect={this.onSelect}
                 />
@@ -392,7 +386,7 @@ class RealTime extends PureComponent{
         <div className="tableList">
           <Search
             dataTypes={this.state.dataTypes}
-            type={this.state.activeNodeType}
+            type={activeNodeType}
             searchForm={this.searchForm}
             saveList={this.saveList}
             resetTags={this.resetTags}
@@ -411,7 +405,8 @@ class RealTime extends PureComponent{
                 //   return <div><Input type="checkbox"/></div>
                 // }
               }}
-              dataSource={this.state.dataSource}
+              gist={dataSource}
+              dataSource={dataSource}
               tableDataTypes={this.state.tableDataTypes}
               loadMore={this.loadMore}
               count={this.state.count}
@@ -419,7 +414,7 @@ class RealTime extends PureComponent{
                 console.length(record)
                 return record.id
               }}
-              columns={this.tableColums(this.state.activeNodeType).map(el => {
+              columns={this.tableColums(activeNodeType).map(el => {
                 return {
                   title: el.title,
                   dataIndex: el.dataIndex,

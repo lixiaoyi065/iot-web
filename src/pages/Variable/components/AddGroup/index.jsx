@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Select, Button, message } from 'antd'
-import { LoadingOutlined } from '@ant-design/icons'
+// import { LoadingOutlined } from '@ant-design/icons'
 
 import { GetTreeStructure, AddGroup, ModifyGroup } from 'api/variable/index'
 
