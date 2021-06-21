@@ -50,6 +50,7 @@ class Search extends PureComponent {
         >
           <Form.Item
             label="数据类型"
+            colon={false}
             name="dataType"
             width="70px"
           >

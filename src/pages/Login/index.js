@@ -42,19 +42,23 @@ class Login extends Component {
   </div>)
 
   onFinish = (e) => {
-    this.setState({loading: true})
-    axios.get(`/Login/Login?argUserAccount=${e.user}&argUserPassword=${e.password}`).then(res => {
-      this.setState({loading: false})
-      if (res.code === 0) {
-          // 设置cookie之后跳转回来时的页面
-          setCookie('login', true, 0.1)
-          setCookie('accessToken', res.data, 0.1)
-          setCookie('userName', e.user, 0.1)
-          this.jumpBack()
-      } else {
-        message.error(res.msg)
-      }
-    })
+    try {
+      this.setState({loading: true})
+      axios.get(`/Login/Login?argUserAccount=${e.user}&argUserPassword=${e.password}`).then(res => {
+        this.setState({loading: false})
+        if (res.code === 0) {
+            // 设置cookie之后跳转回来时的页面
+            setCookie('login', true, 0.1)
+            setCookie('accessToken', res.data, 0.1)
+            setCookie('userName', e.user, 0.1)
+            this.jumpBack()
+        } else {
+          message.error(res.msg)
+        }
+      })
+    } catch(err) {
+      message.error(err)
+    }
   }
 
   render() {

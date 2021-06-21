@@ -11,6 +11,7 @@ import Variable from 'pages/Variable'
 import RealTime from 'pages/RealTime'
 import Operations from 'pages/Operations'
 import Authorization from 'pages/Authorization'
+import User from 'pages/User'
 
 import './index.less'
 
@@ -39,7 +40,7 @@ class BasicLayout extends PureComponent {
               <Route path="/index/realTime" component={RealTime}/>
               <Route path="/index/operations" component={Operations}/>
               <Route path="/index/authorization" component={Authorization}/>
-              {/* <Route path="/realtime" component={RealTime}/> */}
+              <Route path="/index/user" component={User}/>
               <Redirect to="/index/variable"/>
             </Switch>
           </Content>

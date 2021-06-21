@@ -45,7 +45,6 @@ export function downFile(res, fileName) {
 export function isEffectiveEditor(gist, key, dataIndex, val){
   return gist.some(item => {
     if(item.key === key){
-      console.log(item[dataIndex] === val)
       return item[dataIndex] === val
     }
   })

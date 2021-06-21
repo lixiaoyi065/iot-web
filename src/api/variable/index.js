@@ -1,14 +1,14 @@
-import service from 'utils/request'
+import axios from 'utils/request'
 
 //获取整棵设备列表树结构
 export function GetTreeStructure() {
-  return service({
+  return axios({
     url: '/VariableManage/GetTreeStructure',
     method: 'get'
   })
 }
 export function GetTreeStructure2() {
-  return service({
+  return axios({
     baseURL:"https://www.fastmock.site/mock/252af95046512548bd771bcf6a08b05b/src_iot",
     url: '/equList',
     method: 'get'
@@ -16,7 +16,7 @@ export function GetTreeStructure2() {
 }
 //获取设备
 export function GetDevice(deviceId){
-  return service({
+  return axios({
     url: '/VariableManage/GetDevice',
     params: {
       deviceId
@@ -26,7 +26,7 @@ export function GetDevice(deviceId){
 }
 //添加设备
 export function AddDevice(data) {
-  return service({
+  return axios({
     url: '/VariableManage/AddDevice',
     data, 
     method: 'post',
@@ -34,7 +34,7 @@ export function AddDevice(data) {
 }
 //修改设备信息
 export function ModifyDevice(data) {
-  return service({
+  return axios({
     url: '/VariableManage/ModifyDevice',
     data,
     method: 'put'
@@ -42,7 +42,7 @@ export function ModifyDevice(data) {
 }
 //删除设备
 export function DeleteDevice(id) {
-  return service({
+  return axios({
     url: "/VariableManage/DeleteDevice",
     data: {
       id
@@ -52,7 +52,7 @@ export function DeleteDevice(id) {
 }
 //添加分组
 export function AddGroup(data) {
-  return service({
+  return axios({
     url: '/VariableManage/AddGroup',
     data,
     method: 'post'
@@ -60,7 +60,7 @@ export function AddGroup(data) {
 }
 //修改分组
 export function ModifyGroup(data) {
-  return service({
+  return axios({
     url: '/VariableManage/ModifyGroup',
     data,
     method: 'put'
@@ -68,7 +68,7 @@ export function ModifyGroup(data) {
 }
 //删除分组
 export function DelGroup(id) {
-  return service({
+  return axios({
     url: '/VariableManage/DeleteGroup',
     data: {
       id
@@ -78,7 +78,7 @@ export function DelGroup(id) {
 }
 //查询变量
 export function QueryTags(data) {
-  return service({
+  return axios({
     url: "/VariableManage/QueryTags",
     params: data,
     method: 'get'
@@ -86,7 +86,7 @@ export function QueryTags(data) {
 }
 //导出
 export function ExportTags(data){
-  return service({
+  return axios({
     url: '/VariableManage/ExportTags',
     params: data,
     method: 'get'
@@ -94,7 +94,7 @@ export function ExportTags(data){
 }
 //初次加载变量
 export function InitTags(data) {
-  return service({
+  return axios({
     url: "/VariableManage/InitTags",
     params: data,
     method: 'get'
@@ -103,7 +103,7 @@ export function InitTags(data) {
 //校验变量名是否格式正确、重复
 //params: object
 export function VerifyTagName(params) {
-  return service({
+  return axios({
     url: "/VariableManage/VerifyTagName",
     params,
     method: 'get'
@@ -112,7 +112,7 @@ export function VerifyTagName(params) {
 //校验IO变量地址是否合法
 //params: object
 export function VerifyAddress(params) {
-  return service({
+  return axios({
     url: "/VariableManage/VerifyAddress",
     params,
     method: 'get'
@@ -121,7 +121,7 @@ export function VerifyAddress(params) {
 //获取地址编辑信息
 //params: object
 export function GetAddressEditInfo(params) {
-  return service({
+  return axios({
     url: "/VariableManage/GetAddressEditInfo",
     params,
     method: 'get'
@@ -130,7 +130,7 @@ export function GetAddressEditInfo(params) {
 //保存变量
 //data: object
 export function SaveTags(data) {
-  return service({
+  return axios({
     url: "/VariableManage/SaveTags",
     data,
     method: 'post'
@@ -139,7 +139,7 @@ export function SaveTags(data) {
 //获取保存变量任务状态
 //id: string
 export function GetSaveTagsTaskProgress(id) {
-  return service({
+  return axios({
     url: "/VariableManage/GetSaveTagsTaskProgress",
     params: {
       id
@@ -150,7 +150,7 @@ export function GetSaveTagsTaskProgress(id) {
 //删除分组
 //ids: Array
 export function DeleteTags(ids) {
-  return service({
+  return axios({
     url: '/VariableManage/DeleteTags',
     data: {
       ids

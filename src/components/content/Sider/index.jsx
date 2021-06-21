@@ -15,7 +15,8 @@ import OperationsImg from 'assets/img/index/operations.png'
 import OperationsActiveImg from 'assets/img/index/operations_active.png'
 import AuthorizationImg from 'assets/img/index/authorization.png'
 import AuthorizationActiveImg from 'assets/img/index/authorization_active.png'
-// import UserImg from 'assets/img/index/user.png'
+import UserImg from 'assets/img/index/account.png'
+import UserActiveImg from 'assets/img/index/account_active.png'
 
 const { Sider } = Layout;
 
@@ -53,10 +54,11 @@ class PageSider extends PureComponent {
             <img className="normalImg" src={AuthorizationImg} alt="" />
             <span>授权管理</span>
           </MyNavLink>
-          {/* <MyNavLink to="/user">
-            <img src={this.state.activeRoute === "/user" ? AuthorizationActiveImg : AuthorizationImg} alt="" />
+          <MyNavLink to="/index/user">
+            <img className="activeImg" src={UserActiveImg} alt="" />
+            <img className="normalImg" src={UserImg} alt="" />
             <span>用户管理</span>
-          </MyNavLink> */}
+          </MyNavLink>
         </div>
       </Sider>
     )

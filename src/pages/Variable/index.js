@@ -35,12 +35,17 @@ class RealTime extends PureComponent{
   }
 
   componentDidMount() {
-    //获取整棵设备列表树结构
+    this.getTreeStructure();
+  }
+
+  //获取整棵设备列表树结构
+  getTreeStructure = () => {
     GetTreeStructure().then(res => {
       console.log(res.data)
       this.setState({treeData: res.data})
     })
   }
+
   //收缩设备列表
   toggleLeft = ()=>{
     const collapsed = !this.state.collasped

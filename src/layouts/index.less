@@ -397,3 +397,134 @@
     text-align: left;
   }
 }
+
+.ant-opt-btn{
+  padding: 0;
+  width: 76px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background: #ECF5FF;
+  border: 1px solid #B3D8FF;
+  border-radius: 4px;
+  font-weight: 500;
+  color: #4799ED;
+  background: none;
+  cursor: pointer;
+
+  &:hover{
+    color: #fff;
+    background: #4799ED;
+  }
+
+  &:active{
+    color: #fff;
+    background: #408BD7;
+  }
+
+  &.ant-opt-btn-normal{
+    border: 1px solid #F5AB3A;
+    color: #F5AB3A;
+  
+    &:hover{
+      color: #fff;
+      background: #F5AB3A;
+      border: 1px solid #F5AB3A;
+    }
+    &:active{
+      color: #fff;
+      background: #E29D33;
+    }
+  }
+}
+
+.table-column{
+  text-align: center;
+  cursor: pointer;
+
+  .serialNum{
+    padding: 0 10px;
+  }
+
+  .col-check{
+    width: 20px;
+    height: 20px;
+    background: #FFFFFF;
+    border: 1px solid #B1B1B1;
+    border-radius: 3px;
+  }
+}
+
+.card-form{
+  margin-bottom: 8vh;
+
+  .card-title{
+    width: 50vw;
+    padding: 0 10px;
+    height: 36px;
+    line-height: 36px;
+    font-weight: 500;
+    color: #252525;
+    font-size: 16px;
+    border-bottom: 1px solid #DCDFE6;
+  
+    .card-title-icon{
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  
+    span{
+      vertical-align: middle;
+    }
+  }
+
+  .form{
+    width: 22vw;
+    padding: 40px 0 0 73px;
+
+    .ant-input-text{
+      &:disabled{
+        border: 0;
+        background: none;
+        cursor: default;
+      }
+    }
+
+    .saved{
+      background: #DCECFD;
+      color: #76B8FC;
+      border-color: #DCECFD;
+    }
+
+    .form-item{
+      line-height: 50px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 500;
+
+      .form-item-label{
+        display: inline-block;
+        width: 69px;
+        color: #6F7374;
+      }
+      .form-item-val{
+        display: inline-block;
+        width: 520px;
+        color: #333333;
+      }
+
+      .ant-btn-opt-normal{
+        margin-left: 20px;
+        color: #4799ED;
+        border-radius: 4px;
+      }
+
+      .tip{
+        line-height: 20px;
+        color: #F5AB3A
+      } 
+    }
+  }
+}
