@@ -16,7 +16,7 @@ class UserList extends PureComponent {
     count: 0,
     isShow: false,
     modalContent: "",
-    delObj: []
+    selectedRowKeys: []
   }
 
   componentDidMount() {
@@ -28,7 +28,7 @@ class UserList extends PureComponent {
       if (res.code === 0) {
         let dataList = [];
         res.data.forEach(el => {
-          el.checked = false;
+          el.key = el.userID;
           dataList.push(el)
         })
 
@@ -90,8 +90,8 @@ class UserList extends PureComponent {
   }
   //删除用户
   delUser = () => {
-    if (this.state.delObj.length > 0) {
-      DeleteUser(this.state.delObj).then(res => {
+    if (this.state.selectedRowKeys.length > 0) {
+      DeleteUser(this.state.selectedRowKeys).then(res => {
         if (res.code === 0) {
           message.info("删除成功")
           this.GetUserList("");
@@ -124,55 +124,32 @@ class UserList extends PureComponent {
     this.setState({isShow: false})
   }
 
-  colChecked = (key) => {
-    if (this.state.delObj.indexOf(key) < 0) {
-      this.setState({
-        delObj: [...this.state.delObj, key]
-      }, () => {
-        console.log(key, this.state.delObj)
-      })
-    } else {
-      this.setState((state) => {
-        let index = state.delObj.indexOf(key);
-        state.delObj.splice(index, 1);
-        return {delObj: state.delObj}
-      }, () => {
-        console.log(key, this.state.delObj)
-      })
-    }
-  }
   onSelectChange = selectedRowKeys => {
-    console.log('selectedRowKeys changed: ', selectedRowKeys);
     this.setState({ selectedRowKeys });
   };
   
   render() {
+
     return (
       <div className="tableList" style={{'paddingLeft': '25px'}}>
         <Search searchForm={this.search} addUser={this.addUser} delUser={ this.delUser }/>
         <div className="tableContain">
           <DataTable
             dataSource={this.state.dataSource}
+            rowSelection={{
+              columnWidth: "50px",
+              selectedRowKeys: this.state.selectedRowKeys,
+              onChange: this.onSelectChange,
+            }}
             loadMore={this.loadMore}
             count={this.state.count}
             columns={[
             {
               title: '序号',
-              dataIndex: 'userID',
-              width: "80px",
+              dataIndex: 'key',
+              width: "70px",
               render: (key, i) => {
-                let isShow = this.state.delObj.indexOf(key) < 0
-                // console.log("-----" + isShow,key)
-                return (
-                  <>
-                    <div className="table-column" onClick={() => { this.colChecked(key) }}>
-                      {
-                        this.state.delObj.indexOf(key) < 0 ?  <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span> :
-                          <div className="col-check"></div>
-                      }
-                    </div>
-                  </>
-                )
+                return <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span>
               }
             },
             {

@@ -406,9 +406,6 @@ class RealTime extends PureComponent{
                 columnTitle: "序号",
                 selectedRowKeys: this.state.selectedRowKeys,
                 onChange: this.onSelectChange,
-                // renderCell: (idx) => {
-                //   return <div><Input type="checkbox"/></div>
-                // }
               }}
               gist={dataSource}
               dataSource={dataSource}
