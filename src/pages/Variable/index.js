@@ -1,26 +1,29 @@
 import React, { PureComponent } from 'react'
-import { Modal, message } from "antd"
+import { Modal, message,Input } from "antd"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
-
 import EditableTable from 'components/common/EditDataTable/index.jsx'
+
 import AddEqu from './components/AddEqu'
-import AddGroup from './components/AddGroup'
+import AddGroupPane from './components/AddGroup'
 import Search from './components/Search'
 
 import { downFile } from "utils";
 
 import {
+  AddDevice, ModifyDevice, AddGroup, ModifyGroup,
   GetTreeStructure, GetDevice, DeleteDevice, DelGroup, 
-  InitTags, QueryTags, ExportTags
+  InitTags, QueryTags, ExportTags, DeleteTags
 } from 'api/variable'
 
 class RealTime extends PureComponent{
   state = {
     treeData: [],//设备树数据
     dataSource: [], //表格的变量列表数据
+    gist: [],//表格的变量列表数据参考对象
     dataTypes: [], //查询的数据类型
+    activeNodeType: null, //当前变量列表的类型
     count: 0,
     collasped: false,
     selectedRowKeys: [],
@@ -62,6 +65,9 @@ class RealTime extends PureComponent{
         {
           key: "addGroup",
           name: "添加分组",
+      }, {
+          key: "allExport",
+          name: "整体导出"
         }
       ]}
       onClick={(e) => {
@@ -89,6 +95,10 @@ class RealTime extends PureComponent{
         {
           key: "delDevice",
           name: "删除设备",
+        },
+        {
+          key: "overallExport",
+          name: '整体导出',
         }
       ]}
       onClick={(e) => {
@@ -131,19 +141,88 @@ class RealTime extends PureComponent{
       onOk: callback
     });
   }
+
+  //添加设备提交函数
+  onAddDeviceFinish = val => {
+    this.setState({ loading: true })
+    const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
+    //数据二次处理
+    const equObj = { params: {} }
+    for (let key in val) {
+      if (list.indexOf(key) < 0) {
+        if (key === "StrByteOrder1") {
+          equObj.params.StrByteOrder = val[key] ? "True" : "False"
+        } else {
+          equObj.params[key] = val[key]
+        }
+      } else {
+        equObj[key] = val[key]
+      }
+    }
+    if (val.id === "00000000-0000-0000-0000-000000000000") {
+      AddDevice(equObj).then(res => {
+        this.setState({ loading: false })
+        if (res.code === 0) {
+          message.info("新增成功");
+          this.getTreeStructure();
+          this.handleCancel();
+        } else {
+          message.error("新增失败。" + res.msg)
+        }
+      })
+    } else {
+      ModifyDevice(equObj).then(res => {
+        this.setState({ loading: false })
+        if (res.code === 0) {
+          this.handleCancel();
+          message.info("编辑成功")
+          this.getTreeStructure();
+        } else {
+          message.error("编辑失败。" + res.msg)
+        }
+      })
+    }
+  }
+
+  //添加分组提交函数
+  onAddGroupFinish = (val) => {
+    console.log(val)
+    if (val.groupId === "00000000-0000-0000-0000-000000000000") {
+      AddGroup(val).then(res => {
+        if (res.code === 0) {
+          this.getTreeStructure();
+          message.info("新增成功")
+          this.handleCancel();
+        } else {
+          message.error("新增失败。" + res.msg)
+        }
+      })
+    } else {
+      ModifyGroup(val).then(res => {
+        if (res.code === 0) {
+          this.getTreeStructure();
+          message.info("编辑成功")
+          this.handleCancel();
+        } else {
+          message.error("编辑失败。" + res.msg)
+        }
+      })
+    }
+  }
+
   menuClick = (e, id, length)=>{
     if (e.key === "addDevice") {
       this.setState({
         visible: true, 
         title: "新增设备", 
-        modalContent: <AddEqu key="addDevice" onCancel={this.handleCancel}/>
+        modalContent: <AddEqu key="addDevice" onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
       })
     } else if(e.key === "modifyDevice"){
       GetDevice(id).then(res=>{
         this.setState({
           visible: true, 
           title: "编辑设备", 
-          modalContent: <AddEqu key="modifyDevice" node={ res.data } onCancel={this.handleCancel}/>
+          modalContent: <AddEqu key="modifyDevice" node={ res.data } onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
         })
       })
     } else if(e.key === "delDevice"){
@@ -166,17 +245,31 @@ class RealTime extends PureComponent{
           }
         })
       }
-    }else if(e.key === "addGroup"){
+    } else if (e.key === "allExport") {
+      ExportTags({
+        id: "00000000-0000-0000-0000-000000000000",
+        type: -1
+      }).then(res => {
+        downFile(res, "变量列表.xls");
+      })
+    } else if (e.key === "overallExport") {
+      ExportTags({
+        id: id,
+        type: 3
+      }).then(res => {
+        downFile(res, "设备列表.xls");
+      })
+    }else if (e.key === "addGroup") {
       this.setState({
         visible: true, 
         title: "新增分组", 
-        modalContent: <AddGroup key="addGroup" onCancel={this.handleCancel}/>
+        modalContent: <AddGroupPane key="addGroup" onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
       })
     }else if(e.key === "modifyGroup"){
       this.setState({
         visible: true, 
         title: "编辑分组", 
-        modalContent: <AddGroup key="modifyGroup" node={ id } onCancel={this.handleCancel}/>
+        modalContent: <AddGroupPane key="modifyGroup" node={ id } onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
       })
     } else if (e.key === "delGroup") {
       this.confirm('节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?',()=>{
@@ -191,21 +284,23 @@ class RealTime extends PureComponent{
     }
   }
   //点击节点触发函数
-  onSelect = (res, info)=>{
+  onSelect = (res, info) => {
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
     }
+    this.setState({ activeNodeType: info.node.nodeType })
+
     InitTags(tags).then(res => {
       let dataList = [];
       if (res.code === 0) {
-        console.log(res.data.tags)
         res.data.tags.forEach(element => {
           element.key = element.id
           dataList.push(element)
         });
         this.setState({
           dataSource: dataList,
+          gist: dataList,
           count: res.data.total,
           dataTypes: res.data.dataTypes,
           activeNode: info.node.key,
@@ -235,7 +330,6 @@ class RealTime extends PureComponent{
   }
   //数据表格选中的项
   onSelectChange = (selectedRowKeys) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`);
     this.setState({ selectedRowKeys });
     // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
   }
@@ -258,21 +352,12 @@ class RealTime extends PureComponent{
           downFile(res, "变量列表.xls");
         })
       }
-    } else if (e.key === "overallExport") { //整体导出
-      ExportTags({
-        id: "00000000-0000-0000-0000-000000000000",
-        type: "-1"
-      }).then(res => {
-        downFile(res, "变量列表.xls");
-      })
     } else if (e.key === "currentTableImport") { //导入当前点表
       if (this.state.activeNode === "") {
         message.error("请选择要导出的节点")
       } else {
         
       }
-    } else if (e.key === "currentTableExport") { //整体导入
-      
     }
   }
   //保存变量列表
@@ -305,25 +390,40 @@ class RealTime extends PureComponent{
   }
   //删除变量
   delTags = () => {
-    
+    DeleteTags(this.state.selectedRowKeys).then(res => {
+      if (res.cede === 0) {
+        message.info("删除成功")
+      } else {
+        message.error(res.msg)
+      }
+    })
   }
-  //
-  inputChange = (el) => {
-    console.log(el)
-  }
+
+  //表格项变化
   tableColums = (activeNodeType) => {
     let columArr = [
       {
+        title: '序号',
+        dataIndex: 'key',
+        width: "50px",
+        editable: false,
+        render: (key , i) => {
+          return <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span>
+        }
+      },{
         title: '变量名',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        editable: true,
       }, {
         title: '变量描述',
-        dataIndex: 'desc'
+        dataIndex: 'desc',
+        editable: true,
       }, {
         title: '数据类型',
         dataIndex: 'dataType',
         type: "select",
-        content: this.state.tableDataTypes
+        content: this.state.tableDataTypes,
+        editable: true,
       }
     ]
     if (activeNodeType === 0 || activeNodeType === 2) {
@@ -331,28 +431,33 @@ class RealTime extends PureComponent{
       columArr.push({
         title: '最大值',
         dataIndex: 'max',
-        width: '100px'
+        width: '100px',
+        editable: true,
       },
       {
         title: '最小值',
         dataIndex: 'min',
-        width: '100px'
+        width: '100px',
+        editable: true,
       })
     } else if (activeNodeType === 3 || activeNodeType === 4) {
       //设备或者设备变量组
       columArr.push({
         title: '变量地址',
-        dataIndex: 'address'
+        dataIndex: 'address',
+        editable: true,
       },
       {
         title: '字符串长度',
         dataIndex: 'stringLength',
-        width: '100px'
+        width: '100px',
+        editable: true,
       },
       {
         title: '缩放比',
         dataIndex: 'zoom',
-        width: '100px'
+        width: '100px',
+        editable: true,
       })
     }
 
@@ -360,7 +465,7 @@ class RealTime extends PureComponent{
   }
 
   render() {
-    const {activeNodeType, collasped, treeData, dataSource} = this.state
+    const {activeNodeType, collasped, treeData, dataSource, gist} = this.state
     return (
       <div className={`antProPageContainer ${ collasped ? 'foldToLeft' : "" }`}>
         <div className="leftContent">
@@ -402,18 +507,17 @@ class RealTime extends PureComponent{
           <div className="tableContain">
             <EditableTable
               rowSelection={{
-                columnWidth: 50,
-                columnTitle: "序号",
+                columnWidth: "50px",
                 selectedRowKeys: this.state.selectedRowKeys,
                 onChange: this.onSelectChange,
               }}
-              gist={dataSource}
+              gist={gist}
               dataSource={dataSource}
+              activeNodeType={this.state.activeNodeType}
               tableDataTypes={this.state.tableDataTypes}
               loadMore={this.loadMore}
               count={this.state.count}
               rowKey={record => {
-                console.length(record)
                 return record.id
               }}
               columns={this.tableColums(activeNodeType).map(el => {
@@ -422,7 +526,7 @@ class RealTime extends PureComponent{
                   dataIndex: el.dataIndex,
                   width: el.width || '150px',
                   ellipsis: true,
-                  editable: true,
+                  editable: el.editable,
                   type: el.type || "",
                   content: el.content || "",
                   render: el.render

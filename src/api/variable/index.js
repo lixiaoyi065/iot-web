@@ -147,7 +147,7 @@ export function GetSaveTagsTaskProgress(id) {
     method: 'get'
   })
 }
-//删除分组
+//删除变量
 //ids: Array
 export function DeleteTags(ids) {
   return axios({

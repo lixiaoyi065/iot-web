@@ -42,10 +42,82 @@ export function downFile(res, fileName) {
  * val: 判断的字段值
  * return bool
  */
-export function isEffectiveEditor(gist, key, dataIndex, val){
+export function isEffectiveEditor(gist, key, dataIndex, val) {
+  if (gist.length === 0) {
+    return false
+  }
   return gist.some(item => {
-    if(item.key === key){
+    if (item.key === key) {
       return item[dataIndex] === val
     }
+    return false
   })
+}
+
+/**
+ * 判断值是否唯一
+ * @param {*} dataArr : 依据
+ * @param {*} key ：判断的key
+ * @param {*} val ：判断的字段值
+ * true: 唯一 
+ */
+export function isRepeat(dataArr, key, val) {
+  let len = 1;
+  if (dataArr.length > 0) {
+    dataArr.forEach(item => {
+      if (item[key] === val) {
+        len++;
+      }
+    })
+    if (len > 1) {
+      return false
+    } else {
+      return true
+    }
+  } else {
+    return true
+  }
+}
+
+export function hasKey(dataList, key, val) {
+  dataList.some()
+}
+
+
+//防抖
+export function debounce(fn, wait, immediate = false){
+  let timer, startTimeStamp = 0;
+  let context, args;
+ 
+  let run = (timerInterval) => {
+    timer = setTimeout(() => {
+      let now = (new Date()).getTime();
+      let interval = now - startTimeStamp
+      if (interval < timerInterval) {
+        startTimeStamp = now;
+        run(wait - interval);
+      } else {
+        if (!immediate) {
+          fn.apply(context, args);
+        }
+        clearTimeout(timer);
+        timer = null;
+      }
+			
+    }, timerInterval);
+  }
+ 
+  return function () {
+    context = this;
+    args = arguments;
+    let now = (new Date()).getTime();
+    startTimeStamp = now;
+ 
+    if (!timer) {
+      if (immediate) {
+        fn.apply(context, args);
+      }
+      run(wait);
+    }
+  }
 }

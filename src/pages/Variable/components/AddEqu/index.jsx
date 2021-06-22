@@ -1,8 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Select, Button, Checkbox, message, Divider } from 'antd'
-import { LoadingOutlined } from '@ant-design/icons'
-
-import { AddDevice, ModifyDevice } from 'api/variable'
+import { Form, Input, Select, Button, Checkbox, Divider } from 'antd'
 
 const { Option } = Select;
 export default class addDevice extends PureComponent {
@@ -58,7 +55,6 @@ export default class addDevice extends PureComponent {
       StrByteOrder: "1234"
     },//初始化表单数据
     userPane: false,
-    loading: false
   }
   //判断是否显示某个属性
   isShowFormItem = item => {
@@ -80,47 +76,6 @@ export default class addDevice extends PureComponent {
   //监听验证方式变化
   onChangUserIdentity = e => {
     e === "登录验证" ? this.setState({ userPane: true }) : this.setState({ userPane: false })
-  }
-  onFinish = val => {
-    console.log(val)
-    this.setState({ loading: true })
-    const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
-    //数据二次处理
-    const equObj = { params: {} }
-    for (let key in val) {
-      if (list.indexOf(key) < 0) {
-        if (key === "StrByteOrder1") {
-          equObj.params.StrByteOrder = val[key] ? "True" : "False"
-        } else {
-          equObj.params[key] = val[key]
-        }
-      } else {
-        equObj[key] = val[key]
-      }
-    }
-    if (val.id === "00000000-0000-0000-0000-000000000000") {
-      AddDevice(equObj).then(res => {
-        this.setState({ loading: false })
-        console.log(res)
-        if (res.code === 0) {
-          message.info("新增成功")
-          this.props.onCancel();
-        } else {
-          message.error("新增失败。" + res.msg)
-        }
-      })
-    } else {
-      ModifyDevice(equObj).then(res => {
-        this.setState({ loading: false })
-        console.log(res)
-        if (res.code === 0) {
-          message.info("编辑成功")
-          this.props.onCancel();
-        } else {
-          message.error("编辑失败。" + res.msg)
-        }
-      })
-    }
   }
   componentDidMount() {
     if (this.props.node) {
@@ -164,7 +119,7 @@ export default class addDevice extends PureComponent {
     return (
       <Form
         ref={this.formRef}
-        onFinish={this.onFinish}
+        onFinish={this.props.onFinish}
         initialValues={initialValues}
       >
         <div className="form-table">
@@ -454,10 +409,7 @@ export default class addDevice extends PureComponent {
         </div>
         <Form.Item className="form-footer">
           <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
-          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit" disabled={this.state.loading ? true : false}>
-            {
-              this.state.loading ? <LoadingOutlined /> : <></>
-            }
+          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">
             确认
           </Button>
         </Form.Item>

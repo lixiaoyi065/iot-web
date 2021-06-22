@@ -21,7 +21,7 @@ class OperationsPane extends PureComponent {
       <div style={{ padding: "32px 52px"}}>
         <div className="card-form">
           <div className="card-title">
-            <img className="card-title-icon" src={ project }/>
+            <img className="card-title-icon" src={ project } alt=""/>
             <span>项目管理</span>
           </div>
           <Form onFinish={this.onProjectFinish} className="form">
@@ -42,7 +42,7 @@ class OperationsPane extends PureComponent {
 
         <div className="card-form">
           <div className="card-title">
-            <img className="card-title-icon" src={ link }/>
+            <img className="card-title-icon" src={ link } alt=""/>
             <span>远程运维连接信息</span>
           </div>
           <Form onFinish={this.onProjectFinish} className="form">

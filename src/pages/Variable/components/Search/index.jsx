@@ -13,14 +13,6 @@ class Search extends PureComponent {
   moreMenu = (
     <DrowDownMenu lists={[
       {
-        key: "overallImport",
-        name: '整体导入',
-      },
-      {
-        key: "overallExport",
-        name: '整体导出',
-      },
-      {
         key: "currentTableImport",
         name: '导入当前点表',
       },

@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Select, Button, message } from 'antd'
-// import { LoadingOutlined } from '@ant-design/icons'
+import { Form, Input, Select, Button } from 'antd'
 
-import { GetTreeStructure, AddGroup, ModifyGroup } from 'api/variable/index'
+import { GetTreeStructure } from 'api/variable/index'
 
 
 const { Option } = Select;
@@ -16,8 +15,7 @@ class AddGroups extends PureComponent {
       type: 2,
       name: "",
     },
-    hidden: false,
-    loading: false
+    hidden: false
   }
 
   formRef = React.createRef()
@@ -45,43 +43,12 @@ class AddGroups extends PureComponent {
       //console.log("编辑分组")
       this.setState({ initialValues: this.props.node, hidden: true })
       this.formRef.current.setFieldsValue(this.props.node);
-    } else {
-      // console.log("新增分组")
-
     }
-
-    // store.subscribe(() => {
-    //   this.setState({ euqList: store.getState() })
-    // })
   }
   componentWillUnmount() {
     this.setState = () => false;
   }
 
-  onFinish = (val) => {
-    this.setState({ loading: true })
-    if (this.props.node) {
-      ModifyGroup(val).then(res => {
-        this.setState({ loading: false })
-        if (res.code === 0) {
-          this.props.onCancel();
-          message.info("编辑成功")
-        } else {
-          message.error("编辑失败。" + res.msg)
-        }
-      })
-    } else {
-      AddGroup(val).then(res => {
-        this.setState({ loading: false })
-        if (res.code === 0) {
-          this.props.onCancel();
-          message.info("新增成功")
-        } else {
-          message.error("新增失败。" + res.msg)
-        }
-      })
-    }
-  }
   onFinishFailed = () => {
   }
 
@@ -100,7 +67,7 @@ class AddGroups extends PureComponent {
     return (
       <Form
         ref={this.formRef}
-        onFinish={this.onFinish}
+        onFinish={this.props.onFinish}
         onFinishFailed={this.onFinishFailed}
         initialValues={this.state.initialValues}
       >

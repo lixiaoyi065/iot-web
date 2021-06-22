@@ -1,8 +1,10 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { Table, Input, Form, Select } from 'antd';
+import { Table, Input, Form, Select, message } from 'antd';
 import "./index.less"
 
-import { isEffectiveEditor } from 'utils'
+import { isEffectiveEditor, debounce, isRepeat } from 'utils'
+
+import { VerifyTagName } from 'api/variable'
 
 const EditableContext = React.createContext(null);
 const { Option } = Select;
@@ -19,6 +21,7 @@ const EditableRow = ({ index, ...props }) => {
 };
 
 const EditableCell = ({
+  dataSource,
   gist,
   title,
   editable,
@@ -28,6 +31,7 @@ const EditableCell = ({
   handleSave,
   type,
   content,
+  activeNodeType,
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false);
@@ -40,18 +44,48 @@ const EditableCell = ({
   }, [editing]);
 
   const toggleEdit = () => {
-    setEditing(!editing);
+    // setEditing(!editing);
+    console.log(dataIndex,record[dataIndex],activeNodeType)
     form.setFieldsValue({
       [dataIndex]: record[dataIndex]
     });
   };
 
-  const check = async () => {
+  const verifyTagName = (obj) => {
+    VerifyTagName(obj).then(res => {
+      if (res.code !== 0) {
+        message.error(res.msg)
+      }
+    })
+  }
+
+  const check = async (e) => {
     try {
-      const values = await form.validateFields();
-      toggleEdit();
-      console.log(isEffectiveEditor(gist, record.key, dataIndex, values[dataIndex]))
-      handleSave(dataIndex, values[dataIndex], { ...record, ...values });
+      const value = e.target.value
+      const dataList = await form.validateFields();
+      form.setFieldsValue({
+        [dataIndex]: value
+      });
+
+      //判断变量名是否重复
+      if (dataIndex === "name") {
+        if (isRepeat(dataSource, dataIndex, value)) {
+          verifyTagName({
+            tagId: record.id,
+            tagName: value,
+            type: activeNodeType
+          })
+        } else {
+          message.error("变量名" + value +"已存在")
+        }
+      }
+      handleSave(dataIndex, value, { ...record, ...dataList });
+      if (!isEffectiveEditor(gist, record.key, dataIndex, value)) {
+        e.target.parentNode.className = "ant-form-item-control-input-content effective-editor"
+      } else {
+        e.target.parentNode.className = "ant-form-item-control-input-content"
+      }
+
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -59,38 +93,22 @@ const EditableCell = ({
 
   let childNode = children;
 
-  if (editable && record.editable) {
-    childNode = editing ? (
-      childNode = type === "select" ? (
-        <Form.Item
-          name={dataIndex} defaultValue={content[0]}
-        >
-          <Select onChange={check}>
-            {
-              content.map((el, idx) => {
-                return <Option value={el} key={el + idx}>{el}</Option>
-              })
-            }
-          </Select>
-        </Form.Item>
-      ) : (
-        <Form.Item name={dataIndex}>
-          <Input ref={inputRef} onBlur={check} autoComplete='off' />
-        </Form.Item>
-      )
-    ) : <div
-      className="editable-cell-value-wrap"
-      onClick={toggleEdit}
-    >
-      {children}
-    </div>
-  } else {
-    <div
-      className="editable-cell-value-wrap"
-      onClick={toggleEdit}
-    >
-      {children}
-    </div>
+  if (record && record.editable) {
+    childNode = type === "select" ? (
+      <Form.Item name={dataIndex} defaultValue={content[0]} >
+        <Select>
+          {
+            content.map((el, idx) => {
+              return <Option value={el} key={el + idx}>{el}</Option>
+            })
+          }
+        </Select>
+      </Form.Item>
+    ) : (
+      <Form.Item name={dataIndex}>
+        <Input ref={inputRef} onChange={debounce(check, 1000)} autoComplete='off' />
+      </Form.Item>
+    )
   }
 
   return <td {...restProps}>{childNode}</td>;
@@ -99,6 +117,7 @@ const EditableCell = ({
 class EditableTable extends React.Component {
   constructor(props) {
     super(props);
+    console.log(props)
     this.ref = React.createRef();
     this.state = {
       height: 0,
@@ -145,12 +164,14 @@ class EditableTable extends React.Component {
       return {
         ...col,
         onCell: (record) => ({
+          dataSource: dataSource,
           gist: this.props.gist,
           record,
           editable: col.editable,
           dataIndex: col.dataIndex,
           title: col.title,
           type: col.type,
+          activeNodeType: this.props.activeNodeType,
           content: col.content,
           handleSave: this.handleSave
         }),
@@ -160,6 +181,7 @@ class EditableTable extends React.Component {
       <>
         <div className="table-contain" ref={this.ref}>
           <Table
+            rowSelection={this.props.rowSelection}
             components={components}
             rowClassName={() => 'editable-row'}
             dataSource={dataSource}
