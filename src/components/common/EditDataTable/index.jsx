@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Table, Input, Form, Select, message } from 'antd';
+import PubSub from 'pubsub-js'
 import "./index.less"
 
 import { isEffectiveEditor, debounce, isRepeat } from 'utils'
@@ -9,6 +10,7 @@ import { VerifyTagName } from 'api/variable'
 const EditableContext = React.createContext(null);
 const { Option } = Select;
 
+let modifyTags = [];
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -45,7 +47,7 @@ const EditableCell = ({
 
   const toggleEdit = () => {
     // setEditing(!editing);
-    console.log(dataIndex,record[dataIndex],activeNodeType)
+    console.log(dataIndex, record[dataIndex], activeNodeType)
     form.setFieldsValue({
       [dataIndex]: record[dataIndex]
     });
@@ -76,7 +78,7 @@ const EditableCell = ({
             type: activeNodeType
           })
         } else {
-          message.error("变量名" + value +"已存在")
+          message.error("变量名" + value + "已存在")
         }
       }
       handleSave(dataIndex, value, { ...record, ...dataList });
@@ -91,12 +93,22 @@ const EditableCell = ({
     }
   };
 
+  const selectChange = async (e) => {
+    try {
+      const dataList = await form.validateFields();
+      handleSave(dataIndex, e, { ...record, ...dataList });
+    } catch (errInfo) {
+      console.log('Save failed:', errInfo);
+    }
+  }
+
   let childNode = children;
 
   if (record && record.editable) {
+    console.log(record[dataIndex])
     childNode = type === "select" ? (
-      <Form.Item name={dataIndex} defaultValue={content[0]} >
-        <Select>
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
+        <Select onChange={selectChange}>
           {
             content.map((el, idx) => {
               return <Option value={el} key={el + idx}>{el}</Option>
@@ -105,7 +117,7 @@ const EditableCell = ({
         </Select>
       </Form.Item>
     ) : (
-      <Form.Item name={dataIndex}>
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
         <Input ref={inputRef} onChange={debounce(check, 1000)} autoComplete='off' />
       </Form.Item>
     )
@@ -146,6 +158,19 @@ class EditableTable extends React.Component {
         }
       }
     })
+    if (modifyTags.length > 0) {
+      for (let i = 0; i < modifyTags.length; i++) {
+        if (modifyTags[i].key === row.key) {
+          modifyTags[i][dataIndex] = val
+        } else {
+          modifyTags.push(row)
+        }
+      }
+    } else {
+      modifyTags.push(row)
+    }
+
+    PubSub.publish("modifyTags", modifyTags)
   };
 
   render() {

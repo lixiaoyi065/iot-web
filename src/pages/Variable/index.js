@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
-import { Modal, message,Input } from "antd"
+import { Modal, message, Spin } from "antd"
+import PubSub from "pubsub-js";
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
@@ -14,16 +15,17 @@ import { downFile } from "utils";
 import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
   GetTreeStructure, GetDevice, DeleteDevice, DelGroup, 
-  InitTags, QueryTags, ExportTags, DeleteTags
+  InitTags, QueryTags, SaveTags, ExportTags, DeleteTags,
+  GetSaveTagsTaskProgress
 } from 'api/variable'
 
 class RealTime extends PureComponent{
   state = {
+    loading: false, //保存时显示加载中
     treeData: [],//设备树数据
     dataSource: [], //表格的变量列表数据
     gist: [],//表格的变量列表数据参考对象
     dataTypes: [], //查询的数据类型
-    activeNodeType: null, //当前变量列表的类型
     count: 0,
     collasped: false,
     selectedRowKeys: [],
@@ -35,10 +37,18 @@ class RealTime extends PureComponent{
     activeNodeType: 0, //当前显示变量列表的节点类型
     tableDataTypes: ["二进制变量", "有符号8位整型", "无符号8位整型", "有符号16位整型", "无符号16位整型", "有符号32位整型", "无符号32位整型",
       "有符号64位整型", "无符号64位整型", "F32位浮点数IEEE754","F64位浮点数IEEE754", "日期","时间", "日期时间","字符串"],
+    modifyTagsList: []
   }
 
   componentDidMount() {
     this.getTreeStructure();
+    PubSub.subscribe("modifyTags", (msg, data) => {
+      this.setState({modifyTagsList: data})
+    })
+  }
+  componentWillUnmount(){
+    //取消订阅
+    PubSub.unsubscribe("modifyTags")
   }
 
   //获取整棵设备列表树结构
@@ -362,7 +372,40 @@ class RealTime extends PureComponent{
   }
   //保存变量列表
   saveList = () => {
-
+    if(this.state.modifyTagsList.length === 0){
+      message.warning("当前没有更改的内容")
+      return;
+    }
+    this.setState({loading: true})
+    SaveTags({
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType,
+      dataTypes: [],
+      tags: this.state.modifyTagsList,
+      total: 0
+    }).then(res=>{
+      if(res.code === 0){
+        let timer = setInterval(()=>{
+          //获取
+          GetSaveTagsTaskProgress(res.data).then(val=>{
+            console.log(val)
+            //清除定时器,关闭加载中
+            if(val.data.status === 2 || val.data.status === 3){
+              clearInterval(timer)
+              if(val.data.message){
+                message.error("保存失败：" + val.data.message)
+              }
+              this.setState({loading: false})
+            }
+          })
+        }, 1000)
+      }else{
+        message.error(res.msg)
+        this.setState({loading: false})
+      }
+      console.log(res)
+    })
+   
   }
   //重置变量列表
   resetTags = () => {
@@ -373,7 +416,7 @@ class RealTime extends PureComponent{
     const { dataSource, count } = this.state;
     console.log("新增",dataSource, count)
     let tagObj = {
-      key: count+1,
+      key: "00000000-0000-0000-0000-000000000000",
       id: "00000000-0000-0000-0000-000000000000",
       no: count+1,
       name: "",
@@ -468,73 +511,74 @@ class RealTime extends PureComponent{
     const {activeNodeType, collasped, treeData, dataSource, gist} = this.state
     return (
       <div className={`antProPageContainer ${ collasped ? 'foldToLeft' : "" }`}>
-        <div className="leftContent">
-          <div className="fullContain">
-            {
-              treeData ?
-                <ZTree
-                  title="设备列表"
-                  zTreeOption={{
-                    className: "optAdd",
-                    placement: "bottomCenter"
-                  }}
-                  move={true}
-                  option={ true }
-                  nodeDatas={ treeData}
-                  zTreeOptionDropdown={true}
-                  zTreeOptionMenu={this.zTreeOptionMenu}
-                  optionDeviceMenu={this.optionDeviceMenu}
-                  // defaultExpandAll={true}
-                  optionGroupMenu={this.optionGroupMenu}
-                  onSelect={this.onSelect}
-                />
-                : null
-            }
+        <Spin spinning={this.state.loading}>
+          <div className="leftContent">
+            <div className="fullContain">
+              {
+                treeData ?
+                  <ZTree
+                    title="设备列表"
+                    zTreeOption={{
+                      className: "optAdd",
+                      placement: "bottomCenter"
+                    }}
+                    move={true}
+                    option={ true }
+                    nodeDatas={ treeData}
+                    zTreeOptionDropdown={true}
+                    zTreeOptionMenu={this.zTreeOptionMenu}
+                    optionDeviceMenu={this.optionDeviceMenu}
+                    // defaultExpandAll={true}
+                    optionGroupMenu={this.optionGroupMenu}
+                    onSelect={this.onSelect}
+                  />
+                  : null
+              }
+            </div>
+            <span className="arrowLeft" onClick={this.toggleLeft}></span>
           </div>
-          <span className="arrowLeft" onClick={this.toggleLeft}></span>
-        </div>
-        <div className="tableList">
-          <Search
-            dataTypes={this.state.dataTypes}
-            type={activeNodeType}
-            searchForm={this.searchForm}
-            saveList={this.saveList}
-            resetTags={this.resetTags}
-            addTags={this.addTags}
-            delTags={this.delTags}
-            menuClick={this.importMenu}
-          />
-          <div className="tableContain">
-            <EditableTable
-              rowSelection={{
-                columnWidth: "50px",
-                selectedRowKeys: this.state.selectedRowKeys,
-                onChange: this.onSelectChange,
-              }}
-              gist={gist}
-              dataSource={dataSource}
-              activeNodeType={this.state.activeNodeType}
-              tableDataTypes={this.state.tableDataTypes}
-              loadMore={this.loadMore}
-              count={this.state.count}
-              rowKey={record => {
-                return record.id
-              }}
-              columns={this.tableColums(activeNodeType).map(el => {
-                return {
-                  title: el.title,
-                  dataIndex: el.dataIndex,
-                  width: el.width || '150px',
-                  ellipsis: true,
-                  editable: el.editable,
-                  type: el.type || "",
-                  content: el.content || "",
-                  render: el.render
-                }
-              })}
+          <div className="tableList">
+            <Search
+              dataTypes={this.state.dataTypes}
+              type={activeNodeType}
+              searchForm={this.searchForm}
+              saveList={this.saveList}
+              resetTags={this.resetTags}
+              addTags={this.addTags}
+              delTags={this.delTags}
+              menuClick={this.importMenu}
             />
+            <div className="tableContain">
+              <EditableTable
+                rowSelection={{
+                  columnWidth: "50px",
+                  selectedRowKeys: this.state.selectedRowKeys,
+                  onChange: this.onSelectChange,
+                }}
+                gist={gist}
+                dataSource={dataSource}
+                activeNodeType={this.state.activeNodeType}
+                tableDataTypes={this.state.tableDataTypes}
+                loadMore={this.loadMore}
+                count={this.state.count}
+                rowKey={record => {
+                  return record.id
+                }}
+                columns={this.tableColums(activeNodeType).map(el => {
+                  return {
+                    title: el.title,
+                    dataIndex: el.dataIndex,
+                    width: el.width || '150px',
+                    ellipsis: true,
+                    editable: el.editable,
+                    type: el.type || "",
+                    content: el.content || "",
+                    render: el.render
+                  }
+                })}
+              />
+            </div>
           </div>
-        </div>
           {/* 新增编辑模态框 */}
           <Modal 
             title={this.state.title}
@@ -546,6 +590,7 @@ class RealTime extends PureComponent{
               this.state.modalContent
             }
           </Modal>
+        </Spin>
       </div>
     )
   }
