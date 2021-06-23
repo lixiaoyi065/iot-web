@@ -149,12 +149,10 @@ export function GetSaveTagsTaskProgress(id) {
 }
 //删除变量
 //ids: Array
-export function DeleteTags(ids) {
+export function DeleteTags(data) {
   return axios({
     url: '/VariableManage/DeleteTags',
-    data: {
-      ids
-    },
+    data: data,
     method: 'delete'
   })
 }

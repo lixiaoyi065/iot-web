@@ -53,40 +53,58 @@ const EditableCell = ({
     })
   }
 
-  const check = async (e) => {
-    try {
-      const value = e.target.value
-      const dataList = await form.validateFields();
-      toggleEdit(value)
-
-      //判断变量名是否重复
-      if (dataIndex === "name") {
-        if (isRepeat(dataSource, dataIndex, value)) {
-          verifyTagName({
-            tagId: record.id,
-            tagName: value,
-            type: activeNodeType
-          })
-        } else {
-          message.error("变量名" + value + "已存在")
-        }
-      }
-      handleSave(dataIndex, value, { ...record, ...dataList });
-      if (!isEffectiveEditor(gist, record.key, dataIndex, value)) {
+  //有效编辑
+  const isEffective = (e, value, id = null) => {
+    let flag = isEffectiveEditor(gist, record.key, dataIndex, value)
+    console.log(flag)
+    
+    if (!flag) {
+      if (id !== null) {
+        document.getElementById(id).parentNode.parentNode.classList.add("effective-editor")
+      } else {
         e.target.parentNode.className = "ant-form-item-control-input-content effective-editor"
+      }
+    } else {
+      if (id !== null) {
+        document.getElementById(id).parentNode.parentNode.classList.remove("effective-editor")
       } else {
         e.target.parentNode.className = "ant-form-item-control-input-content"
       }
+    }
+  }
 
+  //判断变量名是否重复
+  const isRepeatName = (e) => {
+    if (dataIndex === "name") {
+      if (!isRepeat(dataSource, record.key, dataIndex, e.target.value)) {
+        verifyTagName({
+          tagId: record.id,
+          tagName: e.target.value,
+          type: activeNodeType
+        })
+      } else {
+        message.error("变量名" + e.target.value + "已存在")
+      }
+    }
+  }
+
+  const check = async (e) => {
+    try {
+      const dataList = await form.validateFields();
+      toggleEdit(e.target.value)
+      isRepeatName(e)
+      handleSave(dataIndex, e.target.value, { ...record, ...dataList });
+      isEffective(e, e.target.value);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
   };
 
-  const selectChange = async (e) => {
+  const selectChange = async (e, id) => {
     try {
       const dataList = await form.validateFields();
       handleSave(dataIndex, e, { ...record, ...dataList });
+      isEffective(e, e, id);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -97,7 +115,7 @@ const EditableCell = ({
   if (record && record.editable) {
     childNode = type === "select" ? (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
-        <Select onChange={selectChange}>
+        <Select onChange={(e)=> selectChange(e, dataIndex + record.key)} id={ dataIndex + record.key }>
           {
             content.map((el, idx) => {
               return <Option value={el} key={el + idx}>{el}</Option>
@@ -106,8 +124,8 @@ const EditableCell = ({
         </Select>
       </Form.Item>
     ) : (
-        <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-        <Input ref={inputRef} onChange={debounce(check, 1000)} autoComplete='off' />
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
+        <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
       </Form.Item>
     )
   }
@@ -136,29 +154,38 @@ class EditableTable extends React.Component {
   }
 
   handleSave = (dataIndex, val, row) => {
-    this.setState((state) => {
-      for (let i = 0; i < state.dataSource.length; i++) {
-        if (state.dataSource[i].key === row.key) {
-          state.dataSource[i][dataIndex] = val
-          return {
-            dataSource: state.dataSource,
-          }
-        }
-      }
-    })
+    // this.setState((state) => {
+    //   for (let i = 0; i < state.dataSource.length; i++) {
+    //     if (state.dataSource[i].key === row.key) {
+    //       state.dataSource[i][dataIndex] = val
+    //       return {
+    //         dataSource: state.dataSource,
+    //       }
+    //     }
+    //   }
+    // })
     if (modifyTags.length > 0) {
-      for (let i = 0; i < modifyTags.length; i++) {
-        if (modifyTags[i].key === row.key) {
-          modifyTags[i][dataIndex] = val
+      let index = -1;
+      //判断是否已经存在
+      let isHas = modifyTags.some((item, i) => {
+        if (item.key === row.key) {
+          index = i;
+          return true
         } else {
-          modifyTags.push(row)
+          index = -1;
+          return false
         }
+      })
+      if (isHas) {
+        //存在则修改
+        modifyTags[index][dataIndex] = val
+      } else {
+        //否则添加
+        modifyTags.push(row)
       }
     } else {
       modifyTags.push(row)
     }
-
-    console.log(modifyTags)
 
     PubSub.publish("modifyTags", modifyTags)
   };

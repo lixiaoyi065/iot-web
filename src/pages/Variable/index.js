@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Modal, message, Spin } from "antd"
 import PubSub from "pubsub-js";
+import $ from 'jquery'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
@@ -10,7 +11,7 @@ import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
 import Search from './components/Search'
 
-import { downFile } from "utils";
+import { downFile, deepClone } from "utils";
 
 import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
@@ -26,6 +27,7 @@ class RealTime extends PureComponent{
     dataSource: [], //表格的变量列表数据
     gist: [],//表格的变量列表数据参考对象
     dataTypes: [], //查询的数据类型
+    total: 0,
     count: 0,
     collasped: false,
     selectedRowKeys: [],
@@ -310,8 +312,9 @@ class RealTime extends PureComponent{
         console.log("变量列表：",dataList)
         this.setState({
           dataSource: dataList,
-          gist: dataList,
+          gist: [...dataList],
           count: res.data.total,
+          total: res.data.total,
           dataTypes: res.data.dataTypes,
           activeNode: info.node.key,
           activeNodeType: info.node.nodeType
@@ -340,6 +343,8 @@ class RealTime extends PureComponent{
   }
   //数据表格选中的项
   onSelectChange = (selectedRowKeys) => {
+    console.log(this.state.dataSource)
+    console.log(selectedRowKeys)
     this.setState({ selectedRowKeys });
     // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
   }
@@ -370,6 +375,7 @@ class RealTime extends PureComponent{
       }
     }
   }
+
   //保存变量列表
   saveList = () => {
     if(this.state.modifyTagsList.length === 0){
@@ -377,12 +383,11 @@ class RealTime extends PureComponent{
       return;
     }
     let modifyList = []
-    this.state.modifyTagsList.map(item => {
+    deepClone(this.state.modifyTagsList).map(item => {
       item.key = item.id
       modifyList.push(item)
       return "";
     })
-    console.log(this.state.modifyTagsList,modifyList)
     this.setState({loading: true})
     SaveTags({
       nodeId: this.state.activeNode,
@@ -402,13 +407,55 @@ class RealTime extends PureComponent{
                 message.info(val.data.message)
               }
               this.setState({ loading: false })
+              this.state.modifyTagsList.forEach(obj => {
+                for (let item in obj) {
+                  if (document.getElementById(item + obj.key)) {
+                    document.getElementById(item + obj.key).parentNode.classList.remove("effective-editor")
+                    document.getElementById(item + obj.key).parentNode.parentNode.classList.remove("effective-editor")
+                  }
+                }
+              })
               if (val.data.resultData !== null) {
-                let { dataTypes, tree } = val.data.resultData
+                let { dataTypes, tree, ids } = val.data.resultData
+                console.log(val.data.resultData)
                 if (dataTypes !== null) {
                   this.setState({ dataTypes: dataTypes})
                 }
                 if (tree !== null) {
                   this.setState({ treeData: tree})
+                }
+                //新增
+                if (ids) {
+                  this.setState(state => {
+                    //遍历返回编辑成功的项的id
+                    let obj2 = state.dataSource
+                    console.log(obj2)
+                    for (let i in ids) {
+                      let idsObj = deepClone(state.modifyTagsList.filter(item => item.key + "" === i)[0])
+                      if (idsObj !== "undefined") {
+                        idsObj.id = idsObj.key = ids[i]
+                        //将保存成功的变量添加到参考数据组
+                        state.gist[i] = idsObj;
+                        //更新变量列表中新增对象的key和id
+                        console.log(i, ids)
+                        for (let it = 0; it < obj2.length; it++){
+                          // console.log(state.dataSource[it].key === i, i, state.dataSource[it].key)
+                          if (obj2[it].key+"" === i) {
+                            obj2[it].key = ids[i];
+                            obj2[it].id = ids[i];
+                            break;
+                          }
+                        }
+
+                        console.log(state.dataSource)
+                      }
+                    }
+                    return {
+                      dataSource: obj2,
+                      gist: state.gist,
+                      modifyTagsList: []
+                    }
+                  })
                 }
               }
             }
@@ -427,11 +474,11 @@ class RealTime extends PureComponent{
   }
   //新增变量
   addTags = () => {
-    const { dataSource, count } = this.state;
+    const { dataSource, total, count } = this.state;
     let tagObj = {
-      key: count + 1,
+      key: total + 1,
       id: "00000000-0000-0000-0000-000000000000",
-      no: count+1,
+      no: total+1,
       name: "",
       desc: "",
       dataType: "",
@@ -442,13 +489,36 @@ class RealTime extends PureComponent{
       zoom: "",
       editable: true
     }
-    this.setState({ dataSource: [...dataSource, tagObj], count: count+1})
+    this.setState({ dataSource: [...dataSource, tagObj], count: count+1, total: total+1})
   }
   //删除变量
   delTags = () => {
-    DeleteTags(this.state.selectedRowKeys).then(res => {
-      if (res.cede === 0) {
+    console.log("delTags",{
+      ids: this.state.selectedRowKeys,
+      type: this.state.activeNodeType
+    })
+    DeleteTags({
+      ids: this.state.selectedRowKeys,
+      type: this.state.activeNodeType
+    }).then(res => {
+      console.log(res)
+      if (res.code === 0) {
         message.info("删除成功")
+        this.setState((state) => {
+          let targetObj = [...state.dataSource]
+          res.data.forEach((id) => {
+            for (let i = 0; i < targetObj.length;i++){
+              if (targetObj[i].key === id) {
+                targetObj.splice(i, 1);
+                break;
+              }
+            }
+          })
+          return {
+            dataSource: targetObj,
+            count: state.count - res.data.length
+          }
+        })
       } else {
         message.error(res.msg)
       }
@@ -521,7 +591,7 @@ class RealTime extends PureComponent{
   }
 
   render() {
-    const {activeNodeType, collasped, treeData, dataSource, gist} = this.state
+    const { activeNodeType, collasped, treeData, dataSource, gist } = this.state
     return (
       <div className={`antProPageContainer ${ collasped ? 'foldToLeft' : "" }`}>
         <Spin spinning={this.state.loading}>
