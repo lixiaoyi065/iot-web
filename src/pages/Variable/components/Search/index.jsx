@@ -49,7 +49,7 @@ class Search extends PureComponent {
             <Select style={{ width: '150px' }}>
               <Select.Option value="不限">不限</Select.Option>
               {
-                this.props.dataTypes.length > 0 ? this.props.dataTypes.map(element => {
+                this.props.dataTypes && this.props.dataTypes.length > 0 ? this.props.dataTypes.map(element => {
                   return <Select.Option value={element}>{element}</Select.Option>
                 }) : <></>
               }

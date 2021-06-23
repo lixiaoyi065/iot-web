@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import { Table, Input, Form, Select, message } from 'antd';
 import PubSub from 'pubsub-js'
 import "./index.less"
@@ -36,20 +36,12 @@ const EditableCell = ({
   activeNodeType,
   ...restProps
 }) => {
-  const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
-  useEffect(() => {
-    if (editing && type !== "select") {
-      inputRef.current.focus();
-    }
-  }, [editing]);
 
-  const toggleEdit = () => {
-    // setEditing(!editing);
-    console.log(dataIndex, record[dataIndex], activeNodeType)
+  const toggleEdit = (value) => {
     form.setFieldsValue({
-      [dataIndex]: record[dataIndex]
+      [dataIndex]: value
     });
   };
 
@@ -65,9 +57,7 @@ const EditableCell = ({
     try {
       const value = e.target.value
       const dataList = await form.validateFields();
-      form.setFieldsValue({
-        [dataIndex]: value
-      });
+      toggleEdit(value)
 
       //判断变量名是否重复
       if (dataIndex === "name") {
@@ -105,7 +95,6 @@ const EditableCell = ({
   let childNode = children;
 
   if (record && record.editable) {
-    console.log(record[dataIndex])
     childNode = type === "select" ? (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
         <Select onChange={selectChange}>
@@ -117,7 +106,7 @@ const EditableCell = ({
         </Select>
       </Form.Item>
     ) : (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
+        <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
         <Input ref={inputRef} onChange={debounce(check, 1000)} autoComplete='off' />
       </Form.Item>
     )
@@ -129,7 +118,6 @@ const EditableCell = ({
 class EditableTable extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props)
     this.ref = React.createRef();
     this.state = {
       height: 0,
@@ -170,12 +158,13 @@ class EditableTable extends React.Component {
       modifyTags.push(row)
     }
 
+    console.log(modifyTags)
+
     PubSub.publish("modifyTags", modifyTags)
   };
 
   render() {
     const { dataSource } = this.state;
-    console.log(this.state.dataSource)
     const components = {
       body: {
         row: EditableRow,

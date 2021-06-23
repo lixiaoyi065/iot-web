@@ -54,7 +54,7 @@ class RealTime extends PureComponent{
   //获取整棵设备列表树结构
   getTreeStructure = () => {
     GetTreeStructure().then(res => {
-      console.log(res.data)
+      console.log("设备树：",res.data)
       this.setState({treeData: res.data})
     })
   }
@@ -196,7 +196,6 @@ class RealTime extends PureComponent{
 
   //添加分组提交函数
   onAddGroupFinish = (val) => {
-    console.log(val)
     if (val.groupId === "00000000-0000-0000-0000-000000000000") {
       AddGroup(val).then(res => {
         if (res.code === 0) {
@@ -308,6 +307,7 @@ class RealTime extends PureComponent{
           element.key = element.id
           dataList.push(element)
         });
+        console.log("变量列表：",dataList)
         this.setState({
           dataSource: dataList,
           gist: dataList,
@@ -376,26 +376,41 @@ class RealTime extends PureComponent{
       message.warning("当前没有更改的内容")
       return;
     }
+    let modifyList = []
+    this.state.modifyTagsList.map(item => {
+      item.key = item.id
+      modifyList.push(item)
+      return "";
+    })
+    console.log(this.state.modifyTagsList,modifyList)
     this.setState({loading: true})
     SaveTags({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType,
       dataTypes: [],
-      tags: this.state.modifyTagsList,
+      tags: modifyList,
       total: 0
     }).then(res=>{
       if(res.code === 0){
         let timer = setInterval(()=>{
           //获取
           GetSaveTagsTaskProgress(res.data).then(val=>{
-            console.log(val)
             //清除定时器,关闭加载中
             if(val.data.status === 2 || val.data.status === 3){
               clearInterval(timer)
               if(val.data.message){
-                message.error("保存失败：" + val.data.message)
+                message.info(val.data.message)
               }
-              this.setState({loading: false})
+              this.setState({ loading: false })
+              if (val.data.resultData !== null) {
+                let { dataTypes, tree } = val.data.resultData
+                if (dataTypes !== null) {
+                  this.setState({ dataTypes: dataTypes})
+                }
+                if (tree !== null) {
+                  this.setState({ treeData: tree})
+                }
+              }
             }
           })
         }, 1000)
@@ -403,7 +418,6 @@ class RealTime extends PureComponent{
         message.error(res.msg)
         this.setState({loading: false})
       }
-      console.log(res)
     })
    
   }
@@ -414,9 +428,8 @@ class RealTime extends PureComponent{
   //新增变量
   addTags = () => {
     const { dataSource, count } = this.state;
-    console.log("新增",dataSource, count)
     let tagObj = {
-      key: "00000000-0000-0000-0000-000000000000",
+      key: count + 1,
       id: "00000000-0000-0000-0000-000000000000",
       no: count+1,
       name: "",
