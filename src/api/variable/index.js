@@ -89,15 +89,47 @@ export function ExportTags(data){
   return axios({
     url: '/VariableManage/ExportTags',
     params: data,
+    responseType:'blob',
     method: 'get'
   })
 }
+//导入
+export function ImportFile(data) {
+  return axios({
+    url: `/VariableManage/ImportTags?nodeId=${data.nodeId}&type=${data.type}`,
+    method: 'post',
+    data: data.formData,
+    processData: false, //不处理发送的数据
+    contentType: false, //不设置Content-Type请求头
+  })
+}
+
+//获取导入变量的任务状态
+export function GetImportTagsTaskProgress(id) {
+  return axios({
+    url: "/VariableManage/GetImportTagsTaskProgress",
+    method: "get",
+    params: {
+      id
+    }
+  })
+}
+
 //初次加载变量
 export function InitTags(data) {
   return axios({
     url: "/VariableManage/InitTags",
     params: data,
     method: 'get'
+  })
+}
+export function GetNextPageTags(nodeId) {
+  return axios({
+    url: "/VariableManage/GetNextPageTags",
+    params: {
+      nodeId
+    },
+    method: "get"
   })
 }
 //校验变量名是否格式正确、重复

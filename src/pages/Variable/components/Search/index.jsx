@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Button, Select, Dropdown } from 'antd'
+import { Form, Input, Button, Select, Dropdown, Upload, message } from 'antd'
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import './index.less'
 
@@ -8,17 +8,22 @@ import addOpt from 'assets/img/variable/add2.png'
 import delOpt from 'assets/img/variable/del.png'
 import moreOpt from 'assets/img/variable/more.png'
 
+// style={{display:"none"}}
 class Search extends PureComponent {
 
   moreMenu = (
     <DrowDownMenu lists={[
       {
         key: "currentTableImport",
-        name: '导入当前点表',
+        name: <>
+          <span>导入当前点表</span>
+          <input type="file" name="file" multiple="multiple" onChange={this.props.importProps} id="importFile"
+            accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+        </>
       },
       {
         key: "currentTableExport",
-        name: '导出当前点表',
+        name: <span>导出当前点表</span>,
       }
     ]}
       onClick={(e) => { this.props.menuClick(e) }}
