@@ -14,6 +14,14 @@ export function GetTreeStructure2() {
     method: 'get'
   })
 }
+//修改节点排序
+export function SortTreeNode(data){
+  return axios({
+    url: "/VariableManage/SortTreeNode",
+    data,
+    method: "put"
+  })
+}
 //获取设备
 export function GetDevice(deviceId){
   return axios({

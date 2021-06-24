@@ -384,11 +384,11 @@ class RealTime extends PureComponent{
         })
       }
     } else if (e.key === "currentTableImport") { //导入当前点表
-      // if (this.state.activeNode === "") {
-      //   message.error("请选择要导入的节点")
-      // } else {
-      //   document.getElementById("importFile").click();
-      // }
+      if (this.state.activeNode === "") {
+        message.error("请选择要导入的节点")
+      } else {
+        document.getElementById("importFile").click();
+      }
     }
   }
 
@@ -598,9 +598,9 @@ class RealTime extends PureComponent{
         this.setState({loading: true})
         let getProcessTimer = setInterval(() => {
           GetImportTagsTaskProgress(res.data).then(mes => {
-            let result = mes.data
+            let result = mes.data.resultData
             console.log(mes)
-            if (result.status === 2 || result.status === 3) {
+            if ( mes.data.status === 2 ||  mes.data.status === 3) {
               this.setState({
                 loading: false,
                 dataTypes: result.dataTypes,
@@ -610,7 +610,7 @@ class RealTime extends PureComponent{
               if (result.tree !== null) {
                 this.setState({treeData: result.tree})
               }
-              message.info(result.message)
+              message.info( mes.data.message)
               clearInterval(getProcessTimer)
             }
           })
@@ -618,6 +618,13 @@ class RealTime extends PureComponent{
       }
     })
 
+  }
+
+  onDrop = (info)=>{
+    console.log("onDrop",info)
+  }
+  onDragOver=(info)=>{
+    console.log("onDragOver",info)
   }
     
   render() {
@@ -644,6 +651,8 @@ class RealTime extends PureComponent{
                     // defaultExpandAll={true}
                     optionGroupMenu={this.optionGroupMenu}
                     onSelect={this.onSelect}
+                    onDrop={this.onDrop}
+                    onDragOver={this.onDragOver}
                   />
                   : null
               }

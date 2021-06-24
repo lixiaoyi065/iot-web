@@ -305,7 +305,8 @@
       line-height: 42px;
       padding: 0 19px;
 
-      .ant-input,.ant-select-selector{
+      .ant-input,
+      .ant-select-selector {
         margin: 0 -9px;
         border-radius: 3px;
         border: 1px solid transparent;
@@ -321,13 +322,15 @@
       background: #fff;
     }
 
-    &:hover{
-      .ant-input,.ant-select-selector{
+    &:hover {
+
+      .ant-input,
+      .ant-select-selector {
         background: #F5F8FE;
         border: 1px solid #DEE2E9;
         border-radius: 3px;
 
-        &:hover{
+        &:hover {
           background: #F5F8FE;
           border: 1px solid #4799ED;
           border-radius: 3px;
@@ -335,17 +338,20 @@
 
       }
     }
-    .ant-input,.ant-select-selector{
+
+    .ant-input,
+    .ant-select-selector {
       height: 32px;
 
-      &:focus{
+      &:focus {
         background: #FFFFFF;
         border: 1px solid #4799ED;
         border-radius: 3px;
         box-shadow: none;
       }
     }
-    .ant-select-arrow{
+
+    .ant-select-arrow {
       right: 16px;
     }
   }
@@ -360,7 +366,7 @@
 .ant-table-selection-column {
   width: 50px;
 
-  .ant-checkbox{
+  .ant-checkbox {
     width: 20px;
     height: 20px;
   }
@@ -407,7 +413,7 @@
   }
 }
 
-.ant-opt-btn{
+.ant-opt-btn {
   padding: 0;
   width: 76px;
   height: 30px;
@@ -421,41 +427,42 @@
   background: none;
   cursor: pointer;
 
-  &:hover{
+  &:hover {
     color: #fff;
     background: #4799ED;
   }
 
-  &:active{
+  &:active {
     color: #fff;
     background: #408BD7;
   }
 
-  &.ant-opt-btn-normal{
+  &.ant-opt-btn-normal {
     border: 1px solid #F5AB3A;
     color: #F5AB3A;
-  
-    &:hover{
+
+    &:hover {
       color: #fff;
       background: #F5AB3A;
       border: 1px solid #F5AB3A;
     }
-    &:active{
+
+    &:active {
       color: #fff;
       background: #E29D33;
     }
   }
 }
 
-.table-column{
+.table-column {
   text-align: center;
   cursor: pointer;
 
-  .serialNum{
+  .serialNum {
     padding: 0 10px;
   }
 
-  .col-check{
+  .col-check {
     width: 20px;
     height: 20px;
     background: #FFFFFF;
@@ -464,10 +471,10 @@
   }
 }
 
-.card-form{
+.card-form {
   margin-bottom: 8vh;
 
-  .card-title{
+  .card-title {
     width: 50vw;
     padding: 0 10px;
     height: 36px;
@@ -476,64 +483,76 @@
     color: #252525;
     font-size: 16px;
     border-bottom: 1px solid #DCDFE6;
-  
-    .card-title-icon{
+
+    .card-title-icon {
       width: 18px;
       height: 18px;
       margin-right: 8px;
       vertical-align: middle;
     }
-  
-    span{
+
+    span {
       vertical-align: middle;
     }
   }
 
-  .form{
+  .form {
     width: 22vw;
     padding: 40px 0 0 73px;
 
-    .ant-input-text{
-      &:disabled{
+    .ant-input-text {
+      &:disabled {
         border: 0;
         background: none;
         cursor: default;
       }
     }
 
-    .saved{
+    .saved {
       background: #DCECFD;
       color: #76B8FC;
       border-color: #DCECFD;
     }
 
-    .form-item{
+    .form-item {
       line-height: 50px;
       margin-bottom: 20px;
       font-size: 14px;
       font-weight: 500;
 
-      .form-item-label{
+      .form-item-label {
         display: inline-block;
         width: 69px;
         color: #6F7374;
       }
-      .form-item-val{
+
+      .form-item-val {
         display: inline-block;
         width: 520px;
         color: #333333;
       }
 
-      .ant-btn-opt-normal{
+      .ant-btn-opt-normal {
         margin-left: 20px;
         color: #4799ED;
         border-radius: 4px;
       }
 
-      .tip{
+      .tip {
         line-height: 20px;
         color: #F5AB3A
-      } 
+      }
     }
   }
+}
+
+.upload-file {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0;
+  cursor: pointer;
+  display: none;
 }

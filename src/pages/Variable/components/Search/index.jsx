@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Button, Select, Dropdown, Upload, message } from 'antd'
+import { Form, Input, Button, Select, Dropdown } from 'antd'
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import './index.less'
 
@@ -15,11 +15,10 @@ class Search extends PureComponent {
     <DrowDownMenu lists={[
       {
         key: "currentTableImport",
-        name: <>
-          <span>导入当前点表</span>
-          <input type="file" name="file" multiple="multiple" onChange={this.props.importProps} id="importFile"
+        name: <span>导入当前点表
+          <input type="file" className="upload-file" name="file" multiple="multiple" onChange={this.props.importProps} id="importFile"
             accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-        </>
+        </span>
       },
       {
         key: "currentTableExport",
@@ -67,16 +66,16 @@ class Search extends PureComponent {
             <Button type="primary" htmlType="submint" className="btn-submint"><img className="btn-icon" src={searchLogo} alt="" />查询</Button>
           </Form.Item>
         </Form>
-        <div className="option-area" onClick={ this.props.optionClick }>
+        <div className="option-area" onClick={this.props.optionClick}>
           <Button className="ant-button-normal"
             onClick={this.props.saveList}
-            disabled={ this.props.type === 1 ? true : false }>保存</Button>
-          <Button type="primary" onClick={ this.props.resetTags } style={{ margin: 0 }} disabled={ this.props.type === 1 ? true : false }>重置</Button>
+            disabled={this.props.type === 1 ? true : false}>保存</Button>
+          <Button type="primary" onClick={this.props.resetTags} style={{ margin: 0 }} disabled={this.props.type === 1 ? true : false}>重置</Button>
           <span className="divider"></span>
-          <Button className="ant-btn-opt-sm ant-btn-opt-primary" onClick={ this.props.addTags } disabled={ this.props.type === 1 ? true : false }>
+          <Button className="ant-btn-opt-sm ant-btn-opt-primary" onClick={this.props.addTags} disabled={this.props.type === 1 ? true : false}>
             <img className="btn-icon" src={addOpt} alt="" />
           </Button>
-          <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={ this.props.delTags } disabled={ this.props.type === 1 ? true : false }>
+          <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={this.props.delTags} disabled={this.props.type === 1 ? true : false}>
             <img className="btn-icon" src={delOpt} alt="" />
           </Button>
           <Dropdown overlay={this.moreMenu} trigger={['click']} placement="bottomRight" arrow>

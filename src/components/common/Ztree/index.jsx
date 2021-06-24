@@ -44,7 +44,9 @@ class ZTree extends PureComponent {
       if (data.canBeDeleted) {
         nodeData.title = (<>
           <span>{data.nodeName}</span>
-          <Dropdown overlay={() => { return this.props.optionDeviceMenu(data.nodeID, data.children.length) }} placement="bottomCenter" arrow>
+          <Dropdown trigger={["click"]} overlay={() => {
+            return this.props.optionDeviceMenu(data.nodeID, data.children.length)
+          }} placement="bottomCenter" arrow>
             <span className="ant-tree-title-operationNode"></span>
           </Dropdown>
         </>)
@@ -69,7 +71,7 @@ class ZTree extends PureComponent {
           if (child.canBeDeleted) {
             childNode.title = (<>
               <span>{child.nodeName}</span>
-              <Dropdown overlay={() => {
+              <Dropdown trigger={['click']} overlay={() => {
                 return this.props.optionGroupMenu({
                   groupId: child.nodeID,
                   name: child.nodeName,
@@ -121,7 +123,8 @@ class ZTree extends PureComponent {
                 <span>{this.props.title}</span>
                 {
                   this.props.zTreeOptionDropdown ? <div className="optGroup"> {
-                    <Dropdown overlay={this.state.zTreeOptionMenu} placement={this.props.zTreeOption.placement} arrow>
+                    <Dropdown overlay={this.state.zTreeOptionMenu} trigger={['click']}
+                      placement={this.props.zTreeOption.placement} arrow>
                       <div className={this.props.zTreeOption.className}></div>
                     </Dropdown>
                   } </div> : (

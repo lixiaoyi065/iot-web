@@ -3,7 +3,7 @@ import { Table, Input, Form, Select, message } from 'antd';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
-import { isEffectiveEditor, debounce, isRepeat } from 'utils'
+import { isEffectiveEditor, isRepeat } from 'utils'
 
 import { VerifyTagName } from 'api/variable'
 
@@ -57,7 +57,7 @@ const EditableCell = ({
   const isEffective = (e, value, id = null) => {
     let flag = isEffectiveEditor(gist, record.key, dataIndex, value)
     console.log(flag)
-    
+
     if (!flag) {
       if (id !== null) {
         document.getElementById(id).parentNode.parentNode.classList.add("effective-editor")
@@ -115,7 +115,7 @@ const EditableCell = ({
   if (record && record.editable) {
     childNode = type === "select" ? (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
-        <Select onChange={(e)=> selectChange(e, dataIndex + record.key)} id={ dataIndex + record.key }>
+        <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
           {
             content.map((el, idx) => {
               return <Option value={el} key={el + idx}>{el}</Option>
@@ -232,7 +232,7 @@ class EditableTable extends React.Component {
         </div>
         <div className="paging">
           {
-            dataSource.length > 0 ? (
+            dataSource && dataSource.length > 0 ? (
               <>
                 {
                   this.props.count - dataSource.length > 0 ? (
