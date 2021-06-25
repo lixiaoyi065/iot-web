@@ -1,3 +1,4 @@
+import { message } from 'antd'
 import axios from 'axios'
 import {getCookie} from 'utils'
 
@@ -14,6 +15,9 @@ service.interceptors.request.use(
     let token = getCookie("accessToken")
     if (token) {
         config.headers['Authorization'] = token;
+    } else {
+      message.error("你还没有登录哦, 确认将跳转登录界面进行登录!")
+      return 
     }
     return config;
   },

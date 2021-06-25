@@ -1,11 +1,10 @@
 import React, { useContext, useRef } from 'react';
-import { Table, Input, Form, Select, message } from 'antd';
+import { Table, Input, Form, Select } from 'antd';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
-import { isEffectiveEditor, isRepeat } from 'utils'
-
-import { VerifyTagName } from 'api/variable'
+import { isEffectiveEditor, isFit } from 'utils'
+import { addressVerify, descVerify, nameVerify } from './verify'
 
 const EditableContext = React.createContext(null);
 const { Option } = Select;
@@ -33,6 +32,7 @@ const EditableCell = ({
   handleSave,
   type,
   content,
+  activeNode,
   activeNodeType,
   ...restProps
 }) => {
@@ -45,18 +45,10 @@ const EditableCell = ({
     });
   };
 
-  const verifyTagName = (obj) => {
-    VerifyTagName(obj).then(res => {
-      if (res.code !== 0) {
-        message.error(res.msg)
-      }
-    })
-  }
 
   //有效编辑
   const isEffective = (e, value, id = null) => {
     let flag = isEffectiveEditor(gist, record.key, dataIndex, value)
-    console.log(flag)
 
     if (!flag) {
       if (id !== null) {
@@ -72,29 +64,27 @@ const EditableCell = ({
       }
     }
   }
-
-  //判断变量名是否重复
-  const isRepeatName = (e) => {
-    if (dataIndex === "name") {
-      if (!isRepeat(dataSource, record.key, dataIndex, e.target.value)) {
-        verifyTagName({
-          tagId: record.id,
-          tagName: e.target.value,
-          type: activeNodeType
-        })
-      } else {
-        message.error("变量名" + e.target.value + "已存在")
-      }
-    }
-  }
-
+ 
   const check = async (e) => {
+    let val = e.target.value;
     try {
       const dataList = await form.validateFields();
-      toggleEdit(e.target.value)
-      isRepeatName(e)
-      handleSave(dataIndex, e.target.value, { ...record, ...dataList });
-      isEffective(e, e.target.value);
+      toggleEdit(val)
+      if (dataIndex === "name") {
+        nameVerify(val, dataSource, record, dataIndex, activeNodeType)
+      }else if (dataIndex === "address") { //变量地址校验
+        addressVerify(val, {
+          nodeId: activeNode,
+          type: activeNodeType,
+          dataType: dataList.dataType,
+          address: val,
+          length: dataList.stringLength
+        })
+      }else if (dataIndex === "desc") {
+        descVerify(val)
+      }
+      handleSave(dataIndex, val, { ...record, ...dataList });
+      isEffective(e, val);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -154,39 +144,37 @@ class EditableTable extends React.Component {
   }
 
   handleSave = (dataIndex, val, row) => {
-    // this.setState((state) => {
-    //   for (let i = 0; i < state.dataSource.length; i++) {
-    //     if (state.dataSource[i].key === row.key) {
-    //       state.dataSource[i][dataIndex] = val
-    //       return {
-    //         dataSource: state.dataSource,
-    //       }
-    //     }
-    //   }
-    // })
-    if (modifyTags.length > 0) {
-      let index = -1;
-      //判断是否已经存在
-      let isHas = modifyTags.some((item, i) => {
-        if (item.key === row.key) {
-          index = i;
-          return true
-        } else {
-          index = -1;
-          return false
-        }
-      })
-      if (isHas) {
-        //存在则修改
-        modifyTags[index][dataIndex] = val
+    console.log(row)
+    /**
+     * 1、判断在modifyTags中存在，
+     * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
+     * 3、不存在在加入
+     */
+    let index = -1;
+    //判断是否已经存在
+    let isHas = modifyTags.some((item, i) => {
+      if (item.key === row.key) {
+        index = i;
+        return true
       } else {
-        //否则添加
-        modifyTags.push(row)
+        index = -1;
+        return false
+      }
+    })
+
+    if (isHas) {
+      //存在
+      if (isFit(this.props.gist, row)) {//新旧对象一致,modifyTags移除该对象
+        modifyTags.splice(index, 1)
+      } else {
+        //修改
+        modifyTags[index][dataIndex] = val
       }
     } else {
+      //否则添加
       modifyTags.push(row)
     }
-
+    console.log(modifyTags)
     PubSub.publish("modifyTags", modifyTags)
   };
 
@@ -212,6 +200,7 @@ class EditableTable extends React.Component {
           dataIndex: col.dataIndex,
           title: col.title,
           type: col.type,
+          activeNode: this.props.activeNode,
           activeNodeType: this.props.activeNodeType,
           content: col.content,
           handleSave: this.handleSave
@@ -227,6 +216,7 @@ class EditableTable extends React.Component {
             rowClassName={() => 'editable-row'}
             dataSource={dataSource}
             columns={columns}
+            loading={this.props.loading}
             pagination={false} scroll={{ y: this.state.height }}
           />
         </div>

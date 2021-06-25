@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Modal, message, Spin } from "antd"
 import PubSub from "pubsub-js";
+import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
@@ -36,16 +37,22 @@ class RealTime extends PureComponent{
     modalContent: "",//弹窗内容
     activeNode: "", //当前显示变量列表的节点
     activeNodeType: 0, //当前显示变量列表的节点类型
-    tableDataTypes: ["二进制变量", "有符号8位整型", "无符号8位整型", "有符号16位整型", "无符号16位整型", "有符号32位整型", "无符号32位整型",
-      "有符号64位整型", "无符号64位整型", "F32位浮点数IEEE754","F64位浮点数IEEE754", "日期","时间", "日期时间","字符串"],
+    tableDataTypes: [],
     modifyTagsList: [],
-    fileList: []
+    fileList: [],
+    canSubmit: {},
+    tableLoading: false,
+    comfirmContent: "",
+    comfirmVisible: false
   }
 
   componentDidMount() {
     this.getTreeStructure();
     PubSub.subscribe("modifyTags", (msg, data) => {
       this.setState({modifyTagsList: data})
+    })
+    PubSub.subscribe("canSubmit", (msg, data) => {
+      this.setState({canSubmit: data})
     })
   }
   componentWillUnmount(){
@@ -142,7 +149,7 @@ class RealTime extends PureComponent{
   }
 
   handleCancel = ()=>{
-    this.setState({visible: false})
+    this.setState({visible: false, comfirmVisible: false})
   }
   confirm = (content,callback)=> {
     Modal.confirm({
@@ -221,6 +228,17 @@ class RealTime extends PureComponent{
     }
   }
 
+  delDevice = (id) => {
+    DeleteDevice(id).then(res=>{
+      if(res.code === 0){
+        message.info("删除成功") 
+        this.getTreeStructure();
+      }else{
+        message.error(res.msg)
+      }
+    })
+  }
+
   menuClick = (e, id, length)=>{
     if (e.key === "addDevice") {
       this.setState({
@@ -239,22 +257,10 @@ class RealTime extends PureComponent{
     } else if(e.key === "delDevice"){
       if(length > 0){
         this.confirm('节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?',()=>{
-          DeleteDevice(id).then(res=>{
-            if(res.code === 0){
-              message.info("删除成功") 
-            }else{
-              message.error(res.msg)
-            }
-          })
+          this.delDevice(id);
         })
       }else{
-        DeleteDevice(id).then(res=>{
-          if(res.code === 0){
-            message.info("删除成功") 
-          }else{
-            message.error(res.msg)
-          }
-        })
+        this.delDevice(id)
       }
     } else if (e.key === "allExport") {
       ExportTags({
@@ -287,6 +293,7 @@ class RealTime extends PureComponent{
         DelGroup(id.groupId).then(res=>{
           if(res.code === 0){
             message.info("删除成功")
+            this.getTreeStructure();
           }else{
             message.error(res.msg)
           }
@@ -296,6 +303,10 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
+    if (this.state.modifyTagsList.length > 0) {
+      
+    }
+
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
@@ -309,16 +320,18 @@ class RealTime extends PureComponent{
   }
   //初始加载变量列表
   initTagList = tags => {
+    this.setState({tableLoading: true})
     InitTags(tags).then(res => {
       let dataList = [];
+      this.setState({tableLoading: false})
       if (res.code === 0) {
         res.data.tags.forEach(element => {
           element.key = element.id
           dataList.push(element)
         });
-        console.log("变量列表：",dataList)
         this.setState({
           dataSource: dataList,
+          tableDataTypes: res.data.gridDataTypes,
           gist: [...dataList],
           count: res.data.total,
           total: res.data.total > 100 ? 100 : res.data.total,
@@ -356,11 +369,8 @@ class RealTime extends PureComponent{
   //加载更多
   loadMore = () => {
     GetNextPageTags(this.state.activeNode).then(res => {
-      console.log(res.data)
       this.setState((state) => {
-        console.log(state.total,state.count)
         state.dataSource.splice(state.total, 0, ...res.data)
-        console.log(state.dataSource)
         return {
           dataSource: [...state.dataSource],
           total: state.total + res.data
@@ -394,18 +404,26 @@ class RealTime extends PureComponent{
 
   //保存变量列表
   saveList = () => {
+    console.log(this.state.modifyTagsList)
     if(this.state.modifyTagsList.length === 0){
       message.warning("当前没有更改的内容")
       return;
     }
+    
+    if (!this.state.canSubmit.canSubmit) {
+      message.error(this.state.canSubmit.message)
+      return;
+    }
+
     let modifyList = []
     deepClone(this.state.modifyTagsList).map(item => {
+      console.log(item)
       item.key = item.id
       modifyList.push(item)
       return "";
     })
+    console.log(modifyList)
     this.setState({loading: true})
-  
     SaveTags({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType,
@@ -413,17 +431,19 @@ class RealTime extends PureComponent{
       tags: modifyList,
       total: 0
     }).then(res=>{
+      console.log(res)
       if(res.code === 0){
         let timer = setInterval(()=>{
           //获取
           GetSaveTagsTaskProgress(res.data).then(val=>{
+            console.log(val)
             //清除定时器,关闭加载中
             if (val.data.status === 2 || val.data.status === 3) {
-              console.log(val)
               clearInterval(timer)
               if(val.data.message){
                 message.info(val.data.message)
               }
+              $("div").removeClass("effective-editor")
               this.setState({ loading: false })
               if (val.data.resultData !== null) {
                 let { dataTypes, tree } = val.data.resultData
@@ -458,7 +478,7 @@ class RealTime extends PureComponent{
   }
   //新增变量
   addTags = () => {
-    const { dataSource, total, count } = this.state;
+    const { dataSource, count } = this.state;
     let tagObj = {
       key: count + 1,
       id: "00000000-0000-0000-0000-000000000000",
@@ -474,8 +494,17 @@ class RealTime extends PureComponent{
       editable: true
     }
     this.setState(state => {
-      return { dataSource: [...dataSource, tagObj], count: count+1}
+      return {
+        dataSource: [...dataSource, tagObj],
+        count: count + 1,
+        modifyTagsList: [...state.modifyTagsList, tagObj],
+        canSubmit: {
+          canSubmit: false,
+          message: "变量名不可为空，请重新输入"
+        }
+      }
     })
+    PubSub.publish("modifyTags", [...this.state.modifyTagsList, tagObj])
   }
   //删除变量
   delTags = () => {
@@ -560,7 +589,7 @@ class RealTime extends PureComponent{
         editable: true,
       },
       {
-        title: '字符串长度',
+        title: '字符长度',
         dataIndex: 'stringLength',
         width: '100px',
         editable: true,
@@ -601,16 +630,17 @@ class RealTime extends PureComponent{
             let result = mes.data.resultData
             console.log(mes)
             if ( mes.data.status === 2 ||  mes.data.status === 3) {
-              this.setState({
-                loading: false,
-                dataTypes: result.dataTypes,
-                dataSource: result.tags,
-                count: result.total
+              message.info(mes.data.message)
+              
+              this.setState(state => {
+                return {
+                  loading: false,
+                  count: mes.data.message === "导入成功" ? result.total : state.count,
+                  dataSource: result.tags !== null ? result.tags : state.dataSource,
+                  treeData: result.tree !== null ? result.tree : state.treeData,
+                  dataTypes: result.dataTypes !== null ? result.dataTypes : state.dataTypes
+                }
               })
-              if (result.tree !== null) {
-                this.setState({treeData: result.tree})
-              }
-              message.info( mes.data.message)
               clearInterval(getProcessTimer)
             }
           })
@@ -680,6 +710,7 @@ class RealTime extends PureComponent{
                 }}
                 gist={gist}
                 dataSource={dataSource}
+                activeNode={this.state.activeNode}
                 activeNodeType={this.state.activeNodeType}
                 tableDataTypes={this.state.tableDataTypes}
                 loadMore={this.loadMore}
@@ -687,6 +718,7 @@ class RealTime extends PureComponent{
                 rowKey={record => {
                   return record.id
                 }}
+                loading={this.state.tableLoading}
                 columns={this.tableColums(activeNodeType).map(el => {
                   return {
                     title: el.title,
@@ -712,6 +744,13 @@ class RealTime extends PureComponent{
             {
               this.state.modalContent
             }
+          </Modal>
+          <Modal
+            title="提示"
+            visible={this.state.comfirmVisible}
+            onCancel={this.handleCancel}
+          >
+            {this.state.comfirmContent}
           </Modal>
         </Spin>
       </div>

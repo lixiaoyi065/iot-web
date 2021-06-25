@@ -47,7 +47,9 @@ class ZTree extends PureComponent {
           <Dropdown trigger={["click"]} overlay={() => {
             return this.props.optionDeviceMenu(data.nodeID, data.children.length)
           }} placement="bottomCenter" arrow>
-            <span className="ant-tree-title-operationNode"></span>
+            <span className="ant-tree-title-operationNode" onClick={(e) => {
+              e.stopPropagation();
+            }}></span>
           </Dropdown>
         </>)
       } else {
@@ -79,7 +81,10 @@ class ZTree extends PureComponent {
                   type: child.nodeType
                 })
               }} placement="bottomCenter" arrow>
-                <span className="ant-tree-title-operationNode"></span>
+                <span className="ant-tree-title-operationNode" onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                ></span>
               </Dropdown>
             </>)
           } else {

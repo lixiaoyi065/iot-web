@@ -84,11 +84,27 @@ export function isEffectiveEditor(gist, key, dataIndex, val) {
  
   return gist.some(item => {
     if (item.key === key) {
-      console.log(item, item[dataIndex], val)
       return item[dataIndex] === val
     }
     return false
   })
+}
+/**
+ * 判断数组中对应的对象跟被判断的对象是否一致
+ * @param gist 依据（数组）
+ * @param newObj 判断对象
+ */
+export function isFit(gist, newObj) {
+  for (let i = 0; i < gist.length;i++){
+    if (gist[i].key === newObj.key) {
+      for (let key in gist[i]) {
+        if (newObj[key] !== gist[i][key]) {
+          return false
+        }
+      }
+      return true
+    }
+  }
 }
 
 /**

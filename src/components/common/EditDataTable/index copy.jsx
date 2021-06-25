@@ -1,12 +1,16 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
-import { Table, Input, Form, Select } from 'antd';
+import React, { useContext, useRef } from 'react';
+import { Table, Input, Form, Select, message } from 'antd';
+import PubSub from 'pubsub-js'
 import "./index.less"
 
-import { isEffectiveEditor } from 'utils'
+import { isEffectiveEditor, isRepeat } from 'utils'
+
+import { VerifyTagName, VerifyAddress } from 'api/variable'
 
 const EditableContext = React.createContext(null);
 const { Option } = Select;
 
+let modifyTags = [];
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -19,6 +23,7 @@ const EditableRow = ({ index, ...props }) => {
 };
 
 const EditableCell = ({
+  dataSource,
   gist,
   title,
   editable,
@@ -28,86 +33,170 @@ const EditableCell = ({
   handleSave,
   type,
   content,
+  activeNode,
+  activeNodeType,
   ...restProps
 }) => {
-  const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
-  useEffect(() => {
-    if (editing && type !== "select") {
-      inputRef.current.focus();
-    }
-  }, [editing]);
 
-  const toggleEdit = () => {
-    setEditing(!editing);
+  PubSub.publish("canSubmit", {
+    canSubmit: true,
+    message: ""
+  })
+
+  const toggleEdit = (value) => {
     form.setFieldsValue({
-      [dataIndex]: record[dataIndex]
+      [dataIndex]: value
     });
   };
 
+
+  //有效编辑
+  const isEffective = (e, value, id = null) => {
+    let flag = isEffectiveEditor(gist, record.key, dataIndex, value)
+
+    if (!flag) {
+      if (id !== null) {
+        document.getElementById(id).parentNode.parentNode.classList.add("effective-editor")
+      } else {
+        e.target.parentNode.className = "ant-form-item-control-input-content effective-editor"
+      }
+    } else {
+      if (id !== null) {
+        document.getElementById(id).parentNode.parentNode.classList.remove("effective-editor")
+      } else {
+        e.target.parentNode.className = "ant-form-item-control-input-content"
+      }
+    }
+  }
+
+  //变量名校验
+  const isRepeatName = (e) => {
+    if (!isRepeat(dataSource, record.key, dataIndex, e.target.value)) {
+      // if (e.target.value === "") {
+      //   message.error("变量名不可为空，请重新输入");
+      //   // PubSub.publish("canSubmit", {
+      //   //   canSubmit: false,
+      //   //   message: "变量名不可为空，请重新输入"
+      //   // })
+      // }else if (!(/^[a-zA-Z_]([a-zA-Z0-9_.]+)?$/).test(e.target.value)) {
+      //   console.log(")00")
+      //   message.error("变量名格式错误，请输入字母、数字、下划线、点中的一种或多种，且必须以字母或下划线开头")
+      //   // PubSub.publish("canSubmit", {
+      //   //   canSubmit: false,
+      //   //   message: "变量名格式错误，请输入字母、数字、下划线、点中的一种或多种，且必须以字母或下划线开头"
+      //   // })
+      // } else {
+        VerifyTagName({//后台校验
+          tagId: record.id,
+          tagName: e.target.value,
+          type: activeNodeType
+        }).then(res => {
+          if (res.code !== 0) {
+            message.error(res.msg)
+            // PubSub.publish("canSubmit", {
+            //   canSubmit: false,
+            //   message: res.msg
+            // })
+          } else {
+            // PubSub.publish("canSubmit", {
+            //   canSubmit: true,
+            //   message: ""
+            // })
+          }
+        })
+      // }
+    } else {
+      message.error("变量名" + e.target.value + "已存在，请重新输入")
+    }
+  }
+
+  //变量地址校验
+  const addressVerify = (e, dataList) => {
+    VerifyAddress({
+      nodeId: activeNode,
+      type: activeNodeType,
+      dataType: dataList.dataType,
+      address: e.target.value,
+      length: dataList.stringLength
+    }).then(res => {
+      console.log(res)
+      if (res.code !== 0) {
+        message.error(res.msg)
+        // PubSub.publish("canSubmit", {
+        //   canSubmit: false,
+        //   message: res.msg
+        // })
+      } else {
+        // PubSub.publish("canSubmit", {
+        //   canSubmit: true,
+        //   message: ""
+        // })
+      }
+    })
+  }
+
+  const descVerify = (e) => {
+    // if ((/[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\U00020000-U0002EBEF]/).test(e.target.value) && e.target.value.length > 24) {
+    //   message.error("变量描述文本过长，请重新输入，不超过48个英文字符、24个汉字")
+      
+    //   PubSub.publish("canSubmit", {
+    //     canSubmit: false,
+    //     message: "变量描述文本过长，请重新输入，不超过48个英文字符、24个汉字"
+    //   })
+    // }
+  }
+
   const check = async (e) => {
     try {
-      const values = await form.validateFields();
-      toggleEdit();
-      console.log(e.target)
-      e.target.parentNode.parentNode.style.color = "red"
-      // if (isEffectiveEditor(gist, record.key, dataIndex, values[dataIndex])) {
-      //   e.target.style.backgroundColor = "red"
-      // } else {
-      //   e.target.style.backgroundColor = "#fff"
-      // }
-      // console.log(inputRef2)
-
-      console.log(isEffectiveEditor(gist, record.key, dataIndex, values[dataIndex]))
-      handleSave(dataIndex, values[dataIndex], { ...record, ...values });
-      return isEffectiveEditor(gist, record.key, dataIndex, values[dataIndex])
+      const dataList = await form.validateFields();
+      toggleEdit(e.target.value)
+      if (dataIndex === "name") { //变量名校验
+        isRepeatName(e)
+      } else if (dataIndex === "address") { //变量地址校验
+        addressVerify(e, dataList)
+      } else if (dataIndex === "desc") {
+        descVerify(e)
+      }
+      handleSave(dataIndex, e.target.value, { ...record, ...dataList });
+      isEffective(e, e.target.value);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
   };
 
-  const tdClick = (e) => {
-    console.log(e.target)
+  const selectChange = async (e, id) => {
+    try {
+      const dataList = await form.validateFields();
+      handleSave(dataIndex, e, { ...record, ...dataList });
+      isEffective(e, e, id);
+    } catch (errInfo) {
+      console.log('Save failed:', errInfo);
+    }
   }
 
   let childNode = children;
 
-  if (editable && record.editable) {
-    childNode = editing ? (
-      childNode = type === "select" ? (
-        <Form.Item
-          name={dataIndex} defaultValue={content[0]}
-        >
-          <Select onChange={check}>
-            {
-              content.map((el, idx) => {
-                return <Option value={el} key={el + idx}>{el}</Option>
-              })
-            }
-          </Select>
-        </Form.Item>
-      ) : (
-        <Form.Item name={dataIndex}>
-          <Input ref={inputRef} autoComplete='off' />
-        </Form.Item>
-      )
-    ) : <div
-      className="editable-cell-value-wrap"
-      onClick={toggleEdit}
-    >
-      {children}
-    </div>
-  } else {
-    <div
-      className="editable-cell-value-wrap"
-      onClick={toggleEdit}
-    >
-      {children}
-    </div>
+  if (record && record.editable) {
+    childNode = type === "select" ? (
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
+        <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
+          {
+            content.map((el, idx) => {
+              return <Option value={el} key={el + idx}>{el}</Option>
+            })
+          }
+        </Select>
+      </Form.Item>
+    ) : (
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
+        <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
+      </Form.Item>
+    )
   }
 
-  return <td {...restProps} onClick={tdClick}>{childNode}</td>;
+  return <td {...restProps}>{childNode}</td>;
 };
 
 class EditableTable extends React.Component {
@@ -131,22 +220,44 @@ class EditableTable extends React.Component {
   }
 
   handleSave = (dataIndex, val, row) => {
-    this.setState((state) => {
-      for (let i = 0; i < state.dataSource.length; i++) {
-        if (state.dataSource[i].key === row.key) {
-          state.dataSource[i][dataIndex] = val
-          state.dataSource[i][dataIndex + "edit"] = true
-          return {
-            dataSource: state.dataSource,
-          }
+    // this.setState((state) => {
+    //   for (let i = 0; i < state.dataSource.length; i++) {
+    //     if (state.dataSource[i].key === row.key) {
+    //       state.dataSource[i][dataIndex] = val
+    //       return {
+    //         dataSource: state.dataSource,
+    //       }
+    //     }
+    //   }
+    // })
+    if (modifyTags.length > 0) {
+      let index = -1;
+      //判断是否已经存在
+      let isHas = modifyTags.some((item, i) => {
+        if (item.key === row.key) {
+          index = i;
+          return true
+        } else {
+          index = -1;
+          return false
         }
+      })
+      if (isHas) {
+        //存在则修改
+        modifyTags[index][dataIndex] = val
+      } else {
+        //否则添加
+        modifyTags.push(row)
       }
-    })
+    } else {
+      modifyTags.push(row)
+    }
+
+    PubSub.publish("modifyTags", modifyTags)
   };
 
   render() {
     const { dataSource } = this.state;
-    console.log(this.state.dataSource)
     const components = {
       body: {
         row: EditableRow,
@@ -160,12 +271,15 @@ class EditableTable extends React.Component {
       return {
         ...col,
         onCell: (record) => ({
+          dataSource: dataSource,
           gist: this.props.gist,
           record,
           editable: col.editable,
           dataIndex: col.dataIndex,
           title: col.title,
           type: col.type,
+          activeNode: this.props.activeNode,
+          activeNodeType: this.props.activeNodeType,
           content: col.content,
           handleSave: this.handleSave
         }),
@@ -185,7 +299,7 @@ class EditableTable extends React.Component {
         </div>
         <div className="paging">
           {
-            dataSource.length > 0 ? (
+            dataSource && dataSource.length > 0 ? (
               <>
                 {
                   this.props.count - dataSource.length > 0 ? (
