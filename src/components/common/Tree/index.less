@@ -1,0 +1,145 @@
+.activeStyle {
+  background: #4270E4;
+  color: #fff;
+}
+
+.hoverStyle {
+  background: #E4EEFF;
+  color: #252525;
+}
+
+.moveStyle(@url) {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 11px;
+  width: 14px;
+  height: 14px;
+  background: url(@url) no-repeat;
+  background-size: 100%;
+}
+
+.optStyle(@url) {
+  position: absolute;
+  right: 0;
+  top: 9px;
+  display: none;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  line-height: 36px;
+  background: url(@url) no-repeat;
+  background-size: 100%;
+  cursor: pointer;
+}
+
+.syc-tree-list {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  list-style: none;
+
+  &.syc-tree-list-nohover {
+    .syc-tree-node {
+      &:hover {
+        background-color: #fff;
+        color: #252525;
+      }
+    }
+  }
+}
+
+
+.moveTreeNode {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  z-index: 2;
+  opacity: 0.5;
+}
+
+.syc-tree-node {
+  position: relative;
+  display: flex;
+  line-height: 36px;
+  margin-top: 1px;
+  padding: 0 10px 0 45px;
+  font-family: PingFang SC;
+  font-weight: 500;
+  color: #252525;
+  cursor: pointer;
+  user-select: all;
+
+  &:hover {
+    .hoverStyle();
+
+    &::before {
+      .moveStyle("./img/move2.png");
+    }
+  }
+
+  .syc-tree-switcher {
+    display: inline-block;
+    width: 24px;
+    height: 36px;
+    line-height: 36px;
+
+    .syc-tree-switcher-icon {
+      display: block;
+      width: 100%;
+      height: 100%;
+      color: inherit;
+      cursor: pointer;
+      text-align: center;
+      transition: all ease 0.3s;
+
+      &.syc-tree-switcher-icon-open {
+        transform: rotate(90deg);
+      }
+    }
+
+    .syc-tree-node-status {
+      width: 18px;
+      height: 18px;
+
+      &.syc-status-on {
+        color: green;
+      }
+
+      &.syc-status-off {
+        color: red;
+      }
+
+      &.syc-status-init {
+        color: gray;
+      }
+    }
+  }
+
+  .syc-tree-node-name {
+    flex: 1;
+    padding: 0 4px;
+    user-select: none;
+  }
+
+  &.syc-tree-activeNode {
+    .activeStyle;
+
+    &:hover {
+      &::before {
+        .moveStyle("./img/move2_active.png");
+      }
+    }
+  }
+}
+
+.move-reference {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: #409EFF;
+  z-index: 2;
+}

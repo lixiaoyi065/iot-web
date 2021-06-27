@@ -4,7 +4,7 @@ import PubSub from "pubsub-js";
 import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-import ZTree from 'components/common/Tree'
+import ZTree from 'components/common/Ztree'
 import EditableTable from 'components/common/EditDataTable/index.jsx'
 
 import AddEqu from './components/AddEqu'
@@ -308,12 +308,12 @@ class RealTime extends PureComponent{
     }
 
     let tags = {
-      nodeId: info.nodeID,
-      type: info.nodeType
+      nodeId: info.node.key,
+      type: info.node.nodeType
     }
     this.setState({
-      activeNode: info.nodeID,
-      activeNodeType: info.nodeType
+      activeNode: info.node.key,
+      activeNodeType: info.node.nodeType
     })
 
     this.initTagList(tags)
@@ -672,7 +672,6 @@ class RealTime extends PureComponent{
                       className: "optAdd",
                       placement: "bottomCenter"
                     }}
-                    pathName="variable"
                     move={true}
                     option={ true }
                     nodeDatas={ treeData}

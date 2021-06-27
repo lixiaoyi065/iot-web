@@ -12,14 +12,19 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    let token = getCookie("accessToken")
-    if (token) {
-        config.headers['Authorization'] = token;
-    } else {
-      message.error("你还没有登录哦, 确认将跳转登录界面进行登录!")
-      return 
+    try{
+      let token = getCookie("accessToken")
+      if (token) {
+          config.headers['Authorization'] = token;
+      }
+      //  else {
+      //   message.error("你还没有登录哦, 确认将跳转登录界面进行登录!")
+      //   return 
+      // }
+      return config;
+    }catch(err){
+      message.error(err)
     }
-    return config;
   },
   error => {
     console.log(error)
