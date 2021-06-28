@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+ import React, { PureComponent } from 'react'
 import { Modal, message, Spin } from "antd"
 import PubSub from "pubsub-js";
 import $ from "jquery"
@@ -45,7 +45,7 @@ class RealTime extends PureComponent{
     comfirmContent: "",
     comfirmVisible: false
   }
-
+  searchRef = React.createRef()
   componentDidMount() {
     this.getTreeStructure();
     PubSub.subscribe("modifyTags", (msg, data) => {
@@ -480,7 +480,7 @@ class RealTime extends PureComponent{
   addTags = () => {
     const { dataSource, count } = this.state;
     let tagObj = {
-      key: count + 1,
+      key: `${count + 1}`,
       id: "00000000-0000-0000-0000-000000000000",
       no: count+1,
       name: "",
@@ -692,6 +692,7 @@ class RealTime extends PureComponent{
           </div>
           <div className="tableList">
             <Search
+              ref={ this.searchRef }
               importProps={this.importProps}
               dataTypes={this.state.dataTypes}
               type={activeNodeType}

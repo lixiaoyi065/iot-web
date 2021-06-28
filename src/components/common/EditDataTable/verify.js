@@ -48,7 +48,7 @@ export function descVerify(value) {
 export function nameVerify(value, dataSource, record, dataIndex, activeNodeType) {
   if (!isRepeat(dataSource, record.key, dataIndex, value)) {
     if (value === "") {
-      message.error("modifyListmodifyList");
+      message.error("变量名不可为空，请重新输入");
       PubSub.publish("canSubmit", {
         canSubmit: false,
         message: "变量名不可为空，请重新输入"

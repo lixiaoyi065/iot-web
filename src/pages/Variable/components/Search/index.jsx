@@ -8,11 +8,9 @@ import addOpt from 'assets/img/variable/add2.png'
 import delOpt from 'assets/img/variable/del.png'
 import moreOpt from 'assets/img/variable/more.png'
 
-// style={{display:"none"}}
 class Search extends PureComponent {
-
-  moreMenu = (
-    <DrowDownMenu lists={[
+  moreMenu = () => {
+    let list = [
       {
         key: "currentTableImport",
         name: <span>导入当前点表
@@ -24,16 +22,23 @@ class Search extends PureComponent {
         key: "currentTableExport",
         name: <span>导出当前点表</span>,
       }
-    ]}
-      onClick={(e) => { this.props.menuClick(e) }}
-    >
-    </DrowDownMenu>
-  )
+    ]
+    if (this.props.type === 1) {
+      list.shift();
+    }
+    return (
+      <DrowDownMenu lists={list}
+        onClick={(e) => { this.props.menuClick(e) }}
+      >
+      </DrowDownMenu>
+    )
+  }
 
   render() {
     return (
       <div className="search-contain">
         <Form
+          ref="formRef"
           layout="inline"
           onFinish={this.props.searchForm}
           onFinishFailed={this.onFinishFailed}
@@ -70,7 +75,7 @@ class Search extends PureComponent {
           <Button className="ant-button-normal"
             onClick={this.props.saveList}
             disabled={this.props.type === 1 ? true : false}>保存</Button>
-          <Button type="primary" onClick={this.props.resetTags} style={{ margin: 0 }} disabled={this.props.type === 1 ? true : false}>重置</Button>
+          <Button type="primary" onClick={this.props.resetTags} style={{ margin: 0 }}>重置</Button>
           <span className="divider"></span>
           <Button className="ant-btn-opt-sm ant-btn-opt-primary" onClick={this.props.addTags} disabled={this.props.type === 1 ? true : false}>
             <img className="btn-icon" src={addOpt} alt="" />
@@ -78,9 +83,12 @@ class Search extends PureComponent {
           <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={this.props.delTags} disabled={this.props.type === 1 ? true : false}>
             <img className="btn-icon" src={delOpt} alt="" />
           </Button>
-          <Dropdown overlay={this.moreMenu} trigger={['click']} placement="bottomRight" arrow>
-            <Button className="ant-btn-opt-sm ant-btn-opt-normal"><img className="btn-icon" src={moreOpt} alt="" /></Button>
-          </Dropdown>
+          {
+            this.props.type === 1 || this.props.type === 2 || this.props.type === 4 ?
+            <Dropdown overlay={this.moreMenu} trigger={['click']} placement="bottomRight" arrow>
+              <Button className="ant-btn-opt-sm ant-btn-opt-normal"><img className="btn-icon" src={moreOpt} alt="" /></Button>
+            </Dropdown> : <></>
+          }
         </div>
       </div>
     )

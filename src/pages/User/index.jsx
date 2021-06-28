@@ -7,6 +7,7 @@ import DataTable from 'components/common/Table'
 import Search from './components/Search'
 import ModifyPw from './components/ModifyPw'
 import AddUserPane from './components/AddUser'
+import img404 from 'assets/img/common/404.png'
 
 import {getCookie} from 'utils'
 
@@ -53,9 +54,7 @@ class UserList extends PureComponent {
       if (res.code === 0) {
         message.info("添加成功")
         this.GetUserList("");
-        this.setState({
-          isShow: false
-        })
+        this.onCancel();
       } else {
         message.error("添加失败："+ res.msg)
       }
@@ -66,9 +65,7 @@ class UserList extends PureComponent {
       if (res.code === 0) {
         message.info("编辑成功")
         this.GetUserList("");
-        this.setState({
-          isShow: false
-        })
+        this.onCancel();
       } else {
         message.error("编辑失败："+ res.msg)
       }
@@ -109,7 +106,12 @@ class UserList extends PureComponent {
       userID: key,
       userPassword: res.userPassword
     }).then(res => {
-      console.log(res)
+      if (res.code === 0) {
+        message.info(res.msg)
+        this.onCancel();
+      } else {
+        message.error(res.msg)
+      }
     })
   }
   //修改密码
@@ -132,78 +134,88 @@ class UserList extends PureComponent {
 
     return (
       <div className="tableList" style={{'paddingLeft': '25px'}}>
-        <Search searchForm={this.search} addUser={this.addUser} delUser={ this.delUser }/>
-        <div className="tableContain">
-          <DataTable
-            dataSource={this.state.dataSource}
-            rowSelection={{
-              columnWidth: "50px",
-              selectedRowKeys: this.state.selectedRowKeys,
-              onChange: this.onSelectChange,
-            }}
-            loadMore={this.loadMore}
-            count={this.state.count}
-            columns={[
-            {
-              title: '序号',
-              dataIndex: 'key',
-              width: "70px",
-              render: (key, i) => {
-                return <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span>
-              }
-            },
-            {
-              title: '用户账号',
-              dataIndex: 'userAccount',
-            },
-            {
-              title: '用户名称',
-              dataIndex: 'userName',
-            },
-            {
-              title: '电话号码',
-              dataIndex: 'phone',
-              width: '200px',
-            },
-            {
-              title: '操作',
-              dataIndex: 'userID',
-              render: (key, obj) => {
-                if (obj.userAccount === "SuperAdmin") {
-                  return <></>
-                } else {
-                  return (
-                    <>
-                      <button className="ant-opt-btn" onClick={() => {
-                      this.modifyUser(obj)
-                    }}>编辑</button>
-                      {
-                        getCookie("userName") === "SuperAdmin" ? (
-                          <button className="ant-opt-btn ant-opt-btn-normal"
-                            onClick={() => { this.modifyPw(key)} } style={{ "marginLeft": "20px" }}>修改密码</button>
-                        ): (
-                            <></>
+        {
+          getCookie("userName") === "SuperAdmin" ? (
+            <>
+              <Search searchForm={this.search} addUser={this.addUser} delUser={ this.delUser }/>
+              <div className="tableContain">
+                <DataTable
+                  dataSource={this.state.dataSource}
+                  rowSelection={{
+                    columnWidth: "50px",
+                    selectedRowKeys: this.state.selectedRowKeys,
+                    onChange: this.onSelectChange,
+                  }}
+                  loadMore={this.loadMore}
+                  count={this.state.count}
+                  columns={[
+                  {
+                    title: '序号',
+                    dataIndex: 'key',
+                    width: "70px",
+                    render: (key, i) => {
+                      return <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span>
+                    }
+                  },
+                  {
+                    title: '用户账号',
+                    dataIndex: 'userAccount',
+                  },
+                  {
+                    title: '用户名称',
+                    dataIndex: 'userName',
+                  },
+                  {
+                    title: '电话号码',
+                    dataIndex: 'phone',
+                    width: '200px',
+                  },
+                  {
+                    title: '操作',
+                    dataIndex: 'userID',
+                    render: (key, obj) => {
+                      if (obj.userAccount === "SuperAdmin") {
+                        return <></>
+                      } else {
+                        return (
+                          <>
+                            <button className="ant-opt-btn" onClick={() => {
+                            this.modifyUser(obj)
+                          }}>编辑</button>
+                            {
+                              getCookie("userName") === "SuperAdmin" ? (
+                                <button className="ant-opt-btn ant-opt-btn-normal"
+                                  onClick={() => { this.modifyPw(key)} } style={{ "marginLeft": "20px" }}>修改密码</button>
+                              ): (
+                                  <></>
+                              )
+                            }
+                          </>
                         )
                       }
-                    </>
-                  )
+                    }
+                  }
+                ]} />
+                
+                <Modal
+                  title="修改密码"
+                  visible={this.state.isShow}
+                  onCancel={this.onCancel}
+                  footer={null}
+                  width="460px"
+                >
+                {
+                  this.state.modalContent
                 }
-              }
-            }
-          ]} />
-          
-          <Modal
-            title="修改密码"
-            visible={this.state.isShow}
-            onCancel={this.onCancel}
-            footer={null}
-            width="460px"
-          >
-          {
-            this.state.modalContent
-          }
-          </Modal>
-        </div>
+                </Modal>
+              </div>
+            </>
+          ) :
+          <div className="error-page">
+            <img src={ img404 } alt="404"/>
+            <div className="error-msg">抱歉，您没有权限访问！</div>   
+          </div>
+        }
       </div>
     )
   }

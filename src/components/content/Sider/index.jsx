@@ -3,6 +3,7 @@ import { Layout } from 'antd'
 import { withRouter } from "react-router-dom";
 
 import store from 'store'
+import {getCookie} from 'utils'
 
 import MyNavLink from 'components/common/MyNavLink'
 
@@ -54,11 +55,14 @@ class PageSider extends PureComponent {
             <img className="normalImg" src={AuthorizationImg} alt="" />
             <span>授权管理</span>
           </MyNavLink>
-          <MyNavLink to="/index/user">
-            <img className="activeImg" src={UserActiveImg} alt="" />
-            <img className="normalImg" src={UserImg} alt="" />
-            <span>用户管理</span>
-          </MyNavLink>
+          {
+            getCookie("userName") === "SuperAdmin" ?
+              <MyNavLink to="/index/user">
+                <img className="activeImg" src={UserActiveImg} alt="" />
+                <img className="normalImg" src={UserImg} alt="" />
+                <span>用户管理</span>
+              </MyNavLink> : <></>
+          }
         </div>
       </Sider>
     )

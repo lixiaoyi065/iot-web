@@ -2,28 +2,19 @@ import React, { PureComponent } from 'react'
 import {Route,Switch,Redirect} from 'react-router-dom'
 import { Layout } from 'antd';
 
-import store from 'store'
-
-import Header from "./HeaderLayout"
-import PageSider from "components/content/Sider";
-
-import Variable from 'pages/Variable'
-import RealTime from 'pages/RealTime'
-import Operations from 'pages/Operations'
-import Authorization from 'pages/Authorization'
-import User from 'pages/User'
-
+import Load from 'utils/lazy'
 import './index.less'
 
 const { Content } = Layout;
+let Variable = Load(() => import('pages/Variable/index2')),
+RealTime = Load(() => import('pages/RealTime')),
+Operations = Load(() => import('pages/Operations')),
+Authorization = Load(() => import('pages/Authorization')),
+User = Load(() => import('pages/User')),
+Header = Load(() => import('./HeaderLayout')),
+PageSider = Load(() => import('components/content/Sider'))
 
 class BasicLayout extends PureComponent {
-  componentDidMount() {
-    store.subscribe(() => {
-      // this.setState({equLength: store.getState().length})
-    })
-  }
-
   state = {
     collapsed: false
   }
@@ -39,7 +30,7 @@ class BasicLayout extends PureComponent {
               <Route path="/index/variable" component={Variable}/>
               <Route path="/index/realTime" component={RealTime}/>
               <Route path="/index/operations" component={Operations}/>
-              <Route path="/index/authorization" component={Authorization}/>
+              <Route path="/index/authorization" component={Authorization} />
               <Route path="/index/user" component={User}/>
               <Redirect to="/index/variable"/>
             </Switch>

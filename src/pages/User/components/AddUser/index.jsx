@@ -50,10 +50,11 @@ export default class AddUserPane extends PureComponent{
             <Input placeholder="请输入用户名称" autoComplete="off"/>
           </Form.Item>
           <Form.Item name="phone" label="电话号码" rules={[
-              {
-                required: true,
-                message: "电话号码不能为空"
-              }, {
+            //   {
+            //     required: true,
+            //     message: "电话号码不能为空"
+            // },
+            {
                 pattern: /^1(3|4|5|6|7|8|9)\d{9}$/,
                 message: "请输入11位的手机号码"
               }]}>

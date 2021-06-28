@@ -172,11 +172,10 @@
 }
 
 .form-footer {
+  text-align: right;
   margin-top: 20px;
 
   .ant-form-item-control-input-content {
-    text-align: right;
-
     .ant-btn {
       padding: 0 26px;
       height: 32px;
@@ -555,4 +554,22 @@
   opacity: 0;
   cursor: pointer;
   display: none;
+}
+
+.error-page{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-60%);
+  text-align: center;
+
+  img{
+    width: 600px;
+    height: auto;
+  }
+  .error-msg{
+    line-height: 50px;
+    font-size: 16px;
+    color: #8F8F8F;
+  }
 }

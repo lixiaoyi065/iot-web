@@ -45,7 +45,6 @@ const EditableCell = ({
     });
   };
 
-
   //有效编辑
   const isEffective = (e, value, id = null) => {
     let flag = isEffectiveEditor(gist, record.key, dataIndex, value)
@@ -104,22 +103,22 @@ const EditableCell = ({
 
   if (record && record.editable) {
     childNode = type === "select" ? (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
-        <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
-          {
-            content.map((el, idx) => {
-              return <Option value={el} key={el + idx}>{el}</Option>
-            })
-          }
-        </Select>
-      </Form.Item>
+        <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
+          <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
+            {
+              content.map((el, idx) => {
+                return <Option value={el} key={el + idx}>{el}</Option>
+              })
+            }
+          </Select>
+        </Form.Item>
     ) : (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
         <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
       </Form.Item>
     )
   }
-
+  //<Tooltip placement="topLeft" title={record&&record[dataIndex]}></Tooltip>
   return <td {...restProps}>{childNode}</td>;
 };
 
@@ -163,19 +162,20 @@ class EditableTable extends React.Component {
     })
 
     if (isHas) {
-      //存在
       if (isFit(this.props.gist, row)) {//新旧对象一致,modifyTags移除该对象
         modifyTags.splice(index, 1)
       } else {
-        //修改
         modifyTags[index][dataIndex] = val
       }
     } else {
       //否则添加
       modifyTags.push(row)
     }
-    console.log(modifyTags)
     PubSub.publish("modifyTags", modifyTags)
+    PubSub.publish("canSubmit", {
+      canSubmit: modifyTags.length > 0 ? true : false,
+      message: modifyTags.length > 0 ? "" : "当前没有修改的内容"
+    })
   };
 
   render() {

@@ -24,15 +24,16 @@ class RealTime extends PureComponent{
     //获取整棵设备列表树结构
     GetTreeStructure().then(res => {
       let allcheck = [];
-      res.data.forEach(data => {
-        if (data.children.length > 0) {
-          data.children.forEach(child => {
-            allcheck.push(child.nodeID)
-          })
-        }
-        allcheck.push(data.nodeID)
-      })
-      console.log(res.data)
+      if (res.data && res.data.length > 0) {
+        res.data.forEach(data => {
+          if (data.children.length > 0) {
+            data.children.forEach(child => {
+              allcheck.push(child.nodeID)
+            })
+          }
+          allcheck.push(data.nodeID)
+        })
+      }
       this.setState({ treeData: res.data, allNodeId: allcheck })
     })
   }

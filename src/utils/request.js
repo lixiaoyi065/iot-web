@@ -12,19 +12,11 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    try{
-      let token = getCookie("accessToken")
-      if (token) {
-          config.headers['Authorization'] = token;
-      }
-      //  else {
-      //   message.error("你还没有登录哦, 确认将跳转登录界面进行登录!")
-      //   return 
-      // }
-      return config;
-    }catch(err){
-      message.error(err)
+    let token = getCookie("accessToken")
+    if (token) {
+      config.headers['Authorization'] = token;
     }
+    return config;
   },
   error => {
     console.log(error)
@@ -34,11 +26,16 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   response => {
-    const res = response
-    
-    return res.data
+    const res = response.data
+    if (res.Code === 4002) {
+      message.error("登录失效，请重新登录")
+      return []
+    } else {
+      return res
+    }
   },
   error => {
+    message.error(error)
     console.log('err' + error)
     return Promise.reject(error)
   }
