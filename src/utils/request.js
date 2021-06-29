@@ -35,9 +35,16 @@ service.interceptors.response.use(
     }
   },
   error => {
-    message.error(error)
-    console.log('err' + error)
-    return Promise.reject(error)
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          message.error("登录失效，请重新登录")
+          break;
+        default:
+          break;
+      }
+    }
+    return Promise.reject(error.response.data)
   }
 )
 

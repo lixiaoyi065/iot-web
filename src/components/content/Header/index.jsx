@@ -4,8 +4,8 @@ import { withRouter } from "react-router-dom";
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-import {getCookie} from 'utils'
-import store from 'store'
+import { getCookie } from 'utils'
+import PubSub from 'pubsub-js';
 
 import equLogo from 'assets/img/index/equ.png'
 import './index.less'
@@ -13,12 +13,16 @@ import './index.less'
 class PageHeader extends PureComponent {
   state = {
     currentEqu: '定子线',
-    userName: getCookie("userName")
+    userName: getCookie("userName"),
+    toggleMenu: false
   }
 
   toggle = () => {
-    store.dispatch({
-      type: "collapsed"
+    this.setState(state => {
+      PubSub.publish("toggleMenu", !state.toggleMenu)
+      return {
+        toggleMenu: !state.toggleMenu
+      }
     })
   }
 
@@ -59,7 +63,7 @@ class PageHeader extends PureComponent {
         </div>
         <div className="flexContent">
           {/* {this.props.flexChildren} */}
-          {React.createElement(store.getState() ? MenuUnfoldOutlined : MenuFoldOutlined, {
+          {React.createElement(this.state.toggleMenu ? MenuUnfoldOutlined : MenuFoldOutlined, {
             className: 'trigger',
             onClick: this.toggle,
           })}

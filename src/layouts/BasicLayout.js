@@ -15,16 +15,13 @@ Header = Load(() => import('./HeaderLayout')),
 PageSider = Load(() => import('components/content/Sider'))
 
 class BasicLayout extends PureComponent {
-  state = {
-    collapsed: false
-  }
 
   render() {
     return (
       <Layout className="full-page">
-        <Header collapsed={this.state.collapsed}/>
+        <Header/>
         <Layout className="site-layout">
-          <PageSider collapsed={ this.state.collapsed }/>
+          <PageSider/>
           <Content className="site-layout-background">
             <Switch>
               <Route path="/index/variable" component={Variable}/>

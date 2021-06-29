@@ -13,7 +13,7 @@ let modifyTags = [];
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
-    <Form form={form} component={false}>
+    <Form form={form} component={false} >
       <EditableContext.Provider value={form}>
         <tr {...props} />
       </EditableContext.Provider>
@@ -30,8 +30,10 @@ const EditableCell = ({
   dataIndex,
   record,
   handleSave,
+  addressSearch,
   type,
   content,
+  changeTags,
   activeNode,
   activeNodeType,
   ...restProps
@@ -63,7 +65,7 @@ const EditableCell = ({
       }
     }
   }
- 
+
   const check = async (e) => {
     let val = e.target.value;
     try {
@@ -71,7 +73,7 @@ const EditableCell = ({
       toggleEdit(val)
       if (dataIndex === "name") {
         nameVerify(val, dataSource, record, dataIndex, activeNodeType)
-      }else if (dataIndex === "address") { //变量地址校验
+      } else if (dataIndex === "address") { //变量地址校验
         addressVerify(val, {
           nodeId: activeNode,
           type: activeNodeType,
@@ -79,7 +81,7 @@ const EditableCell = ({
           address: val,
           length: dataList.stringLength
         })
-      }else if (dataIndex === "desc") {
+      } else if (dataIndex === "desc") {
         descVerify(val)
       }
       handleSave(dataIndex, val, { ...record, ...dataList });
@@ -103,20 +105,27 @@ const EditableCell = ({
 
   if (record && record.editable) {
     childNode = type === "select" ? (
-        <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
-          <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
-            {
-              content.map((el, idx) => {
-                return <Option value={el} key={el + idx}>{el}</Option>
-              })
-            }
-          </Select>
-        </Form.Item>
-    ) : (
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
+        <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
+          {
+            content.map((el, idx) => {
+              return <Option value={el} key={el + idx}>{el}</Option>
+            })
+          }
+        </Select>
+      </Form.Item>
+    ) : (type === "input-group" ? (
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
+        <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onSearch={ (value, event)=>{addressSearch(value, event, record)} }/>
+      </Form.Item>
+    ): (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
         <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
       </Form.Item>
-    )
+    ))
+    if (changeTags) {
+      toggleEdit(record[dataIndex])
+    }
   }
   //<Tooltip placement="topLeft" title={record&&record[dataIndex]}></Tooltip>
   return <td {...restProps}>{childNode}</td>;
@@ -128,7 +137,8 @@ class EditableTable extends React.Component {
     this.ref = React.createRef();
     this.state = {
       height: 0,
-      dataSource: []
+      dataSource: [],
+      changeTags: false
     };
   }
 
@@ -136,7 +146,15 @@ class EditableTable extends React.Component {
     setTimeout(() => {
       this.setState({ height: this.ref.current.getBoundingClientRect().height - 50 })
     })
+    PubSub.subscribe("changeTags", (msg, data) => {
+      this.setState({ changeTags: data })
+    })
   }
+
+  componentWillUnmount() {
+    PubSub.unsubscribe("changeTags")
+  }
+
   static getDerivedStateFromProps(props, state) {
     state.dataSource = props.dataSource
     return null
@@ -203,7 +221,9 @@ class EditableTable extends React.Component {
           activeNode: this.props.activeNode,
           activeNodeType: this.props.activeNodeType,
           content: col.content,
-          handleSave: this.handleSave
+          changeTags: this.state.changeTags,
+          handleSave: this.handleSave,
+          addressSearch: this.props.addressSearch
         }),
       };
     });

@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
-import { Layout } from 'antd'
+import { Layout,Tooltip } from 'antd'
 import { withRouter } from "react-router-dom";
+import PubSub from 'pubsub-js';
 
-import store from 'store'
 import {getCookie} from 'utils'
 
 import MyNavLink from 'components/common/MyNavLink'
@@ -23,45 +23,91 @@ const { Sider } = Layout;
 
 class PageSider extends PureComponent {
   state = {
-    collapsed: store.getState()
+    collapsed: false
   }
 
   componentDidMount() {
-    console.log(store.getState())
-    this.setState({ collapsed: store.getState().collapsed })
+    PubSub.subscribe("toggleMenu", (msg, data) => {
+      this.setState({collapsed: data})
+    })
+  }
+  componentWillUnmount() {
+    PubSub.unsubscribe("toggleMenu")
   }
 
   render() {
     return (
       <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
         <div className="page-sider">
-          <MyNavLink to="/index/variable">
-            <img className="activeImg" src={VariableActiveImg} alt="" />
-            <img className="normalImg" src={VariableImg} alt="" />
-            <span>变量管理</span>
-          </MyNavLink>
-          <MyNavLink to="/index/realTime">
-            <img className="activeImg" src={RealTimeActiveImg} alt="" />
-            <img className="normalImg" src={RealTimeImg} alt="" />
-            <span>实时监测</span>
-          </MyNavLink>
-          <MyNavLink to="/index/operations">
-            <img className="activeImg" src={OperationsActiveImg} alt="" />
-            <img className="normalImg" src={OperationsImg} alt="" />
-            <span>远程运维</span>
-          </MyNavLink>
-          <MyNavLink to="/index/authorization">
-            <img className="activeImg" src={AuthorizationActiveImg} alt="" />
-            <img className="normalImg" src={AuthorizationImg} alt="" />
-            <span>授权管理</span>
-          </MyNavLink>
           {
-            getCookie("userName") === "SuperAdmin" ?
-              <MyNavLink to="/index/user">
-                <img className="activeImg" src={UserActiveImg} alt="" />
-                <img className="normalImg" src={UserImg} alt="" />
-                <span>用户管理</span>
-              </MyNavLink> : <></>
+            this.state.collapsed ?
+              <>
+                <Tooltip title="变量管理" placement="right">
+                  <MyNavLink to="/index/variable">
+                    <img className="activeImg" src={VariableActiveImg} alt="" />
+                    <img className="normalImg" src={VariableImg} alt="" />
+                    <span>变量管理</span>
+                  </MyNavLink>
+                </Tooltip>
+                <Tooltip title="实时监测" placement="right">
+                  <MyNavLink to="/index/realTime">
+                    <img className="activeImg" src={RealTimeActiveImg} alt="" />
+                    <img className="normalImg" src={RealTimeImg} alt="" />
+                    <span>实时监测</span>
+                  </MyNavLink>
+                </Tooltip>
+                <Tooltip title="远程运维" placement="right">
+                  <MyNavLink to="/index/operations">
+                    <img className="activeImg" src={OperationsActiveImg} alt="" />
+                    <img className="normalImg" src={OperationsImg} alt="" />
+                    <span>远程运维</span>
+                  </MyNavLink>
+                </Tooltip>
+                <Tooltip title="授权管理" placement="right">
+                  <MyNavLink to="/index/authorization">
+                    <img className="activeImg" src={AuthorizationActiveImg} alt="" />
+                    <img className="normalImg" src={AuthorizationImg} alt="" />
+                    <span>授权管理</span>
+                  </MyNavLink>
+                </Tooltip>
+                <Tooltip title="用户管理" placement="right">
+                  <MyNavLink to="/index/user">
+                    <img className="activeImg" src={UserActiveImg} alt="" />
+                    <img className="normalImg" src={UserImg} alt="" />  
+                    <span>用户管理</span>
+                  </MyNavLink>
+                </Tooltip>
+              </> :
+              <>
+                <MyNavLink to="/index/variable">
+                  <img className="activeImg" src={VariableActiveImg} alt="" />
+                  <img className="normalImg" src={VariableImg} alt="" />
+                  <span>变量管理</span>
+                </MyNavLink>
+                <MyNavLink to="/index/realTime">
+                  <img className="activeImg" src={RealTimeActiveImg} alt="" />
+                  <img className="normalImg" src={RealTimeImg} alt="" />
+                  <span>实时监测</span>
+                </MyNavLink>
+                <MyNavLink to="/index/operations">
+                  <img className="activeImg" src={OperationsActiveImg} alt="" />
+                  <img className="normalImg" src={OperationsImg} alt="" />
+                  <span>远程运维</span>
+                </MyNavLink>
+                <MyNavLink to="/index/authorization">
+                  <img className="activeImg" src={AuthorizationActiveImg} alt="" />
+                  <img className="normalImg" src={AuthorizationImg} alt="" />
+                  <span>授权管理</span>
+                </MyNavLink>
+                {
+                  getCookie("userName") === "SuperAdmin" ?
+                    <MyNavLink to="/index/user">
+                      <img className="activeImg" src={UserActiveImg} alt="" />
+                      <img className="normalImg" src={UserImg} alt="" />  
+                      <span>用户管理</span>
+                    </MyNavLink> : <></>
+                }
+              </>
           }
         </div>
       </Sider>

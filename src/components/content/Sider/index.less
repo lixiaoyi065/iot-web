@@ -2,12 +2,16 @@
   width: 100%;
   height: 100%;
 
-  .menu-list {
+  .menu-list,.ant-tooltip-open {
     display: block;
     width: 100%;
     line-height: 50px;
     padding: 0 10px 0 45px;
     color: #333;
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all ease 0.2s;
 
     img {
       width: 20px;
@@ -45,6 +49,15 @@
       .activeImg {
         display: inline-block;
       }
+    }
+  }
+}
+.ant-layout-sider-collapsed{
+  .menu-list,.ant-tooltip-open{
+    padding-left: 30px; 
+
+    span{
+      opacity: 0;
     }
   }
 }

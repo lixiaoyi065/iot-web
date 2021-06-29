@@ -1,13 +1,11 @@
 import React, {PureComponent} from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";//引入routerdom
-// import asyncComponent from 'utils/asyncComponent'
+import Load from 'utils/lazy'
 import PrivateRoute from './PrivateRoute'
 
-import Login from 'pages/Login'//导入的组件
-import Index from "@/layouts/BasicLayout";
 //按需导入
-// const Login = asyncComponent(() => import("pages/Login"))
-// const BasicLayout = asyncComponent(()=>import("@/layouts/BasicLayout"))
+const Login = Load(() => import("pages/Login"))
+const Index = Load(()=>import("@/layouts/BasicLayout"))
 
 class Router extends PureComponent {
   render() {

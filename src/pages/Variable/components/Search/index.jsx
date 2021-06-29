@@ -13,10 +13,7 @@ class Search extends PureComponent {
     let list = [
       {
         key: "currentTableImport",
-        name: <span>导入当前点表
-          <input type="file" className="upload-file" name="file" multiple="multiple" onChange={this.props.importProps} id="importFile"
-            accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-        </span>
+        name: <span>导入当前点表</span>
       },
       {
         key: "currentTableExport",
@@ -37,6 +34,8 @@ class Search extends PureComponent {
   render() {
     return (
       <div className="search-contain">
+        <input type="file" className="upload-file" name="file" multiple="multiple" onChange={this.props.importProps} id="importFile"
+        accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
         <Form
           ref="formRef"
           layout="inline"
