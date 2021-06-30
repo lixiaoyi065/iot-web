@@ -37,16 +37,16 @@ class EditableTable extends PureComponent {
 
   componentDidMount() {
     setTimeout(() => {
-      this.setState({ height: this.ref.current.getBoundingClientRect().height - 50 })
+      // this.setState({ height: this.ref.current.getBoundingClientRect().height - 50 })
     })
     PubSub.subscribe("changeTags", (msg, data) => {
       this.setState({ changeTags: data })
     })
   }
   components = {
-		header: {
-			cell: ResizeableTitle,
-	 	},
+    header: {
+      cell: ResizeableTitle,
+    },
   };
   handleResize = index => (e, { size }) => {
     this.setState(({ columns }) => {
@@ -62,19 +62,19 @@ class EditableTable extends PureComponent {
 
   render() {
     const { dataSource } = this.state;
-   
+
     const columns = this.state.columns.map((col, index) => ({
       ...col,
       onHeaderCell: column => ({
         width: column.width,
         onResize: this.handleResize(index),
       }),
-    })); 
+    }));
     return (
       <>
         <div className="table-contain" ref={this.ref}>
           <Table
-            bordered 
+            bordered
             components={this.components}
             rowSelection={this.props.rowSelection}
             dataSource={dataSource}

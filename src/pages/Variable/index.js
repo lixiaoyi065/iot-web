@@ -4,7 +4,7 @@ import PubSub from "pubsub-js";
 import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-import ZTree from 'components/common/Tree'
+import ZTree from './components/Ztree'
 // import EditableTable from 'components/common/EditDataTable/index.jsx'
 import Table from './components/Table/index.jsx'
 

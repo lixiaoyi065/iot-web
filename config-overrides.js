@@ -1,5 +1,5 @@
 //配置具体的修改规则
-const { override, fixBabelImports, addLessLoader, addWebpackAlias } = require('customize-cra');
+const { override, fixBabelImports, addLessLoader, addWebpackAlias, addWebpackExternals } = require('customize-cra');
 const path = require("path")
 
 module.exports = override(
@@ -78,7 +78,9 @@ module.exports = override(
     ["store"]: path.resolve(__dirname, './src/store'),
     ["utils"]: path.resolve(__dirname, './src/utils')
   }),
-  addWebpackAlias({
-    // 'react-virtualized' : 'react-virtualized/dist/commonjs' , 
+  // externals
+  addWebpackExternals({
+    // 注意对应的在public/index.html引入jquery的远程文件地址
+    "jQuery": "jQuery"
   })
 );
