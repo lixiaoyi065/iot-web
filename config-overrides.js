@@ -77,5 +77,8 @@ module.exports = override(
     ["components"]: path.resolve(__dirname, "src/components"),
     ["store"]: path.resolve(__dirname, './src/store'),
     ["utils"]: path.resolve(__dirname, './src/utils')
+  }),
+  addWebpackAlias({
+    // 'react-virtualized' : 'react-virtualized/dist/commonjs' , 
   })
 );

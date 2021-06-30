@@ -40,6 +40,9 @@ service.interceptors.response.use(
         case 401:
           message.error("登录失效，请重新登录")
           break;
+        case 504:
+          message.error("服务器未响应")
+          break;
         default:
           break;
       }

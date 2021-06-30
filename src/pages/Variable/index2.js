@@ -21,6 +21,7 @@ import {
   GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress, GetAddressEditInfo
 } from 'api/variable'
 
+
 class RealTime extends PureComponent{
   state = {
     loading: false, //保存时显示加载中
@@ -306,7 +307,6 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
-    console.log(info)
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
@@ -537,7 +537,7 @@ class RealTime extends PureComponent{
       no: count+1,
       name: "",
       desc: "",
-      dataType: "",
+      dataType: this.state.tableDataTypes[0],
       max: "",
       min: "",
       address: "",
@@ -555,6 +555,8 @@ class RealTime extends PureComponent{
           message: "变量名不可为空，请重新输入"
         }
       }
+    }, () => {
+      $(`#dataType${count+1}`).parent().parent().addClass("effective-editor")
     })
     PubSub.publish("modifyTags", [...this.state.modifyTagsList, tagObj])
   }
@@ -607,7 +609,7 @@ class RealTime extends PureComponent{
       {
         title: '序号',
         dataIndex: 'no',
-        width: "50px",
+        width: 50,
         editable: false,
         render: (key, i) => {
           return <span className="serialNum">{this.state.dataSource.indexOf(i) +1}</span>
@@ -633,13 +635,13 @@ class RealTime extends PureComponent{
       columArr.push({
         title: '最大值',
         dataIndex: 'max',
-        width: '100px',
+        width: 100,
         editable: true,
       },
       {
         title: '最小值',
         dataIndex: 'min',
-        width: '100px',
+        width: 100,
         editable: true,
       })
     } else if (activeNodeType === 3 || activeNodeType === 4) {
@@ -653,13 +655,13 @@ class RealTime extends PureComponent{
       {
         title: '字符长度',
         dataIndex: 'stringLength',
-        width: '100px',
+        width: 100,
         editable: true,
       },
       {
         title: '缩放比',
         dataIndex: 'zoom',
-        width: '100px',
+        width: 100,
         editable: true,
       })
     }
@@ -723,26 +725,24 @@ class RealTime extends PureComponent{
     })
   }
 
-  onDrop = (info)=>{
-    console.log("onDrop",info)
-  }
-  onDragOver=(info)=>{
-    console.log("onDragOver",info)
-  }
   addressSearch = (value, event, row) => {
     GetAddressEditInfo({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType
     }).then(res => {
-      let config = AddressConfig(res.data, row)
-      console.log(config)
-      // this.setState({
-      //   modalContent: <div>{ config }</div>,
-      //   visible: true,
-      //   title: "选择地址"
-      // })
+      console.log(row.dataType)
+      this.setState({
+        modalContent: (
+          <AddressConfig data={res.data} row={row} key={ new Date()} onCancel={this.handleCancel} onFinish={ this.addressFinish }/>
+        ),
+        visible: true,
+        title: "选择地址"
+      })
     })
     // console.log(value, event, id)
+  }
+  addressFinish = (res) => {
+    console.log(res)
   }
     
   render() {
@@ -769,8 +769,6 @@ class RealTime extends PureComponent{
                     // defaultExpandAll={true}
                     optionGroupMenu={this.optionGroupMenu}
                     onSelect={this.onSelect}
-                    onDrop={this.onDrop}
-                    onDragOver={this.onDragOver}
                   />
                   : null
               }
@@ -814,7 +812,7 @@ class RealTime extends PureComponent{
                   return {
                     title: el.title,
                     dataIndex: el.dataIndex,
-                    width: el.width || '150px',
+                    width: el.width || 150,
                     ellipsis: {
                       showTitle: false,
                     },

@@ -5,7 +5,8 @@ import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Tree'
-import EditableTable from 'components/common/EditDataTable/index.jsx'
+// import EditableTable from 'components/common/EditDataTable/index.jsx'
+import Table from './components/Table/index.jsx'
 
 import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
@@ -546,7 +547,7 @@ class RealTime extends PureComponent{
       {
         title: '序号',
         dataIndex: 'no',
-        width: "50px",
+        width: 50,
         editable: false,
         render: (key) => {
           return <span className="serialNum">{key}</span>
@@ -572,13 +573,13 @@ class RealTime extends PureComponent{
       columArr.push({
         title: '最大值',
         dataIndex: 'max',
-        width: '100px',
+        width: 100,
         editable: true,
       },
       {
         title: '最小值',
         dataIndex: 'min',
-        width: '100px',
+        width: 100,
         editable: true,
       })
     } else if (activeNodeType === 3 || activeNodeType === 4) {
@@ -591,13 +592,13 @@ class RealTime extends PureComponent{
       {
         title: '字符长度',
         dataIndex: 'stringLength',
-        width: '100px',
+        width: 100,
         editable: true,
       },
       {
         title: '缩放比',
         dataIndex: 'zoom',
-        width: '100px',
+        width: 100,
         editable: true,
       })
     }
@@ -704,12 +705,13 @@ class RealTime extends PureComponent{
               menuClick={this.importMenu}
             />
             <div className="tableContain">
-              <EditableTable
+              <Table 
                 rowSelection={{
                   columnWidth: "50px",
                   selectedRowKeys: this.state.selectedRowKeys,
                   onChange: this.onSelectChange,
                 }}
+                pageIndex={this.state.pageIndex}
                 gist={gist}
                 dataSource={dataSource}
                 activeNode={this.state.activeNode}
@@ -720,13 +722,16 @@ class RealTime extends PureComponent{
                 rowKey={record => {
                   return record.id
                 }}
+                addressSearch={ this.addressSearch }
                 loading={this.state.tableLoading}
                 columns={this.tableColums(activeNodeType).map(el => {
                   return {
                     title: el.title,
                     dataIndex: el.dataIndex,
-                    width: el.width || '150px',
-                    ellipsis: true,
+                    width: el.width || 150,
+                    ellipsis: {
+                      showTitle: false,
+                    },
                     editable: el.editable,
                     type: el.type || "",
                     content: el.content || "",

@@ -1,5 +1,6 @@
 import React, { useContext, useRef } from 'react';
 import { Table, Input, Form, Select } from 'antd';
+import { Resizable } from 'react-resizable';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
@@ -18,6 +19,24 @@ const EditableRow = ({ index, ...props }) => {
         <tr {...props} />
       </EditableContext.Provider>
     </Form>
+  );
+};
+const ResizeableTitle = props => {
+  const { onResize, width, ...restProps } = props;
+
+  if (!width) {
+    return <th {...restProps} />;
+  }
+
+  return (
+    <Resizable
+      width={width}
+      height={0}
+      onResize={onResize}
+      draggableOpts={{ enableUserSelectHack: false }}
+    >
+      <th {...restProps} />
+    </Resizable>
   );
 };
 
@@ -55,13 +74,15 @@ const EditableCell = ({
       if (id !== null) {
         document.getElementById(id).parentNode.parentNode.classList.add("effective-editor")
       } else {
-        e.target.parentNode.className = "ant-form-item-control-input-content effective-editor"
+        // e.target.parentNode.className = "ant-form-item-control-input-content effective-editor"
+        e.target.parentNode.classList.add("effective-editor")
       }
     } else {
       if (id !== null) {
         document.getElementById(id).parentNode.parentNode.classList.remove("effective-editor")
       } else {
-        e.target.parentNode.className = "ant-form-item-control-input-content"
+        e.target.parentNode.classList.remove("effective-editor")
+        // e.target.parentNode.className = "ant-form-item-control-input-content"
       }
     }
   }
@@ -104,8 +125,9 @@ const EditableCell = ({
   let childNode = children;
 
   if (record && record.editable) {
+    console.log(record.dataType)
     childNode = type === "select" ? (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex]} >
+      <Form.Item name={dataIndex} initialValue={record[dataIndex]||content[0]} >
         <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
           {
             content.map((el, idx) => {
@@ -138,7 +160,8 @@ class EditableTable extends React.Component {
     this.state = {
       height: 0,
       dataSource: [],
-      changeTags: false
+      changeTags: false,
+      columns: this.props.columns
     };
   }
 
@@ -195,21 +218,39 @@ class EditableTable extends React.Component {
       message: modifyTags.length > 0 ? "" : "当前没有修改的内容"
     })
   };
+  handleResize = index => (e, { size }) => {
+    console.log(size)
+    this.setState(({ columns }) => {
+      const nextColumns = [...columns];
+      nextColumns[index] = {
+        ...nextColumns[index],
+        width: size.width,
+      };
+      return { columns: nextColumns };
+    });
+  };
 
   render() {
     const { dataSource } = this.state;
     const components = {
+      header: {
+        cell: ResizeableTitle,
+       },
       body: {
         row: EditableRow,
         cell: EditableCell,
       },
     };
-    const columns = this.props.columns.map((col) => {
+    const columns = this.state.columns.map((col, index) => {
       if (!col.editable) {
         return col;
       }
       return {
         ...col,
+        onHeaderCell: column => ({
+          width: column.width,
+          onResize: this.handleResize(index),
+        }),
         onCell: (record) => ({
           dataSource: dataSource,
           gist: this.props.gist,
