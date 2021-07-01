@@ -197,3 +197,44 @@ export function DeleteTags(data) {
     method: 'delete'
   })
 }
+
+//获取设备状态
+export function GetDeviceStatus() {
+  return axios({
+    url: '/IoTControl/GetDeviceStatus',
+    method: 'get'
+  })
+}
+
+//启动设备
+export function StartDevice(id) {
+  return axios({
+    url: '/IoTControl/StartDevice',
+    body: {
+      id
+    },
+    method: 'put'
+  })
+}
+
+//停止设备
+export function StopDevice(id) {
+  return axios({
+    url: '/IoTControl/StopDevice',
+    body: {
+      id
+    },
+    method: 'put'
+  })
+}
+
+//重启设备
+export function RestartDevice(id) {
+  return axios({
+    url: '/IoTControl/RestartDevice',
+    body: {
+      id
+    },
+    method: 'put'
+  })
+}

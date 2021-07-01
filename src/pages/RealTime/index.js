@@ -59,6 +59,7 @@ class RealTime extends PureComponent{
     this.getList(1, this.state.allNodeId)
   }
   onCheck = (checkedKeysValue) => {
+    console.log(checkedKeysValue)
     this.setState({ checkedKeys: checkedKeysValue })
     this.getList(1, checkedKeysValue)
   }

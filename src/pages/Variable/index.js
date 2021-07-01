@@ -5,8 +5,8 @@ import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from './components/Ztree'
-// import EditableTable from 'components/common/EditDataTable/index.jsx'
-import Table from './components/Table/index.jsx'
+import Table from 'components/common/EditDataTable/index.jsx'
+// import Table from './components/Table/index.jsx'
 
 import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
@@ -16,9 +16,10 @@ import { downFile, deepClone } from "utils";
 
 import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
-  GetTreeStructure, GetDevice, DeleteDevice, DelGroup, 
+  GetTreeStructure, GetDevice, DeleteDevice, DelGroup, SortTreeNode,
   InitTags, GetNextPageTags, QueryTags, SaveTags, ExportTags, DeleteTags,
-  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress
+  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress,
+  GetDeviceStatus
 } from 'api/variable'
 
 class RealTime extends PureComponent{
@@ -44,7 +45,12 @@ class RealTime extends PureComponent{
     canSubmit: {},
     tableLoading: false,
     comfirmContent: "",
-    comfirmVisible: false
+    comfirmVisible: false,
+    arrowMenuVisible: false,
+    arrowMenuPosition: {
+      left: 0,
+      top: 0
+    }
   }
   searchRef = React.createRef()
   componentDidMount() {
@@ -303,15 +309,12 @@ class RealTime extends PureComponent{
     }
   }
   //点击节点触发函数
-  onSelect = (res, info) => {
-    if (this.state.modifyTagsList.length > 0) {
-      
-    }
-
+  onSelect = (info) => {
     let tags = {
       nodeId: info.nodeID,
       type: info.nodeType
     }
+    console.log(info,tags)
     this.setState({
       activeNode: info.nodeID,
       activeNodeType: info.nodeType
@@ -657,6 +660,23 @@ class RealTime extends PureComponent{
   onDragOver=(info)=>{
     console.log("onDragOver",info)
   }
+
+  //提交节点排序的修改
+  submitSortTreeNode = (obj) => {
+    SortTreeNode(obj).then(res => {
+      console.log(res)
+    })
+  }
+  MenuPaneLoad = (e) => {
+    console.log(e.pageX, e.pageY)
+    this.setState({
+      arrowMenuVisible: true,
+      arrowMenuPosition: {
+        left: e.pageX + "px",
+        top: e.pageY + "px"
+      }
+    })
+  }
     
   render() {
     const { activeNodeType, collasped, treeData, dataSource, gist } = this.state
@@ -669,22 +689,19 @@ class RealTime extends PureComponent{
                 treeData ?
                   <ZTree
                     title="设备列表"
-                    zTreeOption={{
-                      className: "optAdd",
-                      placement: "bottomCenter"
-                    }}
+                    // zTreeOption={{
+                    //   className: "optAdd",
+                    //   placement: "bottomCenter"
+                    // }}
+                    MenuPaneLoad={this.MenuPaneLoad}
                     pathName="variable"
-                    move={true}
-                    option={ true }
                     nodeDatas={ treeData}
-                    zTreeOptionDropdown={true}
-                    zTreeOptionMenu={this.zTreeOptionMenu}
-                    optionDeviceMenu={this.optionDeviceMenu}
-                    // defaultExpandAll={true}
-                    optionGroupMenu={this.optionGroupMenu}
+                    // zTreeOptionDropdown={true}
+                    // zTreeOptionMenu={this.zTreeOptionMenu}
+                    // optionDeviceMenu={this.optionDeviceMenu}
+                    // optionGroupMenu={this.optionGroupMenu}
                     onSelect={this.onSelect}
-                    onDrop={this.onDrop}
-                    onDragOver={this.onDragOver}
+                    submitSortTreeNode={this.submitSortTreeNode}
                   />
                   : null
               }
@@ -759,6 +776,17 @@ class RealTime extends PureComponent{
           >
             {this.state.comfirmContent}
           </Modal>
+          {/* arrowMenuPosition */}
+          <div className="arrow-menu" style={{
+            display: this.state.arrowMenuVisible,
+            left: this.state.arrowMenuPosition.left,
+            top: this.state.arrowMenuPosition.top
+          }}>
+            <div class="ant-menu-arrow"></div>
+            <ul>
+              <li>整体导出</li>
+            </ul>
+          </div>
         </Spin>
       </div>
     )

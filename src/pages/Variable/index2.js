@@ -307,6 +307,7 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
+    console.log(info)
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
