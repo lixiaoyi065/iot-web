@@ -6,8 +6,10 @@
 }
 
 .ztree {
+  flex: 1;
   padding: 0;
   font-size: 16px;
+  overflow: hidden;
 }
 
 .ztree li ul {
@@ -19,7 +21,8 @@
   position: relative;
   line-height: 36px;
 
-  span.level0, a.level0{
+  span.level0,
+  a.level0 {
     display: none;
   }
 }
@@ -31,7 +34,7 @@
   padding-top: 0px;
   padding-left: 79px;
 
-  &:before{
+  &:before {
     display: none;
     content: "";
     position: absolute;
@@ -45,7 +48,7 @@
     background-repeat: no-repeat;
   }
 
-  .more_option{
+  .more_option {
     display: none;
     position: absolute;
     right: 10px;
@@ -59,10 +62,10 @@
   }
 }
 
-.ztree li{
-  &.level1.hover-level{
-    &>span{
-      &.button{
+.ztree li {
+  &.level1.hover-level {
+    &>span {
+      &.button {
         background-image: url("~assets/img/ztree/switch_active.png");
         background-size: 100%;
         background-repeat: no-repeat;
@@ -74,20 +77,20 @@
     text-decoration: none;
     color: #252525;
     background-color: #E4EEFF;
-  
-    &::before{
+
+    &::before {
       content: "";
       display: block;
       background-image: url("~assets/img/common/move2.png")
     }
-  
-    .more_option{
+
+    .more_option {
       display: block;
     }
   }
 
-  .level2{
-    a{
+  .level2 {
+    a {
       padding-left: 89px;
     }
   }
@@ -103,13 +106,14 @@
   border: 0;
   height: 36px;
 
-  span{
-    &.button{
+  span {
+    &.button {
       background-image: url("~assets/img/ztree/switch_active.png")
     }
   }
-  &:hover{
-    &:before{
+
+  &:hover {
+    &:before {
       display: block;
       content: "";
       background-image: url("~assets/img/common/move2_active.png");
@@ -117,7 +121,8 @@
       background-repeat: no-repeat;
     }
   }
-  .more_option{
+
+  .more_option {
     background-image: url("~assets/img/variable/more_active.png");
   }
 }
@@ -173,11 +178,62 @@
   background-position: -18px -18px;
 }
 
-ul.ztree.zTreeDragUL{
+ul.ztree.zTreeDragUL {
   width: 250px;
   z-index: 999;
 }
-span.tmpzTreeMove_arrow{
-  display: block!important;
-  
+
+span.tmpzTreeMove_arrow {
+  display: block !important;
+
+}
+
+.arrow-menu {
+  position: absolute;
+  transform: translate(-50%, 8px);
+  top: 78px;
+  right: -100px;
+  z-index: 10;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.12);
+
+  .ant-menu-arrow {
+    display: none;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    border-top-color: #fff;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: #fff;
+    box-shadow: -2px -2px 5px rgba(0, 0, 0, 6%);
+    position: absolute;
+    z-index: 1;
+    display: block;
+    width: 8.48528137px;
+    height: 8.48528137px;
+    background: transparent;
+    border-style: solid;
+    border-width: 4.24264069px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 4px 0;
+    margin: 0;
+
+    li {
+      padding: 0 33px;
+      line-height: 32px;
+      color: #666;
+      cursor: pointer;
+      text-align: center;
+
+      &:hover {
+        color: #409EFF;
+        background: #E4EEF8;
+      }
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom';
+import { Dropdown } from 'antd'
 import $ from 'utils/jquery-vendor';   //加载jQuery
 import 'ztree';  //加载ztree
 import 'ztree/css/zTreeStyle/zTreeStyle.css';
@@ -14,6 +15,10 @@ let ztreeIndex = 0,
 class ReactZtree extends PureComponent {
   state = {
     pathname: "",
+    isShow: false,
+    top: "0px",
+    list: [],
+    treeNode: {},
     isOpen: stringToArray(localStorage.getItem(`${this.props.location.pathname}`)) || [],
   }
 
@@ -24,12 +29,11 @@ class ReactZtree extends PureComponent {
     isOpen = stringToArray(localStorage.getItem(`${this.props.location.pathname}`)) || []
     this.renderZtreeDom();
 
-    $(".ztree").bind("click", ".more_option", (e) => {
-      this.MenuClick(e)
+    $(".ztree").click(() => {
+      this.setState({ isShow: false })
     })
   }
   componentDidUpdate() {
-    console.log("--------------")
     this.renderZtreeDom();
   }
   componentWillUnmount() {
@@ -63,10 +67,10 @@ class ReactZtree extends PureComponent {
       check: props.check,
       data: props.data,
       view: {
-				showLine: false,
-				showIcon: false,
-				selectedMulti: false,
-				dblClickExpand: false,
+        showLine: false,
+        showIcon: false,
+        selectedMulti: false,
+        dblClickExpand: false,
         addDiyDom: this.addDiyDom
       },
       edit: {
@@ -93,7 +97,7 @@ class ReactZtree extends PureComponent {
       },
       callback: {
         onClick: this.onClick,
-				beforeDrag: this.beforeDrag,
+        beforeDrag: this.beforeDrag,
         onDrop: this.onDrop,
         onExpand: this.onExpand, //展开回调
         onCollapse: this.onCollapse //折叠回调
@@ -102,31 +106,90 @@ class ReactZtree extends PureComponent {
   }
   onClick = (event, treeId, treeNode) => {
     console.log(treeNode.tId)
-    if (event.target.className === "more_option") return
-    console.log(treeNode)
-    if (treeNode.isParent) {
-      $(`#${treeNode.tId}`).addClass("hover-level").siblings().removeClass("hover-level")
+    if (event.target.className === "more_option") {
+      this.MenuPaneLoad(event, treeId, treeNode);
     } else {
-      $(".level1").removeClass("hover-level")
+      if (treeNode.isParent) {
+        $(`#${treeNode.tId}`).addClass("hover-level").siblings().removeClass("hover-level")
+      } else {
+        $(".level1").removeClass("hover-level")
+      }
+      this.setState({
+        isShow: false,
+      })
+      this.props.onSelect({
+        nodeID: treeNode.nodeID,
+        nodeType: treeNode.nodeType,
+        type: treeNode.nodeType
+      });
     }
-    this.props.onSelect({
-      nodeID: treeNode.nodeID,
-      nodeType: treeNode.nodeType,
-      type: treeNode.nodeType
-    });
   }
+  MenuPaneLoad = (event, treeId, treeNode) => {
+    this.setState({
+      isShow: false,
+    }, () => {
+      let top = parseInt((event.pageY - 120) / 36) * 36 + ((event.pageY - 120) % 36 > 0 ? 36 : 0) + 50
+      let list = [
+        {
+          key: "overallExport",
+          name: "整体导出"
+        }
+      ]
+      if (treeNode.nodeType === 2 || treeNode.nodeType === 4) {
+        list.unshift({
+          key: "modifyGroup",
+          name: "编辑分组",
+        },
+          {
+            key: "delGroup",
+            name: "删除分组",
+          })
+      }
+      if (treeNode.nodeType === 3) {
+        list.unshift({
+          key: "startDevice",
+          name: "启用",
+        },
+          {
+            key: "stopDevice",
+            name: "停止",
+          },
+          {
+            key: "modifyDevice",
+            name: "编辑设备",
+          },
+          {
+            key: "delDevice",
+            name: "删除设备",
+          })
+      }
+
+      this.setState({
+        top: top + "px",
+        isShow: true,
+        list: list,
+        treeNode: treeNode
+      })
+    })
+  }
+
+  menuClick = (e) => {
+    let { treeNode } = this.state
+    console.log(treeNode)
+    this.props.menuClick(e.target.attributes[0].nodeValue, treeNode, treeNode.children.length)
+    this.setState({ isShow: false })
+  }
+
   addDiyDom = (treeId, treeNode) => {
-    var switchObj = $("#" + treeNode.tId + "_span")
-    $("#" + treeNode.tId).attr("data-id", treeNode.nodeID)
-    var spaceStr = "<span class='more_option'></span>";
-    switchObj.after(spaceStr);
-  }
-  MenuClick = (e) => {
-    console.log(e)
-    this.props.MenuPaneLoad(e);
+    if (treeNode.nodeType !== 1) {
+      let switchObj = $("#" + treeNode.tId + "_span")
+      $("#" + treeNode.tId).attr("data-id", treeNode.nodeID)
+      let spaceStr = "<span class='more_option'></span>";
+      switchObj.after(spaceStr);
+    }
   }
   beforeDrag = (treeId, treeNodes) => {
-    for (var i=0,l=treeNodes.length; i<l; i++) {
+    for (var i = 0, l = treeNodes.length; i < l; i++) {
       if (treeNodes[i].drag === false) {
         curDragNodes = null;
         return false;
@@ -143,7 +206,7 @@ class ReactZtree extends PureComponent {
     if (pNode && pNode.dropInner === false) {
       return false;
     } else {
-      for (var i=0,l=curDragNodes.length; i<l; i++) {
+      for (var i = 0, l = curDragNodes.length; i < l; i++) {
         var curPNode = curDragNodes[i].getParentNode();
         if (curPNode && curPNode !== targetNode.getParentNode() && curPNode.childOuter === false) {
           return false;
@@ -157,7 +220,7 @@ class ReactZtree extends PureComponent {
     if (pNode && pNode.dropInner === false) {
       return false;
     } else {
-      for (var i=0,l=curDragNodes.length; i<l; i++) {
+      for (var i = 0, l = curDragNodes.length; i < l; i++) {
         var curPNode = curDragNodes[i].getParentNode();
         if (curPNode && curPNode !== targetNode.getParentNode() && curPNode.childOuter === false) {
           return false;
@@ -166,13 +229,13 @@ class ReactZtree extends PureComponent {
     }
     return true;
   }
-  
+
   //拖动结束
   onDrop = (event, treeId, treeNodes, targetNode) => {
     if (targetNode !== null) {
       let childNode = $(`#${targetNode.parentTId}_ul`).children()
       let newNodeIDList = [];
-      for (let i = 0; i < childNode.length;i++){
+      for (let i = 0; i < childNode.length; i++) {
         newNodeIDList.push(childNode[i].attributes["data-id"].value)
       }
       this.props.submitSortTreeNode({
@@ -191,13 +254,30 @@ class ReactZtree extends PureComponent {
   onCollapse = (event, treeId, treeNode) => {
     isOpen.splice(isOpen.indexOf(treeNode.nodeID), 1)
     localStorage.setItem(`${this.state.pathname}`, isOpen)
-  }		
+  }
   getTreeObj() {
     return this.ztreeObj;
   }
   render() {
     return (
-      <div className="ztree" ref="ztree" id={`ztree_${ztreeIndex++}`}></div>
+      <>
+        <div className="ztree" ref="ztree" id="ztree">
+        </div >
+        {
+          this.state.isShow ? (
+            <div className='arrow-menu' style={{ top: this.state.top }}>
+              <div className='ant-menu-arrow'></div>
+              <ul onClick={this.menuClick}>
+                {
+                  this.state.list.map(item => {
+                    return <li key={item.key} name={item.key}>{item.name}</li>
+                  })
+                }
+              </ul>
+            </div>
+          ) : <></>
+        }
+      </>
     )
   }
 }
