@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom'
 import { Tree, Dropdown } from 'antd';
+import PubSub from 'pubsub-js'
 
 import './index.less'
 
@@ -11,10 +12,14 @@ class ZTree extends PureComponent {
     nodeDatas: [],
     pathname: "",
     defaultExpandedKeys: [],
+    deviceStatus: [],
     selectCallbackFn: function (keys) { },//选中节点 回调函数
   }
 
   componentDidMount() {
+    PubSub.subscribe("deviceStatus", (msg, data) => {
+      this.setState({deviceStatus: data})
+    })
     this.setState({
       defaultExpandedKeys: stringToArray(localStorage.getItem(`${this.props.location.pathname}`)),
       pathname: this.props.location.pathname,
@@ -30,22 +35,32 @@ class ZTree extends PureComponent {
 
   //数据处理
   node = (data) => {
+    let nodeStatus = 0;
+    this.state.deviceStatus.forEach(item => {
+      if (item.id === data.nodeID) {
+        nodeStatus = item.status
+      }
+    })
     const nodeData = {
       key: data.nodeID,
       nodeNo: data.nodeNo,
       fatherNodeID: data.fatherNodeID,
       nodeType: data.nodeType,
       canBeDeleted: data.canBeDeleted,
-      children: []
+      children: [],
+      nodeStatus: nodeStatus
     }
 
     //是否需要操作节点
     if (this.props.option) {
       if (data.canBeDeleted) {
         nodeData.title = (<>
+          <span className={`iot-status ${nodeData.nodeStatus === 1 ? 'iot-status-normal' : (
+            nodeData.nodeStatus === 2 ? 'iot-status-danger' : 'iot-status-disable'
+          )}`}></span>
           <span>{data.nodeName}</span>
           <Dropdown trigger={["click"]} overlay={() => {
-            return this.props.optionDeviceMenu(data.nodeID, data.children.length)
+            return this.props.optionDeviceMenu(data, data.children.length)
           }} placement="bottomCenter" arrow>
             <span className="ant-tree-title-operationNode" onClick={(e) => {
               e.stopPropagation();
@@ -53,7 +68,17 @@ class ZTree extends PureComponent {
           </Dropdown>
         </>)
       } else {
-        nodeData.title = data.nodeName
+        nodeData.title = (<>
+          <span className={`iot-status`}></span>
+          <span>{data.nodeName}</span>
+          <Dropdown trigger={["click"]} overlay={() => {
+            return this.props.interVariable(data, data.children.length)
+          }} placement="bottomCenter" arrow>
+            <span className="ant-tree-title-operationNode" onClick={(e) => {
+              e.stopPropagation();
+            }}></span>
+          </Dropdown>
+        </>)
       }
     } else {
       nodeData.title = data.nodeName
@@ -72,6 +97,7 @@ class ZTree extends PureComponent {
         if (this.props.option) {
           if (child.canBeDeleted) {
             childNode.title = (<>
+              <span className="iot-status"></span>
               <span>{child.nodeName}</span>
               <Dropdown trigger={['click']} overlay={() => {
                 return this.props.optionGroupMenu({
@@ -88,7 +114,12 @@ class ZTree extends PureComponent {
               </Dropdown>
             </>)
           } else {
-            childNode.title = child.nodeName
+            childNode.title = (
+              <>
+                <span className="iot-status"></span>
+                <span>{child.nodeName}</span>
+              </>
+            )
           }
         } else {
           childNode.title = child.nodeName

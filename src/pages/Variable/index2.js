@@ -18,10 +18,12 @@ import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
   GetTreeStructure, GetDevice, DeleteDevice, DelGroup,
   InitTags, GetNextPageTags, QueryTags, SaveTags, ExportTags, DeleteTags,
-  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress, GetAddressEditInfo
+  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress, GetAddressEditInfo,
+  TestOPCUaConnect,
+  GetDeviceStatus,StartDevice,StopDevice
 } from 'api/variable'
 
-
+let deviceStatusTimer = null;
 class RealTime extends PureComponent{
   state = {
     loading: false, //保存时显示加载中
@@ -37,6 +39,7 @@ class RealTime extends PureComponent{
     visible: false, //弹窗显示隐藏
     title: "",//弹窗标题
     modalContent: "",//弹窗内容
+    node: {},//当前显示的变量对象
     activeNode: "", //当前显示变量列表的节点ID
     activeNodeName: "",//当前显示变量列表的节点名称
     activeNodeType: 0, //当前显示变量列表的节点类型
@@ -56,11 +59,22 @@ class RealTime extends PureComponent{
     PubSub.subscribe("canSubmit", (msg, data) => {
       this.setState({canSubmit: data})
     })
+
+    this.getDeviceStatus();
+    deviceStatusTimer = setInterval(() => {
+      this.getDeviceStatus();
+    }, 5000)
   }
-  componentWillUnmount(){
+  componentWillUnmount() {
+    clearInterval(deviceStatusTimer)
     //取消订阅
     PubSub.unsubscribe("modifyTags")
     PubSub.unsubscribe("canSubmit")
+  }
+  getDeviceStatus = () =>{
+    GetDeviceStatus().then(res => {
+      PubSub.publish("deviceStatus", res.data)
+    })
   }
 
   //获取整棵设备列表树结构
@@ -98,6 +112,23 @@ class RealTime extends PureComponent{
       }}
     />
   )
+  //操作内部变量菜单
+  interVariable = (el) => {
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "overallExport",
+          name: '整体导出',
+        }
+      ]}
+      onClick={(e) => {
+        console.log(el)
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el)
+      }}
+    />
+    )
+  }
   //操作设备菜单
   optionDeviceMenu = (el, length)=> {
     return (
@@ -124,6 +155,7 @@ class RealTime extends PureComponent{
         }
       ]}
       onClick={(e) => {
+        console.log(el)
         e.domEvent.stopPropagation();
         this.menuClick(e, el, length)
       }}
@@ -143,7 +175,7 @@ class RealTime extends PureComponent{
           name: "删除分组",
         }
       ]}
-      onClick={(e) => {
+        onClick={(e) => {
         e.domEvent.stopPropagation();
         this.menuClick(e, el)
       }}
@@ -205,6 +237,17 @@ class RealTime extends PureComponent{
       })
     }
   }
+  
+  //opc_ua协议测试连接
+  connetTest = (val) => {
+    TestOPCUaConnect(val).then(res => {
+      if (res.code === 0) {
+        message.info("连接成功")
+      } else {
+        message.error(res.msg)
+      }
+    })
+  }
 
   //添加分组提交函数
   onAddGroupFinish = (val) => {
@@ -242,28 +285,36 @@ class RealTime extends PureComponent{
     })
   }
 
-  menuClick = (e, id, length)=>{
+  menuClick = (e, node, length)=>{
     if (e.key === "addDevice") {
       this.setState({
         visible: true, 
         title: "新增设备", 
-        modalContent: <AddEqu key="addDevice" onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
+        modalContent: <AddEqu key={ new Date()}
+          onCancel={this.handleCancel}
+          onFinish={this.onAddDeviceFinish}
+          connetTest={this.connetTest} />
       })
-    } else if(e.key === "modifyDevice"){
-      GetDevice(id).then(res=>{
+    } else if (e.key === "modifyDevice") {
+      GetDevice(node.nodeID).then(res=>{
         this.setState({
           visible: true, 
           title: "编辑设备", 
-          modalContent: <AddEqu key="modifyDevice" node={ res.data } onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
+          modalContent: <AddEqu
+            key={`modifyDevice + ${node.nodeID}`}
+            node={res.data}
+            onCancel={this.handleCancel}
+            onFinish={this.onAddDeviceFinish}
+            connetTest={ this.connetTest } />
         })
       })
     } else if(e.key === "delDevice"){
       if(length > 0){
         this.confirm('节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?',()=>{
-          this.delDevice(id);
+          this.delDevice(node.nodeID);
         })
       }else{
-        this.delDevice(id)
+        this.delDevice(node.nodeID)
       }
     } else if (e.key === "allExport") {
       ExportTags({
@@ -274,27 +325,32 @@ class RealTime extends PureComponent{
       })
     } else if (e.key === "overallExport") {
       ExportTags({
-        nodeId: id,
-        type: 3
+        nodeId: node.nodeID,
+        type: node.nodeType
       }).then(res => {
-        downFile(res, "变量列表.xlsx");
-        // downFile(res, `${this.state.activeNodeName}.xlsx`);
+        downFile(res, node.nodeName + ".xlsx");
       })
     }else if (e.key === "addGroup") {
       this.setState({
         visible: true, 
         title: "新增分组", 
-        modalContent: <AddGroupPane key="addGroup" onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
+        modalContent: <AddGroupPane key="addGroup"
+          onCancel={this.handleCancel} 
+          onFinish={this.onAddGroupFinish}/>
       })
-    }else if(e.key === "modifyGroup"){
+    } else if (e.key === "modifyGroup") {
+      console.log(node)
       this.setState({
         visible: true, 
         title: "编辑分组", 
-        modalContent: <AddGroupPane key="modifyGroup" node={ id } onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
+        modalContent: <AddGroupPane
+          key={node.groupId} node={node}
+          onCancel={this.handleCancel}
+          onFinish={this.onAddGroupFinish} />
       })
     } else if (e.key === "delGroup") {
       this.confirm('节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?',()=>{
-        DelGroup(id.groupId).then(res=>{
+        DelGroup(node.groupId).then(res=>{
           if(res.code === 0){
             message.info("删除成功")
             this.getTreeStructure();
@@ -303,11 +359,26 @@ class RealTime extends PureComponent{
           }
         })
       })
+    } else if (e.key === "startDevice") {
+      StartDevice(node.nodeID).then(res =>{
+        if (res.code === 0) {
+          message.info("启动成功")
+        } else {
+          message.info(res.msg)
+        }
+      })
+    } else if (e.key === "stopDevice") {
+      StopDevice(node.nodeID).then(res =>{
+        if (res.code === 0) {
+          message.info("停止成功")
+        } else {
+          message.info(res.msg)
+        }
+      })
     }
   }
   //点击节点触发函数
   onSelect = (res, info) => {
-    console.log(info)
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
@@ -334,7 +405,8 @@ class RealTime extends PureComponent{
         tableLoading: true,
         activeNode: info.node.key,
         // activeNodeName: nodeName,
-        activeNodeType: info.node.nodeType
+        activeNodeType: info.node.nodeType,
+        node: info.node
       })      
     } else {
       this.setState({
@@ -349,6 +421,7 @@ class RealTime extends PureComponent{
           element.key = element.id
           dataList.push(element)
         });
+        console.log(res)
         this.setState({
           dataSource: dataList,
           tableDataTypes: res.data.gridDataTypes,
@@ -731,10 +804,12 @@ class RealTime extends PureComponent{
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType
     }).then(res => {
-      console.log(row.dataType)
       this.setState({
         modalContent: (
-          <AddressConfig data={res.data} row={row} key={ new Date()} onCancel={this.handleCancel} onFinish={ this.addressFinish }/>
+          <AddressConfig data={res.data} row={row} node={this.state.node}
+            key={new Date()}
+            onCancel={this.handleCancel}
+            onFinish={this.addressFinish}/>
         ),
         visible: true,
         title: "选择地址"
@@ -766,6 +841,7 @@ class RealTime extends PureComponent{
                     nodeDatas={ treeData}
                     zTreeOptionDropdown={true}
                     zTreeOptionMenu={this.zTreeOptionMenu}
+                    interVariable={this.interVariable}
                     optionDeviceMenu={this.optionDeviceMenu}
                     // defaultExpandAll={true}
                     optionGroupMenu={this.optionGroupMenu}
@@ -796,6 +872,7 @@ class RealTime extends PureComponent{
                   selectedRowKeys: this.state.selectedRowKeys,
                   onChange: this.onSelectChange,
                 }}
+                key={ this.state.activeNode }
                 pageIndex={this.state.pageIndex}
                 gist={gist}
                 dataSource={dataSource}

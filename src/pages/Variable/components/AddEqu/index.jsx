@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Select, Button, Checkbox, Divider } from 'antd'
+import { Form, Input, Select, Button, Checkbox, Divider, message } from 'antd'
 
 const { Option } = Select;
 export default class addDevice extends PureComponent {
@@ -64,7 +64,6 @@ export default class addDevice extends PureComponent {
   }
   //监听协议名称切换
   onProtocalNameChange = e => {
-    console.log(e)
     this.setState({ activeProto: e }, () => {
       //修改设备厂家和设备协议的初始默认值
       this.formRef.current.setFieldsValue({
@@ -78,6 +77,7 @@ export default class addDevice extends PureComponent {
     e === "登录验证" ? this.setState({ userPane: true }) : this.setState({ userPane: false })
   }
   componentDidMount() {
+    console.log(this.props)
     if (this.props.node) {
       // 将传过来的设备数据进行处理
       const node = this.props.node,
@@ -112,6 +112,21 @@ export default class addDevice extends PureComponent {
         edit: true
       })
     }
+  }
+
+  //opc_ua协议测试连接
+  connetTest = () => {
+    let formData = this.formRef.current.getFieldsValue()
+    console.log(this.formRef.current.validateFields())
+    console.log(this.props)
+    this.formRef.current.validateFields().then(() => {
+      // this.props.connetTest({
+      //   serverName: formData.IPAddress,
+      //   type: formData.UserIdentity,
+      //   username: formData.UserName || "",
+      //   password: formData.Password || ""
+      // })
+    })
   }
 
   render() {
@@ -174,7 +189,13 @@ export default class addDevice extends PureComponent {
           </Form.Item>
           {
             this.isShowFormItem("SessionName") ? (
-              <Form.Item label="连接名" name="SessionName">
+              <Form.Item label="连接名" name="SessionName"
+              rules={[
+                {
+                  required: true,
+                  message: "请输入连接名",
+                }
+              ]}>
                 <Input />
               </Form.Item>
             ) : null
@@ -186,10 +207,11 @@ export default class addDevice extends PureComponent {
                   {
                     required: true,
                     message: `请输入 ${this.state.activeProto === "OPC_UA" ? "连接地址" : "设备IP"}`,
-                  }, {
-                    pattern: /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/,
-                    message: '请输入输入正确的地址',
-                  }
+                  },
+                  // {
+                  //   pattern: /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/,
+                  //   message: '请输入输入正确的地址',
+                  // }
                 ]}
               >
                 <Input />
@@ -358,27 +380,47 @@ export default class addDevice extends PureComponent {
             ) : null
           }{
             this.state.userPane ? (
-              <Form.Item label="用户名" name="UserName">
+              <Form.Item label="用户名" name="UserName" rules={
+                [{
+                  required: true,
+                  message: "请输入用户名"
+                }]
+              }>
                 <Input />
               </Form.Item>
             ) : null
           }{
             this.state.userPane ? (
-              <Form.Item label="密码" name="Password">
+              <Form.Item label="密码" name="Password" rules={
+                [{
+                  required: true,
+                  message: "请输入密码"
+                }]
+              }>
                 <Input.Password />
               </Form.Item>
             ) : null
           }
           {
             this.isShowFormItem("Rack") ? (
-              <Form.Item label="机架号" name="Rack">
+              <Form.Item label="机架号" name="Rack" rules={
+                [{
+                  required: true,
+                  message: "请输入机架号"
+                }]
+              }>
                 <Input />
               </Form.Item>
             ) : null
           }
           {
             this.isShowFormItem("Slot") ? (
-              <Form.Item label="CPU插槽" name="Slot">
+              <Form.Item label="CPU插槽" name="Slot" rules={
+                [{
+                  required: true,
+                  message: "请输入CPU插槽"
+                }]
+              }>
                 <Input />
               </Form.Item>
             ) : null
@@ -407,7 +449,14 @@ export default class addDevice extends PureComponent {
               ) : null
           }
         </div>
-        <Form.Item className="form-footer">
+        <Form.Item className="form-footer" style={{ paddingTop: '20px' }}>
+          {
+            this.state.activeProto === "OPC_UA" ?
+              <>
+                <Button type="default" className="login-form-button" onClick={this.connetTest}>测试连接</Button>
+                <span className="divider" style={{marginRight: 0}}></span>
+              </> : <></>
+          }
           <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
           <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">
             确认

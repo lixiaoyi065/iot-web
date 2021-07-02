@@ -5,7 +5,7 @@ import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from './components/Ztree'
-import Table from 'components/common/EditDataTable/index.jsx'
+import EditableTable from 'components/common/EditDataTable/index.jsx'
 // import Table from './components/Table/index.jsx'
 
 import AddEqu from './components/AddEqu'
@@ -19,9 +19,10 @@ import {
   GetTreeStructure, GetDevice, DeleteDevice, DelGroup, SortTreeNode,
   InitTags, GetNextPageTags, QueryTags, SaveTags, ExportTags, DeleteTags,
   GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress,
-  GetDeviceStatus
+  GetDeviceStatus, StartDevice
 } from 'api/variable'
 
+let getDeviceTimer = null;
 class RealTime extends PureComponent{
   state = {
     loading: false, //保存时显示加载中
@@ -51,21 +52,37 @@ class RealTime extends PureComponent{
       left: 0,
       top: 0
     },
-    arrowMenuList: []
+    arrowMenuList: [],
   }
   searchRef = React.createRef()
   componentDidMount() {
     this.getTreeStructure();
+    this.getDeviceStatus();
     PubSub.subscribe("modifyTags", (msg, data) => {
       this.setState({modifyTagsList: data})
     })
     PubSub.subscribe("canSubmit", (msg, data) => {
       this.setState({canSubmit: data})
     })
+    getDeviceTimer = setInterval(() => {
+      this.getDeviceStatus();
+    }, 5000)
   }
   componentWillUnmount(){
     //取消订阅
     PubSub.unsubscribe("modifyTags")
+    clearInterval(getDeviceTimer)
+  }
+
+  getDeviceStatus = () => {
+    GetDeviceStatus().then(res => {
+      console.log(res)
+      if (res.code === 0) {
+        PubSub.publish("deviceStatus", res.data)
+      } else {
+        message.error(res.msg)
+      }
+    })
   }
 
   //获取整棵设备列表树结构
@@ -98,6 +115,242 @@ class RealTime extends PureComponent{
         })
       } else {
         message.info(res.msg)
+      }
+    })
+  }
+
+  hintSave = (callback) => {
+    if (this.state.modifyTagsList.length > 0) {
+      Modal.confirm({
+        title: "当前存在未保存的变量，确认继续将会被还原",
+        okText: "确认",
+        cancelText: "取消",
+        onCancel: () => {
+          //重置查询
+          this.searchRef.current.refs.formRef.setFieldsValue({
+            dataType: "不限",
+            key: "",
+          })
+        },
+        onOk: callback
+      })
+    } else {
+      callback()
+    }
+  }
+ 
+  //变量查询
+  searchForm = (res) => {
+    let queryCondition = {
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType,
+      dataType: res.dataType,
+      key: res.key
+    }
+    this.hintSave(() => {
+      this.queryTagsFun(queryCondition);
+    })
+  }
+  queryTagsFun = (queryCondition) => {
+    this.setState({ modifyTagsList: [] })
+    $(".effective-editor").removeClass("effective-editor")
+    QueryTags(queryCondition).then(res => {
+      if (res.code === 0) {
+        this.setState({dataSource: res.data.tags, count: res.data.total})
+      } else {
+        message.error(res.msg)
+      }
+    })
+  }
+  //数据表格选中的项
+  onSelectChange = (selectedRowKeys) => {
+    this.setState({ selectedRowKeys });
+    // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
+  }
+  //加载更多
+  loadMore = () => {
+    GetNextPageTags(this.state.activeNode).then(res => {
+      this.setState((state) => {
+        state.dataSource.splice(state.total, 0, ...res.data)
+        return {
+          dataSource: [...state.dataSource],
+          total: state.total + res.data,
+        }
+      })
+    })
+  }
+  
+  //导入导出菜单
+  importMenu = (e) => {
+    let tags = {
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType
+    }
+    if (e.key === "currentTableExport") { //导出当前点表
+      if (this.state.activeNode === "") {
+        message.error("请选择要导出的节点")
+      } else {
+        ExportTags(tags).then(res => {
+          downFile(res, "变量列表.xlsx");
+          // downFile(res, `${this.state.activeNodeName}.xlsx`);
+        })
+      }
+    } else if (e.key === "currentTableImport") { //导入当前点表
+      if (this.state.activeNode === "") {
+        message.error("请选择要导入的节点")
+      } else {
+        this.hintSave(() => {
+          document.getElementById("importFile").click();
+        })
+      }
+    }
+  }
+
+  //保存变量列表
+  saveList = () => {
+    if(this.state.modifyTagsList.length === 0){
+      message.warning("当前没有更改的内容")
+      return;
+    }
+    if (!this.state.canSubmit.canSubmit) {
+      message.error(this.state.canSubmit.message)
+      return;
+    }
+
+    let modifyList = []
+    deepClone(this.state.modifyTagsList).map(item => {
+      item.key = item.id
+      modifyList.push(item)
+      return "";
+    })
+    this.setState({loading: true})
+    SaveTags({
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType,
+      dataTypes: [],
+      tags: modifyList,
+      total: 0
+    }).then(res=>{
+      if(res.code === 0){
+        let timer = setInterval(()=>{
+          //获取
+          GetSaveTagsTaskProgress(res.data).then(val=>{
+            console.log(val)
+            //清除定时器,关闭加载中
+            if (val.data.status === 2 || val.data.status === 3) {
+              clearInterval(timer)
+              if(val.data.message){
+                message.info(val.data.message)
+              }
+              $("div").removeClass("effective-editor")
+              this.setState({ loading: false })
+              if (val.data.resultData !== null) {
+                let { dataTypes, tree } = val.data.resultData
+                if (dataTypes !== null) {
+                  this.setState({ dataTypes: dataTypes})
+                }
+                if (tree !== null) {
+                  this.setState({ treeData: tree})
+                }
+          
+                this.initTagList({
+                  nodeId: this.state.activeNode,
+                  type: this.state.activeNodeType
+                })
+              }
+            }
+          })
+        }, 1000)
+      }else{
+        message.error(res.msg)
+        this.setState({loading: false})
+      }
+    })
+   
+  }
+  //重置变量列表
+  resetTags = () => {
+    this.initTagList({
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType
+    })
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
+  }
+  //新增变量
+  addTags = () => {
+    const { dataSource, count } = this.state;
+    let tagObj = {
+      key: `${count + 1}`,
+      id: "00000000-0000-0000-0000-000000000000",
+      no: count+1,
+      name: "",
+      desc: "",
+      dataType: this.state.tableDataTypes[0],
+      max: "",
+      min: "",
+      address: "",
+      stringLength: "",
+      zoom: "",
+      editable: true
+    }
+    this.setState(state => {
+      return {
+        dataSource: [...dataSource, tagObj],
+        count: count + 1,
+        modifyTagsList: [...state.modifyTagsList, tagObj],
+        canSubmit: {
+          canSubmit: false,
+          message: "变量名不可为空，请重新输入"
+        }
+      }
+    }, () => {
+      $(`#dataType${count+1}`).parent().parent().addClass("effective-editor")
+    })
+    PubSub.publish("modifyTags", [...this.state.modifyTagsList, tagObj])
+  }
+  //删除变量
+  delTags = () => {
+    console.log("delTags",{
+      ids: this.state.selectedRowKeys,
+      type: this.state.activeNodeType
+    })
+    DeleteTags({
+      ids: this.state.selectedRowKeys,
+      type: this.state.activeNodeType
+    }).then(res => {
+      console.log(res)
+      if (res.code === 0) {
+        message.info("删除成功")
+        this.setState((state) => {
+          let targetObj = [...state.dataSource]
+          let modify = [...state.modifyTagsList]
+          res.data.forEach((id) => {
+            for (let i = 0; i < targetObj.length;i++){
+              if (targetObj[i].key === id) {
+                targetObj.splice(i, 1);
+                break;
+              }
+            }
+            //移除modifyTagsList中删除的变量
+            for (let i = 0; i < modify.length; i++){
+              if (modify[i].key === id) {
+                modify.splice(i, 1);
+                break;
+              }
+            }
+          })
+          return {
+            dataSource: targetObj,
+            modifyTagsList: modify,
+            count: state.count - res.data.length
+          }
+        })
+      } else {
+        message.error(res.msg)
       }
     })
   }
@@ -140,7 +393,6 @@ class RealTime extends PureComponent{
       activeNode: info.nodeID,
       activeNodeType: info.nodeType
     })
-
     this.initTagList(tags)
   }
 
@@ -164,7 +416,7 @@ class RealTime extends PureComponent{
         this.setState({
           visible: true, 
           title: "编辑设备", 
-          modalContent: <AddEqu key="modifyDevice" node={ res.data } onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
+          modalContent: <AddEqu key={id} node={ res.data } onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
         })
       })
     } else if(key === "delDevice"){
@@ -185,9 +437,9 @@ class RealTime extends PureComponent{
     } else if (key === "overallExport") {
       ExportTags({
         nodeId: id,
-        type: 3
+        type: treeNode.nodeType
       }).then(res => {
-        downFile(res, "设备列表.xls");
+        downFile(res, treeNode.nodeName + ".xls");
       })
     }else if (key === "addGroup") {
       this.setState({
@@ -196,11 +448,10 @@ class RealTime extends PureComponent{
         modalContent: <AddGroupPane key="addGroup" onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
       })
     }else if(key === "modifyGroup"){
-      console.log(id)
       this.setState({
         visible: true, 
         title: "编辑分组", 
-        modalContent: <AddGroupPane key="modifyGroup" node={{
+        modalContent: <AddGroupPane key={id} node={{
           deviceId: treeNode.fatherNodeID,
           groupId: id,
           name: treeNode.nodeName,
@@ -217,6 +468,11 @@ class RealTime extends PureComponent{
             message.error(res.msg)
           }
         })
+      })
+    } else if (key === "startDevice") {
+      console.log(id)
+      StartDevice(id).then(res => {
+        console.log(res)
       })
     }
   }
@@ -372,7 +628,6 @@ class RealTime extends PureComponent{
         editable: true,
       })
     }
-
     return columArr; 
   }
 
@@ -469,7 +724,8 @@ class RealTime extends PureComponent{
               menuClick={this.importMenu}
             />
             <div className="tableContain">
-              <Table 
+              <EditableTable
+                key={this.state.activeNode}
                 rowSelection={{
                   columnWidth: "50px",
                   selectedRowKeys: this.state.selectedRowKeys,
@@ -511,6 +767,7 @@ class RealTime extends PureComponent{
             visible={this.state.visible}
             onCancel={this.handleCancel}
             footer={null}
+            maskClosable={false}
             >
             {
               this.state.modalContent

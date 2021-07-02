@@ -1,17 +1,18 @@
 import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Dropdown } from 'antd'
 import $ from 'utils/jquery-vendor';   //加载jQuery
 import 'ztree';  //加载ztree
+import PubSub from "pubsub-js";
+
 import 'ztree/css/zTreeStyle/zTreeStyle.css';
 import "components/common/Ztree/index.less"
 import "./index.less"
 
 import { stringToArray } from 'utils'
 
-let ztreeIndex = 0,
-  isOpen = [],
+let isOpen = [],
   curDragNodes
+
 class ReactZtree extends PureComponent {
   state = {
     pathname: "",
@@ -20,6 +21,7 @@ class ReactZtree extends PureComponent {
     list: [],
     treeNode: {},
     isOpen: stringToArray(localStorage.getItem(`${this.props.location.pathname}`)) || [],
+    deviceStatus: []
   }
 
   componentDidMount() {
@@ -29,8 +31,24 @@ class ReactZtree extends PureComponent {
     isOpen = stringToArray(localStorage.getItem(`${this.props.location.pathname}`)) || []
     this.renderZtreeDom();
 
-    $(".ztree").click(() => {
-      this.setState({ isShow: false })
+    PubSub.subscribe("deviceStatus", (msg, data) => {
+      this.setState({
+        deviceStatus: data
+      })
+      data.forEach(item => {
+        // $(item.id)
+        let name = item.status === 1 ? "iot-status-normal" : (item.status === 2 ? "iot-status-danger" : "iot-status-disable")
+        $(`.level1[data-id=${item.id}]`).find(".iot-status").addClass(`iot-status ${name}`)
+      })
+    })
+
+    $(document).click((e) => {
+      if (this.state.isShow) {
+        this.setState({ isShow: false })
+      }
+      if (e.target.className === "arrow-menu-item") {
+        this.menuClick(e)
+      }
     })
   }
   componentDidUpdate() {
@@ -38,6 +56,7 @@ class ReactZtree extends PureComponent {
   }
   componentWillUnmount() {
     this.ztreeObj.destroy();
+    PubSub.unsubscribe("deviceStatus")
   }
   //数据处理
   dataProcessing() {
@@ -63,9 +82,7 @@ class ReactZtree extends PureComponent {
       treeId: props.treeId,
       treeObj: props.treeObj,
       async: props.async,
-      callback: props.events,
       check: props.check,
-      data: props.data,
       view: {
         showLine: false,
         showIcon: false,
@@ -81,7 +98,6 @@ class ReactZtree extends PureComponent {
           prev: this.dropPrev,
           next: this.dropNext
         },
-        enable: true,
         showRemoveBtn: false,
         showRenameBtn: false
       },
@@ -105,15 +121,15 @@ class ReactZtree extends PureComponent {
     }
   }
   onClick = (event, treeId, treeNode) => {
-    console.log(treeNode.tId)
+    event.stopPropagation();
     if (event.target.className === "more_option") {
       this.MenuPaneLoad(event, treeId, treeNode);
     } else {
-      if (treeNode.isParent) {
-        $(`#${treeNode.tId}`).addClass("hover-level").siblings().removeClass("hover-level")
-      } else {
-        $(".level1").removeClass("hover-level")
-      }
+      // if (treeNode.isParent) {
+      //   $(`#${treeNode.tId}`).addClass("hover-level").siblings().removeClass("hover-level")
+      // } else {
+      //   $(".level1").removeClass("hover-level")
+      // }
       this.setState({
         isShow: false,
       })
@@ -136,14 +152,14 @@ class ReactZtree extends PureComponent {
         }
       ]
       if (treeNode.nodeType === 2 || treeNode.nodeType === 4) {
-        list.unshift({
+        list = [{
           key: "modifyGroup",
           name: "编辑分组",
         },
           {
             key: "delGroup",
             name: "删除分组",
-          })
+          }]
       }
       if (treeNode.nodeType === 3) {
         list.unshift({
@@ -175,17 +191,23 @@ class ReactZtree extends PureComponent {
 
   menuClick = (e) => {
     let { treeNode } = this.state
-    console.log(treeNode)
     this.props.menuClick(e.target.attributes[0].nodeValue, treeNode, treeNode.children.length)
     this.setState({ isShow: false })
   }
 
   addDiyDom = (treeId, treeNode) => {
+    console.log("------------")
+    let status = this.state.deviceStatus
+    $("#" + treeNode.tId).attr("data-id", treeNode.nodeID)
+    let switchObj = $("#" + treeNode.tId + "_span")
     if (treeNode.nodeType !== 1) {
-      let switchObj = $("#" + treeNode.tId + "_span")
-      $("#" + treeNode.tId).attr("data-id", treeNode.nodeID)
       let spaceStr = "<span class='more_option'></span>";
       switchObj.after(spaceStr);
+    }
+    if (treeNode.nodeType === 3 || treeNode.nodeType === 0) {
+      
+      let statusStr = "<span class='iot-status'></span>";
+      switchObj.before(statusStr);
     }
   }
   beforeDrag = (treeId, treeNodes) => {
@@ -267,10 +289,10 @@ class ReactZtree extends PureComponent {
           this.state.isShow ? (
             <div className='arrow-menu' style={{ top: this.state.top }}>
               <div className='ant-menu-arrow'></div>
-              <ul onClick={this.menuClick}>
+              <ul>
                 {
                   this.state.list.map(item => {
-                    return <li key={item.key} name={item.key}>{item.name}</li>
+                    return <li key={item.key} name={item.key} className="arrow-menu-item">{item.name}</li>
                   })
                 }
               </ul>

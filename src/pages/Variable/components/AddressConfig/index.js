@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react'
-import { Form, Select, Input, Button } from 'antd'
-import $ from 'jquery'
+import { Form, Select, Input, Button,Tree } from 'antd'
 import "./index.less"
+
+import { InitOPCUaWindows, GetOPCUaNodes } from 'api/variable'
 
 export default class config extends PureComponent {
   state = {
@@ -9,7 +10,8 @@ export default class config extends PureComponent {
     // 需e要在此处手动修改协议protocolNam 和 数据类型 dataType 模拟不同协议下的数据结构
     popupData: {
       protocolName: this.props.data.protocolName,
-      dataType: $("#dataType" + this.props.row.key).parent().siblings(".ant-select-selection-item").attr("title"),
+      // dataType: $("#dataType" + this.props.row.key).parent().siblings(".ant-select-selection-item").attr("title"),
+      dataType: this.props.row.dataType,
       dataValue: '',  // 变量地址
       dataLen: '',  // 字符长度
     },
@@ -29,10 +31,13 @@ export default class config extends PureComponent {
     },
     configHtml: "",
     key: this.props.row.key,
-    formData: {}
+    formData: {},
+    OPC_UATree: [],
+    OPC_UATable: []
   }
 
   componentDidMount() {
+    console.log(this.props)
     this.setState({ formData: JSON.parse(JSON.stringify(this.state.addressData)) }, () => {
       this.openPop()
     })
@@ -70,7 +75,44 @@ export default class config extends PureComponent {
       }
       console.log(formData.showList, formData, popupData.dataType)
       this.renderS7_TCPHTML(formData.showList, formData, popupData.dataType)
+    } else if (popupData.protocolName === 'OPC_UA') {
+      let { node } = this.props
+      console.log({
+        nodeId: node.key,
+        type: node.nodeType
+      })
+      InitOPCUaWindows({
+        nodeId: node.key,
+        type: node.nodeType
+      }).then(res => {
+        if (res.code === 0) {
+          this.setState({
+            OPC_UATree: res.data.tree,
+            OPC_UATable: res.data.table
+          }, () => {
+            this.renderOPC_UAHTML();
+          })
+        }
+      })
     }
+  }
+  onLoadData = () => {
+    console.log(".....")
+  }
+  // OPC_UA协议  弹窗渲染函数
+  renderOPC_UAHTML = () => {
+    this.setState(state=>{
+      configHtml: (
+        <>
+          <div className='leftContent'>
+            <Tree loadData={this.onLoadData} treeData={this.state.OPC_UATree} />
+          </div>
+          <div className="tableList">
+
+          </div>
+        </>
+      )
+    })
   }
 
   // S7_TCP协议 弹窗渲染函数

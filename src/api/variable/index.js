@@ -210,7 +210,7 @@ export function GetDeviceStatus() {
 export function StartDevice(id) {
   return axios({
     url: '/IoTControl/StartDevice',
-    body: {
+    data: {
       id
     },
     method: 'put'
@@ -221,7 +221,7 @@ export function StartDevice(id) {
 export function StopDevice(id) {
   return axios({
     url: '/IoTControl/StopDevice',
-    body: {
+    data: {
       id
     },
     method: 'put'
@@ -232,9 +232,37 @@ export function StopDevice(id) {
 export function RestartDevice(id) {
   return axios({
     url: '/IoTControl/RestartDevice',
-    body: {
+    data: {
       id
     },
     method: 'put'
+  })
+}
+
+//测试OPC_UA连接
+export function TestOPCUaConnect(params) {
+  return axios({
+    url: '/VariableManage/TestOPCUaConnect',
+    params,
+    method: 'get'
+  })
+}
+
+//获取OPC_UA节点
+export function GetOPCUaNodes(nodeId) {
+  return axios({
+    url: '/VariableManage/GetOPCUaNodes',
+    params: {
+      nodeId
+    },
+    method: 'get'
+  })
+}
+//获取OPC_UA节点
+export function InitOPCUaWindows(params) {
+  return axios({
+    url: '/VariableManage/InitOPCUaWindows',
+    params,
+    method: 'get'
   })
 }

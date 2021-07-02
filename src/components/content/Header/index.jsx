@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Dropdown } from 'antd'
+import { Dropdown, message } from 'antd'
 import { withRouter } from "react-router-dom";
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
@@ -7,14 +7,35 @@ import DrowDownMenu from 'components/common/DrowDownMenu'
 import { getCookie } from 'utils'
 import PubSub from 'pubsub-js';
 
-import equLogo from 'assets/img/index/equ.png'
 import './index.less'
 
+import { GetIOTStatus, StartIOT, StopIOT, RestartIoT} from "api/baseIndex"
+
+let timer = null;
 class PageHeader extends PureComponent {
   state = {
     currentEqu: '定子线',
     userName: getCookie("userName"),
-    toggleMenu: false
+    toggleMenu: false,
+    status: 1
+  }
+
+  componentDidMount() {
+    timer = setInterval(() => {
+      GetIOTStatus().then(res => {
+        if (res.code === 0) {
+          this.setState({
+            status: res.data
+          })
+        } else {
+          message.error(res.msg)
+        }
+      })
+    }, 5000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(timer)
   }
 
   toggle = () => {
@@ -30,29 +51,63 @@ class PageHeader extends PureComponent {
     this.props.history.push('/')
   }
 
-  menu = (
-    <DrowDownMenu lists={[
+  menu = () => {
+    let that = this;
+    return <DrowDownMenu lists={[
       {
         name: "重新启动",
         key: "restart",
         onClick() {
-          console.log("重新启动")
+          RestartIoT().then(res => {
+            console.log(res)
+            if (res.code === 0) {
+              that.setState({
+                status: 1
+              }, () => {
+                message.info("重新启动成功")
+              })
+            } else {
+              message.error(res.msg)
+            }
+          })
         }
       }, {
         name: "启动",
         key: "start",
         onClick() {
-          console.log("启动")
+          StartIOT().then(res => {
+            console.log(res)
+            if (res.code === 0) {
+              that.setState({
+                status: 1
+              }, () => {
+                message.info("启动成功")
+              })
+            } else {
+              message.error(res.msg)
+            }
+          })
         }
       }, {
         name: "停止",
         key: "stop",
         onClick() {
-          console.log("停止")
+          StopIOT().then(res => {
+            if (res.code === 0) {
+              console.log(res)
+              that.setState({
+                status: 0
+              }, () => {
+                message.info("已停止")
+              })
+            } else {
+              message.error(res.msg)
+            }
+          })
         }
       }
     ]} />
-  )
+  }
 
   render() {
     return (
@@ -69,7 +124,7 @@ class PageHeader extends PureComponent {
           })}
           <div className="divider"></div>
           <label className="equ-tags">
-            <img src={equLogo} className="equ-logo" alt="equ-logo" />
+            <span className={`iot-status ${this.state.status === 1 ? 'iot-status-normal' : ( this.state.status === 2 ? 'iot-status-danger' : 'iot-status-disable')}`}></span>
             <span className="equ-name">{this.state.currentEqu}</span>
             {<Dropdown overlay={this.menu} trigger={['click']} placement="bottomCenter" arrow>
               <div className="equ-option"></div>
