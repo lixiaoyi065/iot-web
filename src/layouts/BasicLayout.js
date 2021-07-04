@@ -25,7 +25,7 @@ class BasicLayout extends PureComponent {
           <Content className="site-layout-background">
             <Switch>
               <Route path="/index/variable" component={Variable}/>
-                <Route path="/index/realTime" component={RealTime}/>
+              <Route path="/index/realTime" component={RealTime}/>
               <Route path="/index/operations" component={Operations}/>
               <Route path="/index/authorization" component={Authorization} />
               <Route path="/index/user" component={User}/>

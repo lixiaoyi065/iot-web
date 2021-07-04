@@ -51,7 +51,7 @@ const EditableCell = ({
   handleSave,
   addressSearch,
   type,
-  content,
+  tableDataTypes,
   changeTags,
   activeNode,
   activeNodeType,
@@ -127,10 +127,10 @@ const EditableCell = ({
   if (record && record.editable) {
     console.log(record.dataType)
     childNode = type === "select" ? (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex] || content[0]} >
+      <Form.Item name={dataIndex} initialValue={record[dataIndex] || tableDataTypes[0]} >
         <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
           {
-            content.map((el, idx) => {
+            tableDataTypes.map((el, idx) => {
               return <Option value={el} key={el + idx}>{el}</Option>
             })
           }
@@ -264,6 +264,7 @@ class EditableTable extends React.Component {
           content: col.content,
           changeTags: this.state.changeTags,
           handleSave: this.handleSave,
+          tableDataTypes: this.props.tableDataTypes,
           addressSearch: this.props.addressSearch
         }),
       };

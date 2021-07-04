@@ -428,11 +428,10 @@ class RealTime extends PureComponent{
           element.key = element.id
           dataList.push(element)
         });
-        console.log(res)
         this.setState({
           dataSource: dataList,
           tableDataTypes: res.data.gridDataTypes,
-          gist: [...dataList],
+          gist: JSON.parse(JSON.stringify(dataList)),
           count: res.data.total,
           total: res.data.total > 100 ? 100 : res.data.total,
           dataTypes: res.data.dataTypes,
@@ -537,6 +536,7 @@ class RealTime extends PureComponent{
 
   //保存变量列表
   saveList = () => {
+    console.log(this.state.modifyTagsList)
     if(this.state.modifyTagsList.length === 0){
       message.warning("当前没有更改的内容")
       return;
@@ -564,7 +564,6 @@ class RealTime extends PureComponent{
         let timer = setInterval(()=>{
           //获取
           GetSaveTagsTaskProgress(res.data).then(val=>{
-            console.log(val)
             //清除定时器,关闭加载中
             if (val.data.status === 2 || val.data.status === 3) {
               clearInterval(timer)
@@ -772,7 +771,6 @@ class RealTime extends PureComponent{
   //导入点表文件
   importProps = (e) => {
     e.preventDefault();
-    console.log("+++++++++++")
     //重置查询
     this.searchRef.current.refs.formRef.setFieldsValue({
       dataType: "不限",
@@ -790,13 +788,11 @@ class RealTime extends PureComponent{
       type: this.state.activeNodeType,
       formData: formdata
     }).then(res => {
-      console.log(res)
       if (res.code === 0) {
         this.setState({loading: true})
         let getProcessTimer = setInterval(() => {
           GetImportTagsTaskProgress(res.data).then(mes => {
             let result = mes.data.resultData
-            console.log(mes)
             if ( mes.data.status === 2 ||  mes.data.status === 3) {
               message.info(mes.data.message)
               
@@ -807,7 +803,7 @@ class RealTime extends PureComponent{
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
-                  gist: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify(result.tags)) : state.gist,
                   dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
                   treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
                   dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
@@ -1004,7 +1000,7 @@ class RealTime extends PureComponent{
             <div className="tableContain">
               <EditableTable
                 rowSelection={{
-                  columnWidth: "50px",
+                  columnWidth: "56px",
                   selectedRowKeys: this.state.selectedRowKeys,
                   onChange: this.onSelectChange,
                 }}
@@ -1032,8 +1028,8 @@ class RealTime extends PureComponent{
                     },
                     editable: el.editable,
                     type: el.type || "",
-                    content: el.content || "",
-                    render: el.render
+                    // content: el.content,
+                    // render: el.render
                   }
                 })}
               />

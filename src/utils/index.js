@@ -78,16 +78,16 @@ export function downFile(res, fileName) {
  * return bool
  */
 export function isEffectiveEditor(gist, key, dataIndex, val) {
-  if (gist.length === 0) {
-    return false
-  }
+  // if (gist.length === 0) {
+  //   return false
+  // }
  
-  return gist.some(item => {
-    if (item.key === key) {
-      return item[dataIndex] === val
-    }
-    return false
-  })
+  // return gist.some(item => {
+  //   if (item.key === key) {
+  //     return item[dataIndex] === val
+  //   }
+  //   return false
+  // })
 }
 /**
  * 判断数组中对应的对象跟被判断的对象是否一致

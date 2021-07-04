@@ -1,10 +1,10 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Table, Input, Form, Select } from 'antd';
 import { Resizable } from 'react-resizable';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
-import { isEffectiveEditor, isFit } from 'utils'
+import { isFit } from 'utils'
 import { addressVerify, descVerify, nameVerify } from './verify'
 
 const EditableContext = React.createContext(null);
@@ -51,47 +51,45 @@ const EditableCell = ({
   handleSave,
   addressSearch,
   type,
-  content,
+  tableDataTypes,
   changeTags,
   activeNode,
   activeNodeType,
   ...restProps
 }) => {
+  const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
-
-  const toggleEdit = (value) => {
-    form.setFieldsValue({
-      [dataIndex]: value
-    });
-  };
-
-  //有效编辑
-  const isEffective = (e, value, id = null) => {
-    let flag = isEffectiveEditor(gist, record.key, dataIndex, value)
-
-    if (!flag) {
-      if (id !== null) {
-        document.getElementById(id).parentNode.parentNode.classList.add("effective-editor")
-      } else {
-        // e.target.parentNode.className = "ant-form-item-control-input-content effective-editor"
-        e.target.parentNode.classList.add("effective-editor")
-      }
-    } else {
-      if (id !== null) {
-        document.getElementById(id).parentNode.parentNode.classList.remove("effective-editor")
-      } else {
-        e.target.parentNode.classList.remove("effective-editor")
-        // e.target.parentNode.className = "ant-form-item-control-input-content"
-      }
+  useEffect(() => {
+    if (editing && type !== "select") {
+      inputRef.current.focus();
     }
+  }, [editing]);
+
+  const checkIsSame = (val) => {
+    let gistIndex = dataSource && dataSource.indexOf(record);
+    let isSame = true
+
+    if (dataIndex && record.editable) {
+      isSame = gistIndex >= gist.length ? false : (
+        val === gist[gistIndex][dataIndex]
+      )
+    }
+    return isSame
+  }
+
+  const toggleEdits = () => {
+    setEditing(!editing);
+    form.setFieldsValue({
+      [dataIndex]: record[dataIndex],
+    });
   }
 
   const check = async (e) => {
     let val = e.target.value;
     try {
       const dataList = await form.validateFields();
-      toggleEdit(val)
+      toggleEdits()
       if (dataIndex === "name") {
         nameVerify(val, dataSource, record, dataIndex, activeNodeType)
       } else if (dataIndex === "address") { //变量地址校验
@@ -105,8 +103,9 @@ const EditableCell = ({
       } else if (dataIndex === "desc") {
         descVerify(val)
       }
-      handleSave(dataIndex, val, { ...record, ...dataList });
-      isEffective(e, val);
+
+      handleSave(dataIndex, val, { ...record, ...dataList }, !checkIsSame(val))
+
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -115,8 +114,8 @@ const EditableCell = ({
   const selectChange = async (e, id) => {
     try {
       const dataList = await form.validateFields();
+      toggleEdits()
       handleSave(dataIndex, e, { ...record, ...dataList });
-      isEffective(e, e, id);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -125,32 +124,40 @@ const EditableCell = ({
   let childNode = children;
 
   if (record && record.editable) {
-    console.log(record.dataType)
-    childNode = type === "select" ? (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex] || content[0]} >
-        <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
-          {
-            content.map((el, idx) => {
-              return <Option value={el} key={el + idx}>{el}</Option>
-            })
-          }
-        </Select>
-      </Form.Item>
-    ) : (type === "input-group" ? (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-        <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onSearch={(value, event) => { addressSearch(value, event, record) }} />
-      </Form.Item>
+    childNode = editing ? (
+      type === "select" ? (
+        <Form.Item name={dataIndex} initialValue={record[dataIndex] || tableDataTypes[0]} >
+          <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
+            {
+              tableDataTypes.map((el, idx) => {
+                return <Option value={el} key={el + idx}>{el}</Option>
+              })
+            }
+          </Select>
+        </Form.Item>
+      ) : (type === "input-group" ? (
+        <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
+          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onSearch={(value, event) => { addressSearch(value, event, record) }} />
+        </Form.Item>
+      ) : (
+        <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
+          <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
+        </Form.Item>
+      ))
     ) : (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-        <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
-      </Form.Item>
-    ))
-    if (changeTags) {
-      toggleEdit(record[dataIndex])
-    }
+      <div
+        className="editable-cell-value-wrap"
+        onClick={toggleEdits}
+      >
+        {childNode}
+      </div>
+    )
   }
-  //<Tooltip placement="topLeft" title={record&&record[dataIndex]}></Tooltip>
-  return <td {...restProps}>{childNode}</td>;
+
+  return <td {...restProps}
+    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}
+      ${!checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
+    `}>{childNode}</td>;
 };
 
 class EditableTable extends React.Component {
@@ -160,12 +167,14 @@ class EditableTable extends React.Component {
     this.state = {
       height: 0,
       dataSource: [],
+      gist: [],
       changeTags: false,
       columns: this.props.columns
     };
   }
 
   componentDidMount() {
+    this.setState({ gist: this.props.gist })
     setTimeout(() => {
       this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
     })
@@ -183,8 +192,19 @@ class EditableTable extends React.Component {
     return null
   }
 
-  handleSave = (dataIndex, val, row) => {
-    console.log(row)
+  handleSave = (dataIndex, val, row, flag = true) => {
+    this.setState(state => {
+      for (let i = 0; i < state.dataSource.length; i++) {
+        if (state.dataSource[i].key === row.key) {
+          Object.assign(state.dataSource[i], row)
+          return
+        }
+      }
+      return {
+        dataSource: state.dataSource
+      }
+    })
+
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
@@ -208,6 +228,8 @@ class EditableTable extends React.Component {
       } else {
         modifyTags[index][dataIndex] = val
       }
+    } else if (flag) {
+      return
     } else {
       //否则添加
       modifyTags.push(row)
@@ -219,7 +241,6 @@ class EditableTable extends React.Component {
     })
   };
   handleResize = index => (e, { size }) => {
-    console.log(size)
     this.setState(({ columns }) => {
       const nextColumns = [...columns];
       nextColumns[index] = {
@@ -264,6 +285,7 @@ class EditableTable extends React.Component {
           content: col.content,
           changeTags: this.state.changeTags,
           handleSave: this.handleSave,
+          tableDataTypes: this.props.tableDataTypes,
           addressSearch: this.props.addressSearch
         }),
       };
