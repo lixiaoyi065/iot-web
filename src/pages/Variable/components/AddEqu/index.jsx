@@ -117,15 +117,13 @@ export default class addDevice extends PureComponent {
   //opc_ua协议测试连接
   connetTest = () => {
     let formData = this.formRef.current.getFieldsValue()
-    console.log(this.formRef.current.validateFields())
-    console.log(this.props)
     this.formRef.current.validateFields().then(() => {
-      // this.props.connetTest({
-      //   serverName: formData.IPAddress,
-      //   type: formData.UserIdentity,
-      //   username: formData.UserName || "",
-      //   password: formData.Password || ""
-      // })
+      this.props.connetTest({
+        serverName: formData.IPAddress,
+        type: formData.UserIdentity,
+        username: formData.UserName || "",
+        password: formData.Password || ""
+      })
     })
   }
 
@@ -190,12 +188,12 @@ export default class addDevice extends PureComponent {
           {
             this.isShowFormItem("SessionName") ? (
               <Form.Item label="连接名" name="SessionName"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入连接名",
-                }
-              ]}>
+                rules={[
+                  {
+                    required: true,
+                    message: "请输入连接名",
+                  }
+                ]}>
                 <Input />
               </Form.Item>
             ) : null
@@ -454,7 +452,7 @@ export default class addDevice extends PureComponent {
             this.state.activeProto === "OPC_UA" ?
               <>
                 <Button type="default" className="login-form-button" onClick={this.connetTest}>测试连接</Button>
-                <span className="divider" style={{marginRight: 0}}></span>
+                <span className="divider" style={{ marginRight: 0 }}></span>
               </> : <></>
           }
           <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>

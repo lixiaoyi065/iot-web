@@ -4,17 +4,35 @@
   color: #333;
   border-bottom: 1px solid #E4E4E4;
   overflow: hidden;
-  
-  .title-contain{
+
+  .title-contain {
     display: flex;
     padding: 0 12px 0 21px;
   }
+
   .optGroup {
     flex: 1;
     text-align: right;
   }
 }
-.moveNode{
+
+.moveNode {
+
+  .ant-tree-list {
+    height: 100%;
+    overflow: hidden;
+
+    .ant-tree-list-holder {
+      height: 100%;
+      overflow: auto;
+
+      .ant-tree-list-holder-inner{
+        padding: 5px 0;
+      }
+    }
+
+  }
+
   .ant-tree-treenode {
     &:hover::after {
       content: "";
@@ -26,6 +44,7 @@
       background: url("~assets/img/common/move2.png") no-repeat;
       background-size: 100%;
     }
+
     &:active::after {
       content: "";
       background: url("~assets/img/common/move2_active.png") no-repeat;
@@ -43,17 +62,20 @@
         background: url("~assets/img/common/move2.png") no-repeat;
         background-size: 100%;
       }
+
       &:active::after {
         content: "";
         background: url("~assets/img/common/move2_active.png") no-repeat;
         background-size: 100%;
       }
     }
-    &:has(.ant-tree-active){
+
+    &:has(.ant-tree-active) {
       background-color: yellow;
     }
   }
 }
+
 .ant-tree {
   .ant-tree-treenode {
     position: relative;
@@ -64,14 +86,14 @@
     font-weight: 500;
     color: #252525;
 
-    &:hover{
+    &:hover {
       background: #E4EEFF;
     }
 
-    &:active{
+    &:active {
       background: #4270E4;
       color: #fff;
-      
+
       .ant-tree-title {
         .ant-tree-title-operationNode {
           background: url(~assets/img/variable/more_active.png) no-repeat;
@@ -80,8 +102,8 @@
       }
     }
 
-    .ant-tree-node-content-wrapper{
-      &:hover{
+    .ant-tree-node-content-wrapper {
+      &:hover {
         background: none;
       }
     }
@@ -91,10 +113,11 @@
     }
 
     &.ant-tree-treenode-selected {
-      &:hover{
+      &:hover {
         background: #E4EEFF;
       }
-      &:active{
+
+      &:active {
         background: #4270E4;
         color: #fff;
 
@@ -106,7 +129,7 @@
         }
       }
 
-      .ant-tree-node-selected{
+      .ant-tree-node-selected {
         background: none;
       }
 
@@ -122,12 +145,13 @@
       }
     }
 
-    .ant-tree-checkbox{
+    .ant-tree-checkbox {
       position: absolute;
       left: 20px;
       top: 10px;
       margin-top: 0;
-      .ant-tree-checkbox-inner{
+
+      .ant-tree-checkbox-inner {
         width: 18px;
         height: 18px;
         border-radius: 2px;

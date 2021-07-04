@@ -6,7 +6,7 @@ import PubSub from 'pubsub-js'
 import './index.less'
 
 import { stringToArray } from 'utils'
-
+const { TreeNode } = Tree
 class ZTree extends PureComponent {
   state = {
     nodeDatas: [],
@@ -18,7 +18,7 @@ class ZTree extends PureComponent {
 
   componentDidMount() {
     PubSub.subscribe("deviceStatus", (msg, data) => {
-      this.setState({deviceStatus: data})
+      this.setState({ deviceStatus: data })
     })
     this.setState({
       defaultExpandedKeys: stringToArray(localStorage.getItem(`${this.props.location.pathname}`)),
@@ -140,12 +140,10 @@ class ZTree extends PureComponent {
   };
 
   onSelect = (keys, info) => {
-    console.log("onSelect", keys)
     this.state.selectCallbackFn(keys, info);
   };
 
   onExpand = (e) => {
-    // console.log("onExpand", e)
     localStorage.setItem(`${this.state.pathname}`, e)
   };
 
@@ -178,7 +176,6 @@ class ZTree extends PureComponent {
               blockNode
               draggable
               className={this.props.move ? "moveNode" : ""}
-              // autoExpandParent={ true }
               showIcon={false}
               onSelect={this.onSelect}
               onExpand={this.onExpand}
@@ -186,7 +183,11 @@ class ZTree extends PureComponent {
               treeData={this.treeData()}
               defaultExpandedKeys={this.state.defaultExpandedKeys}
               {...this.props}
-            />
+            >
+              {this.state.nodeDatas.map(data => (
+                <TreeNode dragOverGapBottom={true} />
+              ))}
+            </Tree>
           ) : <></>
         }
 

@@ -1,28 +1,31 @@
- import React, { PureComponent } from 'react'
-import { Modal, message, Spin, Dropdown } from "antd"
+import React, { PureComponent } from 'react'
+import { Modal, message, Spin } from "antd"
 import PubSub from "pubsub-js";
 import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
-import ZTree from './components/Ztree'
-import EditableTable from 'components/common/EditDataTable/index.jsx'
-// import Table from './components/Table/index.jsx'
+import ZTree from 'components/common/Ztree'
+import EditableTable from 'components/common/DataTable'
+// import EditableTable from 'components/common/EditDataTable'
 
 import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
 import Search from './components/Search'
+import AddressConfig from './components/AddressConfig'
+import OpcConfig from './components/AddressConfig/OpcConfig'
 
 import { downFile, deepClone } from "utils";
 
 import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
-  GetTreeStructure, GetDevice, DeleteDevice, DelGroup, SortTreeNode,
+  GetTreeStructure, GetDevice, DeleteDevice, DelGroup,
   InitTags, GetNextPageTags, QueryTags, SaveTags, ExportTags, DeleteTags,
-  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress,
-  GetDeviceStatus, StartDevice
+  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress, GetAddressEditInfo,
+  SortTreeNode, TestOPCUaConnect,
+  GetDeviceStatus,StartDevice,StopDevice
 } from 'api/variable'
 
-let getDeviceTimer = null;
+let deviceStatusTimer = null;
 class RealTime extends PureComponent{
   state = {
     loading: false, //保存时显示加载中
@@ -38,50 +41,43 @@ class RealTime extends PureComponent{
     visible: false, //弹窗显示隐藏
     title: "",//弹窗标题
     modalContent: "",//弹窗内容
-    activeNode: "", //当前显示变量列表的节点
+    node: {},//当前显示的变量对象
+    activeNode: "", //当前显示变量列表的节点ID
+    activeNodeName: "",//当前显示变量列表的节点名称
     activeNodeType: 0, //当前显示变量列表的节点类型
     tableDataTypes: [],
     modifyTagsList: [],
     fileList: [],
     canSubmit: {},
     tableLoading: false,
-    comfirmContent: "",
-    comfirmVisible: false,
-    arrowMenuVisible: false,
-    arrowMenuPosition: {
-      left: 0,
-      top: 0
-    },
-    arrowMenuList: [],
+    pageIndex: 0, //当前页面
+    opcConfigVisible: false,
+    opcConfigContent: "",
   }
-  searchRef = React.createRef()
+  searchRef = React.createRef();
   componentDidMount() {
     this.getTreeStructure();
-    this.getDeviceStatus();
     PubSub.subscribe("modifyTags", (msg, data) => {
       this.setState({modifyTagsList: data})
     })
     PubSub.subscribe("canSubmit", (msg, data) => {
       this.setState({canSubmit: data})
     })
-    getDeviceTimer = setInterval(() => {
+
+    this.getDeviceStatus();
+    deviceStatusTimer = setInterval(() => {
       this.getDeviceStatus();
     }, 5000)
   }
-  componentWillUnmount(){
+  componentWillUnmount() {
+    clearInterval(deviceStatusTimer)
     //取消订阅
     PubSub.unsubscribe("modifyTags")
-    clearInterval(getDeviceTimer)
+    PubSub.unsubscribe("canSubmit")
   }
-
-  getDeviceStatus = () => {
+  getDeviceStatus = () =>{
     GetDeviceStatus().then(res => {
-      console.log(res)
-      if (res.code === 0) {
-        PubSub.publish("deviceStatus", res.data)
-      } else {
-        message.error(res.msg)
-      }
+      PubSub.publish("deviceStatus", res.data)
     })
   }
 
@@ -92,9 +88,338 @@ class RealTime extends PureComponent{
       this.setState({treeData: res.data})
     })
   }
+
+  //收缩设备列表
+  toggleLeft = ()=>{
+    const collapsed = !this.state.collasped
+    this.setState({collasped: collapsed})
+  }
+
+  //设备树操作菜单
+  zTreeOptionMenu = (
+    <DrowDownMenu lists={[
+        {
+          key: "addDevice",
+          name: "添加设备",
+        },
+        {
+          key: "addGroup",
+          name: "添加分组",
+      }, {
+          key: "allExport",
+          name: "整体导出"
+        }
+      ]}
+      onClick={(e) => {
+        e.domEvent.stopPropagation();
+        this.menuClick(e)
+      }}
+    />
+  )
+  //操作内部变量菜单
+  interVariable = (el) => {
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "overallExport",
+          name: '整体导出',
+        }
+      ]}
+      onClick={(e) => {
+        console.log(el)
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el)
+      }}
+    />
+    )
+  }
+  //操作设备菜单
+  optionDeviceMenu = (el, length)=> {
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "startDevice",
+          name: "启用",
+        },
+        {
+          key: "stopDevice",
+          name: "停止",
+        },
+        {
+          key: "modifyDevice",
+          name: "编辑设备",
+        },
+        {
+          key: "delDevice",
+          name: "删除设备",
+        },
+        {
+          key: "overallExport",
+          name: '整体导出',
+        }
+      ]}
+      onClick={(e) => {
+        console.log(el)
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el, length)
+      }}
+    />
+    )
+  }
+  //操作分组菜单
+  optionGroupMenu = (el)=> {
+    return (
+      <DrowDownMenu lists={[
+        {
+          key: "modifyGroup",
+          name: "编辑分组",
+        },
+        {
+          key: "delGroup",
+          name: "删除分组",
+        }
+      ]}
+        onClick={(e) => {
+        e.domEvent.stopPropagation();
+        this.menuClick(e, el)
+      }}
+      />
+    )
+  }
+
+  handleCancel = ()=>{
+    this.setState({visible: false})
+  }
+  opcConfigCancel = ()=>{
+    this.setState({opcConfigVisible: false})
+  }
+  confirm = (content,callback)=> {
+    Modal.confirm({
+      title: '注意',
+      content: content,
+      okText: '确认',
+      cancelText: '取消',
+      onOk: callback
+    });
+  }
+
+  //添加设备提交函数
+  onAddDeviceFinish = val => {
+    this.setState({ loading: true })
+    const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
+    //数据二次处理
+    const equObj = { params: {} }
+    for (let key in val) {
+      if (list.indexOf(key) < 0) {
+        if (key === "StrByteOrder1") {
+          equObj.params.StrByteOrder = val[key] ? "True" : "False"
+        } else {
+          equObj.params[key] = val[key]
+        }
+      } else {
+        equObj[key] = val[key]
+      }
+    }
+    if (val.id === "00000000-0000-0000-0000-000000000000") {
+      AddDevice(equObj).then(res => {
+        this.setState({ loading: false })
+        if (res.code === 0) {
+          message.info("新增成功");
+          this.getTreeStructure();
+          this.handleCancel();
+        } else {
+          message.error("新增失败。" + res.msg)
+        }
+      })
+    } else {
+      ModifyDevice(equObj).then(res => {
+        this.setState({ loading: false })
+        if (res.code === 0) {
+          this.handleCancel();
+          message.info("编辑成功")
+          this.getTreeStructure();
+        } else {
+          message.error("编辑失败。" + res.msg)
+        }
+      })
+    }
+  }
+  
+  //opc_ua协议测试连接
+  connetTest = (val) => {
+    TestOPCUaConnect(val).then(res => {
+      if (res.code === 0) {
+        message.info("连接成功")
+      } else {
+        message.error(res.msg)
+      }
+    })
+  }
+
+  //添加分组提交函数
+  onAddGroupFinish = (val) => {
+    if (val.groupId === "00000000-0000-0000-0000-000000000000") {
+      AddGroup(val).then(res => {
+        if (res.code === 0) {
+          this.getTreeStructure();
+          message.info("新增成功")
+          this.handleCancel();
+        } else {
+          message.error("新增失败。" + res.msg)
+        }
+      })
+    } else {
+      ModifyGroup(val).then(res => {
+        if (res.code === 0) {
+          this.getTreeStructure();
+          message.info("编辑成功")
+          this.handleCancel();
+        } else {
+          message.error("编辑失败。" + res.msg)
+        }
+      })
+    }
+  }
+
+  delDevice = (id) => {
+    DeleteDevice(id).then(res=>{
+      if(res.code === 0){
+        message.info("删除成功") 
+        this.getTreeStructure();
+      }else{
+        message.error(res.msg)
+      }
+    })
+  }
+
+  menuClick = (e, node, length)=>{
+    if (e.key === "addDevice") {
+      this.setState({
+        visible: true, 
+        title: "新增设备", 
+        modalContent: <AddEqu key={ new Date()}
+          onCancel={this.handleCancel}
+          onFinish={this.onAddDeviceFinish}
+          connetTest={this.connetTest} />
+      })
+    } else if (e.key === "modifyDevice") {
+      GetDevice(node.nodeID).then(res=>{
+        this.setState({
+          visible: true, 
+          title: "编辑设备", 
+          modalContent: <AddEqu
+            key={`modifyDevice + ${node.nodeID}`}
+            node={res.data}
+            onCancel={this.handleCancel}
+            onFinish={this.onAddDeviceFinish}
+            connetTest={ this.connetTest } />
+        })
+      })
+    } else if(e.key === "delDevice"){
+      if(length > 0){
+        this.confirm('节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?',()=>{
+          this.delDevice(node.nodeID);
+        })
+      }else{
+        this.delDevice(node.nodeID)
+      }
+    } else if (e.key === "allExport") {
+      ExportTags({
+        nodeId: "00000000-0000-0000-0000-000000000000",
+        type: -1
+      }).then(res => {
+        downFile(res, "变量总列表.xls");
+      })
+    } else if (e.key === "overallExport") {
+      ExportTags({
+        nodeId: node.nodeID,
+        type: node.nodeType
+      }).then(res => {
+        downFile(res, node.nodeName + ".xlsx");
+      })
+    }else if (e.key === "addGroup") {
+      this.setState({
+        visible: true, 
+        title: "新增分组", 
+        modalContent: <AddGroupPane key="addGroup"
+          onCancel={this.handleCancel} 
+          onFinish={this.onAddGroupFinish}/>
+      })
+    } else if (e.key === "modifyGroup") {
+      console.log(node)
+      this.setState({
+        visible: true, 
+        title: "编辑分组", 
+        modalContent: <AddGroupPane
+          key={node.groupId} node={node}
+          onCancel={this.handleCancel}
+          onFinish={this.onAddGroupFinish} />
+      })
+    } else if (e.key === "delGroup") {
+      this.confirm('节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?',()=>{
+        DelGroup(node.groupId).then(res=>{
+          if(res.code === 0){
+            message.info("删除成功")
+            this.getTreeStructure();
+          }else{
+            message.error(res.msg)
+          }
+        })
+      })
+    } else if (e.key === "startDevice") {
+      StartDevice(node.nodeID).then(res =>{
+        if (res.code === 0) {
+          message.info("启动成功")
+        } else {
+          message.info(res.msg)
+        }
+      })
+    } else if (e.key === "stopDevice") {
+      StopDevice(node.nodeID).then(res =>{
+        if (res.code === 0) {
+          message.info("停止成功")
+        } else {
+          message.info(res.msg)
+        }
+      })
+    }
+  }
+  //点击节点触发函数
+  onSelect = (res, info) => {
+    let tags = {
+      nodeId: info.node.key,
+      type: info.node.nodeType
+    }
+    //当前节点存在未保存的变量，提示是否继续下面的操作
+    if (this.state.modifyTagsList.length > 0) {
+      this.confirm('当前节点存在未保存的变量，是否继续？',()=>{
+        this.initTagList(tags,info)
+      })
+    } else {
+      this.initTagList(tags,info)
+    }
+  }
   //初始加载变量列表
-  initTagList = tags => {
-    this.setState({tableLoading: true})
+  initTagList = (tags, info = null) => {
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
+    // let nodeName = info.node.nodeType === 1 ? info.selectedNodes[0].title : info.selectedNodes[0].title.props.children[0].props.children
+    if (info) {
+      this.setState({
+        tableLoading: true,
+        activeNode: info.node.key,
+        // activeNodeName: nodeName,
+        activeNodeType: info.node.nodeType,
+        node: info.node
+      })      
+    } else {
+      this.setState({
+        tableLoading: true,
+      })
+    }
     InitTags(tags).then(res => {
       let dataList = [];
       this.setState({tableLoading: false})
@@ -103,6 +428,7 @@ class RealTime extends PureComponent{
           element.key = element.id
           dataList.push(element)
         });
+        console.log(res)
         this.setState({
           dataSource: dataList,
           tableDataTypes: res.data.gridDataTypes,
@@ -111,7 +437,10 @@ class RealTime extends PureComponent{
           total: res.data.total > 100 ? 100 : res.data.total,
           dataTypes: res.data.dataTypes,
           activeNode: tags.nodeId,
-          activeNodeType: tags.type
+          activeNodeName: res.data.nodeName,
+          activeNodeType: tags.type,
+          modifyTagsList: [],
+          pageIndex: 0
         })
       } else {
         message.info(res.msg)
@@ -314,22 +643,41 @@ class RealTime extends PureComponent{
   }
   //删除变量
   delTags = () => {
-    console.log("delTags",{
-      ids: this.state.selectedRowKeys,
-      type: this.state.activeNodeType
+    let phyDel = [], //物理删除
+      dataDel = []; //数据库删除
+    this.state.selectedRowKeys.forEach((item,i)=>{
+      if(item.length !== 36){
+        phyDel.push(item)
+      }else{
+        dataDel.push(item)
+      }
     })
     DeleteTags({
-      ids: this.state.selectedRowKeys,
+      ids: dataDel,
       type: this.state.activeNodeType
     }).then(res => {
-      console.log(res)
       if (res.code === 0) {
         message.info("删除成功")
         this.setState((state) => {
           let targetObj = [...state.dataSource]
           let modify = [...state.modifyTagsList]
           res.data.forEach((id) => {
-            for (let i = 0; i < targetObj.length;i++){
+            for (let i = 0; i < targetObj.length;i++){ 
+              if (targetObj[i].key === id) {
+                targetObj.splice(i, 1);
+                break;
+              }
+            }
+            //移除modifyTagsList中删除的变量
+            for (let i = 0; i < modify.length; i++){
+              if (modify[i].key === id) {
+                modify.splice(i, 1);
+                break;
+              }
+            }
+          })
+          phyDel.forEach((id)=>{
+            for (let i = 0; i < targetObj.length;i++){ 
               if (targetObj[i].key === id) {
                 targetObj.splice(i, 1);
                 break;
@@ -355,218 +703,6 @@ class RealTime extends PureComponent{
     })
   }
 
-  //收缩设备列表
-  toggleLeft = ()=>{
-    const collapsed = !this.state.collasped
-    this.setState({collasped: collapsed})
-  }
-
-  //设备树操作菜单
-  zTreeOptionMenu = (
-    <DrowDownMenu lists={[
-        {
-          key: "addDevice",
-          name: "添加设备",
-        },
-        {
-          key: "addGroup",
-          name: "添加分组",
-      }, {
-          key: "allExport",
-          name: "整体导出"
-        }
-      ]}
-      onClick={(e) => {
-        e.domEvent.stopPropagation();
-        this.menuClick(e.key)
-      }}
-    />
-  )
-
-  //点击节点触发函数
-  onSelect = (info) => {
-    let tags = {
-      nodeId: info.nodeID,
-      type: info.nodeType
-    }
-    this.setState({
-      activeNode: info.nodeID,
-      activeNodeType: info.nodeType
-    })
-    this.initTagList(tags)
-  }
-
-  //提交节点排序的修改
-  submitSortTreeNode = (obj) => {
-    SortTreeNode(obj).then(res => {
-      console.log(res)
-    })
-  }
-  menuClick = (key, treeNode=null, length)=>{
-    let id = treeNode !== null ? treeNode.nodeID : "";
-    console.log(key)
-    if (key === "addDevice") {
-      this.setState({
-        visible: true, 
-        title: "新增设备", 
-        modalContent: <AddEqu key="addDevice" onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
-      })
-    } else if(key === "modifyDevice"){
-      GetDevice(id).then(res=>{
-        this.setState({
-          visible: true, 
-          title: "编辑设备", 
-          modalContent: <AddEqu key={id} node={ res.data } onCancel={this.handleCancel} onFinish={ this.onAddDeviceFinish }/>
-        })
-      })
-    } else if(key === "delDevice"){
-      if(length > 0){
-        this.confirm('节点下有分组存在，删除将会跟随分组一起删除，无法恢复，是否继续?',()=>{
-          this.delDevice(id);
-        })
-      }else{
-        this.delDevice(id)
-      }
-    } else if (key === "allExport") {
-      ExportTags({
-        nodeId: "00000000-0000-0000-0000-000000000000",
-        type: -1
-      }).then(res => {
-        downFile(res, "变量列表.xls");
-      })
-    } else if (key === "overallExport") {
-      ExportTags({
-        nodeId: id,
-        type: treeNode.nodeType
-      }).then(res => {
-        downFile(res, treeNode.nodeName + ".xls");
-      })
-    }else if (key === "addGroup") {
-      this.setState({
-        visible: true, 
-        title: "新增分组", 
-        modalContent: <AddGroupPane key="addGroup" onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
-      })
-    }else if(key === "modifyGroup"){
-      this.setState({
-        visible: true, 
-        title: "编辑分组", 
-        modalContent: <AddGroupPane key={id} node={{
-          deviceId: treeNode.fatherNodeID,
-          groupId: id,
-          name: treeNode.nodeName,
-          type: treeNode.nodeType
-        }} onCancel={this.handleCancel} onFinish={this.onAddGroupFinish}/>
-      })
-    } else if (key === "delGroup") {
-      this.confirm('节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?',()=>{
-        DelGroup(id).then(res=>{
-          if(res.code === 0){
-            message.info("删除成功")
-            this.getTreeStructure();
-          }else{
-            message.error(res.msg)
-          }
-        })
-      })
-    } else if (key === "startDevice") {
-      console.log(id)
-      StartDevice(id).then(res => {
-        console.log(res)
-      })
-    }
-  }
-
-  handleCancel = ()=>{
-    this.setState({visible: false, comfirmVisible: false})
-  }
-  confirm = (content,callback)=> {
-    Modal.confirm({
-      title: '注意',
-      content: content,
-      okText: '确认',
-      cancelText: '取消',
-      onOk: callback
-    });
-  }
-
-  //添加设备提交函数
-  onAddDeviceFinish = val => {
-    this.setState({ loading: true })
-    const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
-    //数据二次处理
-    const equObj = { params: {} }
-    for (let key in val) {
-      if (list.indexOf(key) < 0) {
-        if (key === "StrByteOrder1") {
-          equObj.params.StrByteOrder = val[key] ? "True" : "False"
-        } else {
-          equObj.params[key] = val[key]
-        }
-      } else {
-        equObj[key] = val[key]
-      }
-    }
-    if (val.id === "00000000-0000-0000-0000-000000000000") {
-      AddDevice(equObj).then(res => {
-        this.setState({ loading: false })
-        if (res.code === 0) {
-          message.info("新增成功");
-          this.getTreeStructure();
-          this.handleCancel();
-        } else {
-          message.error("新增失败。" + res.msg)
-        }
-      })
-    } else {
-      ModifyDevice(equObj).then(res => {
-        this.setState({ loading: false })
-        if (res.code === 0) {
-          this.handleCancel();
-          message.info("编辑成功")
-          this.getTreeStructure();
-        } else {
-          message.error("编辑失败。" + res.msg)
-        }
-      })
-    }
-  }
-
-  //添加分组提交函数
-  onAddGroupFinish = (val) => {
-    if (val.groupId === "00000000-0000-0000-0000-000000000000") {
-      AddGroup(val).then(res => {
-        if (res.code === 0) {
-          this.getTreeStructure();
-          message.info("新增成功")
-          this.handleCancel();
-        } else {
-          message.error("新增失败。" + res.msg)
-        }
-      })
-    } else {
-      ModifyGroup(val).then(res => {
-        if (res.code === 0) {
-          this.getTreeStructure();
-          message.info("编辑成功")
-          this.handleCancel();
-        } else {
-          message.error("编辑失败。" + res.msg)
-        }
-      })
-    }
-  }
-
-  delDevice = (id) => {
-    DeleteDevice(id).then(res=>{
-      if(res.code === 0){
-        message.info("删除成功") 
-        this.getTreeStructure();
-      }else{
-        message.error(res.msg)
-      }
-    })
-  }
   //表格项变化
   tableColums = (activeNodeType) => {
     let columArr = [
@@ -575,8 +711,8 @@ class RealTime extends PureComponent{
         dataIndex: 'no',
         width: 50,
         editable: false,
-        render: (key) => {
-          return <span className="serialNum">{key}</span>
+        render: (key, i) => {
+          return <span className="serialNum">{this.state.dataSource.indexOf(i) +1}</span>
         }
       },{
         title: '变量名',
@@ -614,6 +750,7 @@ class RealTime extends PureComponent{
         title: '变量地址',
         dataIndex: 'address',
         editable: true,
+        type: "input-group",
       },
       {
         title: '字符长度',
@@ -628,21 +765,26 @@ class RealTime extends PureComponent{
         editable: true,
       })
     }
+
     return columArr; 
   }
 
   //导入点表文件
   importProps = (e) => {
     e.preventDefault();
+    console.log("+++++++++++")
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
     const formdata = new FormData();
     formdata.append('files', e.target.files[0]);
-    console.log(formdata,formdata.getAll("files"))
+    this.importFileFun(formdata);
+  }
 
-    console.log({
-      nodeId: this.state.activeNode,
-      type: this.state.activeNodeType,
-    })
-
+  importFileFun = (formdata) => {
+    document.getElementById('importFile').value=null
     ImportFile({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType,
@@ -659,22 +801,159 @@ class RealTime extends PureComponent{
               message.info(mes.data.message)
               
               this.setState(state => {
+                if (mes.data.message === "导入成功") {
+                  $(".effective-editor").removeClass("effective-editor")
+                }
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
-                  dataSource: result.tags !== null ? result.tags : state.dataSource,
-                  treeData: result.tree !== null ? result.tree : state.treeData,
-                  dataTypes: result.dataTypes !== null ? result.dataTypes : state.dataTypes
+                  gist: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
+                  dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
+                  modifyTagsList: mes.data.message === "导入成功" ? [] : state.modifyTagsList //导入成功，清空编辑项
                 }
               })
+              PubSub.publish("changeTags", true)
               clearInterval(getProcessTimer)
+              PubSub.publish("changeTags", false)
             }
           })
         },1000)
       }
     })
-
   }
+
+  addressSearch = (value, event, row) => {
+    GetAddressEditInfo({
+      nodeId: this.state.activeNode,
+      type: this.state.activeNodeType
+    }).then(res => {
+      let data = res.data
+      if(data.protocolName === "OPC_UA" || data.protocolName === "OPC_DA"){
+        this.setState({
+          opcConfigContent: (
+            <OpcConfig data={data} row={row} node={this.state.node}
+              key={new Date()}
+              onCancel={this.opcConfigCancel}
+              onFinish={this.OpcConfigCommit}/>
+          ),
+          opcConfigVisible: true,
+          title: "选择"+ data.protocolName +"地址"
+        })
+      }else{
+        this.setState({
+          modalContent : (
+            <AddressConfig data={data} row={row} node={this.state.node}
+              key={new Date()}
+              onCancel={this.handleCancel}
+              onFinish={this.addressFinish}/>
+          ),
+          visible: true,
+          title: "选择"+ data.protocolName +"地址"
+        })
+      }
+    })
+  }
+  OpcConfigCommit = ()=>{
+    console.log("OpcConfigCommit-------")
+    this.opcConfigCancel();
+  }
+  addressFinish = (res) => {
+    console.log(res)
+  }
+
+  onDrop = info => {
+    let newNodeList = []; //新的节点排序
+    console.log("info", info);
+    const dragNode = info.dragNode;
+    const dropNode = info.node;
+    console.log(dragNode, dropNode);
+
+    const isSameParent = (a, b) => {
+      return a.fatherNodeID === b.fatherNodeID;
+    };
+
+    const sameParent = isSameParent(dragNode, dropNode);
+
+    if (sameParent && !dropNode.dragOverGapBottom) {
+      const dragKey = info.dragNode.props.eventKey;
+
+      //如果dragPos 小于 dropPos ，那要减一
+      const dropPosition = info.dragNode.pos < info.node.pos ? info.dropPosition - 1: info.dropPosition;
+
+      const loop = (data, key, callback) => {
+        if(key === "00000000-0000-0000-0000-000000000000"){
+          return callback(data);
+        }else{
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].nodeID === key) {
+              return callback(data[i], i, data);
+            }
+            if (data[i].children) {
+              loop(data[i].children, key, callback);
+            }
+          }
+        }
+      };
+      const data = [...this.state.treeData];
+      console.log(info.dragNode.pos < info.node.pos,info.dragNode.pos, info.node.pos, info.dropPosition, dropPosition)
+      // 找到当前拖动的对象
+      let dragObj; 
+      loop(data, dragKey, (item, index, arr) => {
+        arr.splice(index, 1);
+        dragObj = item;
+      });
+
+      console.log(dropNode.dragOverGapBottom)
+
+      if (!info.dropToGap) {
+        // Drop on the content
+        console.log("...............")
+        loop(data, dragObj.fatherNodeID, (item) => {
+          item.children = item.children || [];
+          // where to insert 示例添加到尾部，可以是随意位置
+          item.children.splice(dropPosition + 1, 0, dragObj)
+          // item.children.push(dragObj);
+        });
+      } else if (
+        (info.node.props.children || []).length > 0 && // Has children
+        info.node.props.expanded && // Is expanded
+        dropPosition === 1 // On the bottom gap
+      ) {
+
+      } else if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"
+        && dropNode.fatherNodeID === "00000000-0000-0000-0000-000000000000"
+      ){
+        console.log("-0-0-0-0")
+        //最外层
+        loop(data, dragObj.fatherNodeID, (item) => {
+          item.splice(dropPosition, 0, dragObj)
+        });
+      }
+
+      data.forEach(item=>{
+        if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"){
+          newNodeList.push(item.nodeID)
+        }else if(dragObj.fatherNodeID === item.nodeID){
+          item.children.forEach(child=>{
+            newNodeList.push(child.nodeID)
+          })
+        }
+      })
+
+      SortTreeNode({
+        nodeId: dragObj.fatherNodeID,
+        children: newNodeList
+      }).then(res=>{
+
+      })
+      this.setState({treeData: data});
+    }else if(dragNode.fatherNodeID === dropNode.key){
+      console.log("====")
+      // dragNode.fatherNodeID === dropNode.nodeID
+    }
+  };
     
   render() {
     const { activeNodeType, collasped, treeData, dataSource, gist } = this.state
@@ -683,27 +962,26 @@ class RealTime extends PureComponent{
         <Spin spinning={this.state.loading}>
           <div className="leftContent">
             <div className="fullContain">
-              <div className="title">
-                <div className="title-contain">
-                  <span>设备列表</span>
-                  <div className="optGroup"> {
-                    <Dropdown overlay={this.zTreeOptionMenu} trigger={['click']}
-                      placement="bottomCenter" arrow>
-                      <div className="optAdd"></div>
-                    </Dropdown>
-                  } </div>
-                </div>
-              </div>
               {
                 treeData ?
                   <ZTree
                     title="设备列表"
-                    MenuPaneLoad={this.MenuPaneLoad}
-                    pathName="variable"
+                    zTreeOption={{
+                      className: "optAdd",
+                      placement: "bottomCenter"
+                    }}
+                    move={true}
+                    option={ true }
                     nodeDatas={ treeData}
+                    zTreeOptionDropdown={true}
+                    zTreeOptionMenu={this.zTreeOptionMenu}
+                    interVariable={this.interVariable}
+                    optionDeviceMenu={this.optionDeviceMenu}
+                    optionGroupMenu={this.optionGroupMenu}
                     onSelect={this.onSelect}
-                    menuClick={this.menuClick}
-                    submitSortTreeNode={this.submitSortTreeNode}
+                    draggable
+                    blockNode
+                    onDrop={this.onDrop}
                   />
                   : null
               }
@@ -712,7 +990,7 @@ class RealTime extends PureComponent{
           </div>
           <div className="tableList">
             <Search
-              ref={ this.searchRef }
+              ref={this.searchRef}
               importProps={this.importProps}
               dataTypes={this.state.dataTypes}
               type={activeNodeType}
@@ -725,12 +1003,12 @@ class RealTime extends PureComponent{
             />
             <div className="tableContain">
               <EditableTable
-                key={this.state.activeNode}
                 rowSelection={{
                   columnWidth: "50px",
                   selectedRowKeys: this.state.selectedRowKeys,
                   onChange: this.onSelectChange,
                 }}
+                key={ this.state.activeNode }
                 pageIndex={this.state.pageIndex}
                 gist={gist}
                 dataSource={dataSource}
@@ -767,18 +1045,22 @@ class RealTime extends PureComponent{
             visible={this.state.visible}
             onCancel={this.handleCancel}
             footer={null}
-            maskClosable={false}
             >
             {
               this.state.modalContent
             }
           </Modal>
           <Modal
-            title="提示"
-            visible={this.state.comfirmVisible}
-            onCancel={this.handleCancel}
-          >
-            {this.state.comfirmContent}
+            width="700px"
+            bodyStyle={{padding: "30px 30px 20px"}}
+            title={this.state.title}
+            visible={this.state.opcConfigVisible}
+            onCancel={this.opcConfigCancel}
+            footer={null}
+            >
+            {
+              this.state.opcConfigContent
+            }
           </Modal>
         </Spin>
       </div>

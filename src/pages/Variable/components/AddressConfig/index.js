@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import { Form, Select, Input, Button,Tree } from 'antd'
 import "./index.less"
 
-import { InitOPCUaWindows, GetOPCUaNodes } from 'api/variable'
 
 export default class config extends PureComponent {
   state = {
@@ -32,8 +31,6 @@ export default class config extends PureComponent {
     configHtml: "",
     key: this.props.row.key,
     formData: {},
-    OPC_UATree: [],
-    OPC_UATable: []
   }
 
   componentDidMount() {
@@ -76,24 +73,7 @@ export default class config extends PureComponent {
       console.log(formData.showList, formData, popupData.dataType)
       this.renderS7_TCPHTML(formData.showList, formData, popupData.dataType)
     } else if (popupData.protocolName === 'OPC_UA') {
-      let { node } = this.props
-      console.log({
-        nodeId: node.key,
-        type: node.nodeType
-      })
-      InitOPCUaWindows({
-        nodeId: node.key,
-        type: node.nodeType
-      }).then(res => {
-        if (res.code === 0) {
-          this.setState({
-            OPC_UATree: res.data.tree,
-            OPC_UATable: res.data.table
-          }, () => {
-            this.renderOPC_UAHTML();
-          })
-        }
-      })
+      
     }
   }
   onLoadData = () => {
@@ -102,16 +82,18 @@ export default class config extends PureComponent {
   // OPC_UA协议  弹窗渲染函数
   renderOPC_UAHTML = () => {
     this.setState(state=>{
-      configHtml: (
-        <>
-          <div className='leftContent'>
-            <Tree loadData={this.onLoadData} treeData={this.state.OPC_UATree} />
+      return {
+        configHtml: (
+          <div style={{position: 'relative',height: '400px'}}>
+            <div className='leftContent'>
+              <Tree loadData={this.onLoadData} treeData={this.state.OPC_UATree} />
+            </div>
+            <div className="tableList">
+  
+            </div>
           </div>
-          <div className="tableList">
-
-          </div>
-        </>
-      )
+        )
+      }
     })
   }
 

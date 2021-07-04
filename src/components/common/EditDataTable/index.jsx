@@ -127,7 +127,7 @@ const EditableCell = ({
   if (record && record.editable) {
     console.log(record.dataType)
     childNode = type === "select" ? (
-      <Form.Item name={dataIndex} initialValue={record[dataIndex]||content[0]} >
+      <Form.Item name={dataIndex} initialValue={record[dataIndex] || content[0]} >
         <Select onChange={(e) => selectChange(e, dataIndex + record.key)} id={dataIndex + record.key}>
           {
             content.map((el, idx) => {
@@ -138,9 +138,9 @@ const EditableCell = ({
       </Form.Item>
     ) : (type === "input-group" ? (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-        <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onSearch={ (value, event)=>{addressSearch(value, event, record)} }/>
+        <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onSearch={(value, event) => { addressSearch(value, event, record) }} />
       </Form.Item>
-    ): (
+    ) : (
       <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
         <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
       </Form.Item>
@@ -167,7 +167,7 @@ class EditableTable extends React.Component {
 
   componentDidMount() {
     setTimeout(() => {
-      this.setState({ height: this.ref.current.getBoundingClientRect().height - 50 })
+      this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
     })
     PubSub.subscribe("changeTags", (msg, data) => {
       this.setState({ changeTags: data })
@@ -235,7 +235,7 @@ class EditableTable extends React.Component {
     const components = {
       header: {
         cell: ResizeableTitle,
-       },
+      },
       body: {
         row: EditableRow,
         cell: EditableCell,
