@@ -914,10 +914,42 @@ class RealTime extends PureComponent{
       for (let item in res) {
         state.dataSource[row.no - 1][item] = res[item]
       }
-      console.log(state.dataSource)
+      
+      let isEdit = false;
+
+      //判断当前记录是否被编辑了
+      state.gist.forEach(item=>{
+        if(item.key === state.dataSource[row.no -1].key){
+          for(let val in item){
+            if(item[val] !== state.dataSource[row.no -1][val]){
+              isEdit = true;
+              return 
+            }
+          }
+        }
+      })
+
+      if(isEdit){
+        if (state.modifyTagsList.length === 0) {
+          console.log(state.dataSource[row.no -1])
+          state.modifyTagsList.push(state.dataSource[row.no -1])
+        }else {
+          state.modifyTagsList.forEach(mod => {
+            if (mod.key === state.dataSource[row.no -1].key) {
+              Object.assign(mod, state.dataSource[row.no -1])
+            }
+          })
+        }
+      }
+
       return {
         dataSource: state.dataSource,
-        visible: false
+        visible: false,
+        modifyTagsList: state.modifyTagsList,
+        canSubmit: {
+          canSubmit: true,
+          messages: ""
+        }
       }
     })
   } 
@@ -1099,6 +1131,7 @@ class RealTime extends PureComponent{
             visible={this.state.visible}
             onCancel={this.handleCancel}
             footer={null}
+            key={new Date()}
             >
             {
               this.state.modalContent

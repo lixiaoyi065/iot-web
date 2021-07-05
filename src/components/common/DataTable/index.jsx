@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState, useEffect } from 'react';
-import { Table, Input, Form, Select,Button } from 'antd';
+import { Table, Input, Form, Select, Button } from 'antd';
 import { Resizable } from 'react-resizable';
 import PubSub from 'pubsub-js'
 import "./index.less"
@@ -147,21 +147,21 @@ const EditableCell = ({
         </Form.Item>
       ))
     ) : (
-      type === "input-group" ? 
+      type === "input-group" ?
         <div className="editable-cell-input-group">
           <div
             className="editable-cell-value-wrap"
-            onClick={toggleEdits}
+            onClick={toggleEdits} id={record.key}
           >
             {childNode}
           </div>
-          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record) }}>···</Button>  
-        </div> : <div
-        className="editable-cell-value-wrap"
-        onClick={toggleEdits}
-      >
-        {childNode}
-      </div>
+          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record) }}>···</Button>
+        </div> : <div id={record.key}
+          className="editable-cell-value-wrap"
+          onClick={toggleEdits}
+        >
+          {childNode}
+        </div>
     )
   }
 
@@ -233,7 +233,7 @@ class EditableTable extends React.Component {
         return false
       }
     })
-    console.log(isHas,flag)
+    console.log(isHas, flag)
 
     if (isHas) {
       if (isFit(this.props.gist, row)) {//新旧对象一致,modifyTags移除该对象
