@@ -1,15 +1,16 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Select, Button, Checkbox, Divider, message } from 'antd'
+import { Form, Input, Select, Button, Checkbox, Divider } from 'antd'
 
 const { Option } = Select;
 export default class addDevice extends PureComponent {
   formRef = React.createRef()
   state = {
-    protocolNames: ['Modbus_TCP', 'S7_TCP', 'OPC_DA', 'OPC_UA', 'MC3E_Binary_Ethernet', 'MCA1E_Binary_Ethernet', 'Fins_TCP'],//协议列表
+    //'OPC_DA', 
+    protocolNames: ['Modbus_TCP', 'S7_TCP', 'OPC_UA', 'MC3E_Binary_Ethernet', 'MCA1E_Binary_Ethernet', 'Fins_TCP'],//协议列表
     suppliers: {//厂家列表
       'Modbus_TCP': ['通用', '西门子Siemens'],
       'S7_TCP': ['西门子Siemens'],
-      'OPC_DA': ['通用'],
+      // 'OPC_DA': ['通用'],
       'OPC_UA': ['通用'],
       'MC3E_Binary_Ethernet': ['通用'],
       'MCA1E_Binary_Ethernet': ['通用'],
@@ -18,7 +19,7 @@ export default class addDevice extends PureComponent {
     modelLists: {//设备型号列表
       'Modbus_TCP': ['通用'],
       'S7_TCP': ['S7-300/400/1200/1500', 'S7-200Smart'],
-      'OPC_DA': ['通用'],
+      // 'OPC_DA': ['通用'],
       'OPC_UA': ['通用'],
       'MC3E_Binary_Ethernet': ['通用'],
       'MCA1E_Binary_Ethernet': ['通用'],
@@ -27,7 +28,7 @@ export default class addDevice extends PureComponent {
     isShowAttr: { //根据协议显示对应的字段
       'Modbus_TCP': ["modelLists", "IPAddress", "DeviceID", "Port", "TimeOut", "ByteOrder", "StrByteOrder"],
       'S7_TCP': ["modelLists", "IPAddress", "Rack", "Slot"],
-      'OPC_DA': ["IPAddress", "ServerName", "GroupName", "UpdateRate", "DeadBand", "IsActive"],
+      // 'OPC_DA': ["IPAddress", "ServerName", "GroupName", "UpdateRate", "DeadBand", "IsActive"],
       'OPC_UA': ["SessionName", "IPAddress", "SecurityMode", "SecurityPolicy", "UserIdentity", "userName", "Password"],
       'MC3E_Binary_Ethernet': ["IPAddress", "Port", "StrByteOrder"],
       'MCA1E_Binary_Ethernet': ["IPAddress", "Port", "StrByteOrder"],
@@ -272,7 +273,7 @@ export default class addDevice extends PureComponent {
               <Form.Item label="32位字节顺序" name="ByteOrder">
                 <Select>
                   <Option value="1234">1234</Option>
-                  <Option value="2134">2134</Option>
+                  <Option value="2143">2143</Option>
                   <Option value="3412">3412</Option>
                   <Option value="4321">4321</Option>
                 </Select>
@@ -438,7 +439,7 @@ export default class addDevice extends PureComponent {
                       }>
                       <Select>
                         <Option value="1234">1234</Option>
-                        <Option value="2134">2134</Option>
+                        <Option value="2143">2143</Option>
                         <Option value="3412">3412</Option>
                         <Option value="4321">4321</Option>
                       </Select>

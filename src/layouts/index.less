@@ -155,10 +155,6 @@
     }
   }
 
-  .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
-    content: none;
-  }
-
   .ant-form-item-label>label::after {
     content: ':';
     margin-right: 20px;
@@ -200,7 +196,12 @@
     width: 250px;
   }
 
-  .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+  .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+    content: none;
+  }
+}
+.ant-modal-body{
+  .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
     content: none;
   }
 }
@@ -508,7 +509,7 @@
   }
 
   .form {
-    width: 22vw;
+    width: 33vw;
     padding: 40px 0 0 73px;
 
     .ant-input-text {
@@ -523,6 +524,26 @@
       background: #DCECFD;
       color: #76B8FC;
       border-color: #DCECFD;
+    }
+
+    .ant-form-item-label{
+      display: inline-block;
+      width: 69px;
+      color: #6F7374;
+    }
+    .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before{
+      content: "";
+    }
+    
+    .ant-form-item-control-input-content{
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .saved{
+      background: #DCECFD;
+      color: #76B8FC;
+      cursor: not-allowed;
     }
 
     .form-item {

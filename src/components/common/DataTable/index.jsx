@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState, useEffect } from 'react';
-import { Table, Input, Form, Select } from 'antd';
+import { Table, Input, Form, Select,Button } from 'antd';
 import { Resizable } from 'react-resizable';
 import PubSub from 'pubsub-js'
 import "./index.less"
@@ -88,7 +88,6 @@ const EditableCell = ({
   const check = async (e) => {
     let val = e.target.value;
     try {
-      const dataList = await form.validateFields();
       toggleEdits()
       if (dataIndex === "name") {
         nameVerify(val, dataSource, record, dataIndex, activeNodeType)
@@ -96,26 +95,25 @@ const EditableCell = ({
         addressVerify(val, {
           nodeId: activeNode,
           type: activeNodeType,
-          dataType: dataList.dataType,
+          dataType: record.dataType,
           address: val,
-          length: dataList.stringLength
+          length: record.stringLength
         })
       } else if (dataIndex === "desc") {
         descVerify(val)
       }
-
-      handleSave(dataIndex, val, { ...record, ...dataList }, !checkIsSame(val))
-
+      record[dataIndex] = e.target.value
+      handleSave(dataIndex, val, record, checkIsSame(val))
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
   };
 
-  const selectChange = async (e, id) => {
+  const selectChange = (e, id) => {
     try {
-      const dataList = await form.validateFields();
       toggleEdits()
-      handleSave(dataIndex, e, { ...record, ...dataList });
+      record[dataIndex] = e
+      handleSave(dataIndex, e, record, false);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -123,7 +121,10 @@ const EditableCell = ({
 
   let childNode = children;
 
+
   if (record && record.editable) {
+    childNode = record && record[dataIndex]
+
     childNode = editing ? (
       type === "select" ? (
         <Form.Item name={dataIndex} initialValue={record[dataIndex] || tableDataTypes[0]} >
@@ -137,7 +138,8 @@ const EditableCell = ({
         </Form.Item>
       ) : (type === "input-group" ? (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onSearch={(value, event) => { addressSearch(value, event, record) }} />
+          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···"
+            onSearch={(value, event) => { addressSearch(value, event, record) }} />
         </Form.Item>
       ) : (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
@@ -145,7 +147,16 @@ const EditableCell = ({
         </Form.Item>
       ))
     ) : (
-      <div
+      type === "input-group" ? 
+        <div className="editable-cell-input-group">
+          <div
+            className="editable-cell-value-wrap"
+            onClick={toggleEdits}
+          >
+            {childNode}
+          </div>
+          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record) }}>···</Button>  
+        </div> : <div
         className="editable-cell-value-wrap"
         onClick={toggleEdits}
       >
@@ -154,7 +165,7 @@ const EditableCell = ({
     )
   }
 
-  return <td {...restProps}
+  return <td {...restProps} title={record && record[dataIndex]}
     className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}
       ${!checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
@@ -193,6 +204,7 @@ class EditableTable extends React.Component {
   }
 
   handleSave = (dataIndex, val, row, flag = true) => {
+    console.log(row)
     this.setState(state => {
       for (let i = 0; i < state.dataSource.length; i++) {
         if (state.dataSource[i].key === row.key) {
@@ -221,6 +233,7 @@ class EditableTable extends React.Component {
         return false
       }
     })
+    console.log(isHas,flag)
 
     if (isHas) {
       if (isFit(this.props.gist, row)) {//新旧对象一致,modifyTags移除该对象

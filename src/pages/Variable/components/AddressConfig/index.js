@@ -169,111 +169,111 @@ export default class config extends PureComponent {
   // 选择下拉内容 -- S7_TCP协议
   changeData = (e, prop, type) => {
     console.log(e, prop, type)
-    this.state(state => {
-      let { formData } = state.formData
-
-      formData[prop] = e
-      if (type === '二进制变量') {
-        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-          if (e === '位') {
-            formData.letters = 'M'
-            formData.showList = [1,2,5]
-          } else if (e === 'DB') {
-            formData.letters = 'DBX'
-            formData.showList = [1,2,3,5]
-          } else if (e === '输入') {
-            formData.letters = 'I'
-            formData.showList = [1,2,5]
-          } else if (e === '输出') {
-            formData.letters = 'Q'
-            formData.showList = [1,2,5]
-          }
-        } else if (type === '有符号8位整型' || type === '无符号8位整型') {
-          if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-            if (e === '位') {
-              formData.letters = 'MB'
-              formData.showList = [1,2]
-            } else if (e === 'DB') {
-              formData.letters = 'DBB'
-              formData.showList = [1,2,3]
-            } else if (e === '输入') {
-              formData.letters = 'IB'
-              formData.showList = [1,2]
-            } else if (e === '输出') {
-              formData.letters = 'QB'
-              formData.showList = [1,2]
-            }
-          }
-        } else if (type === '有符号16位整型' || type === '无符号16位整型') {
-          if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-            if (e === '位') {
-              formData.letters = 'MW'
-              formData.showList = [1,2]
-            } else if (e === 'DB') {
-              formData.letters = 'DBW'
-              formData.showList = [1,2,3]
-            } else if (e === '输入') {
-              formData.letters = 'IW'
-              formData.showList = [1,2]
-            } else if (e === '输出') {
-              formData.letters = 'QW'
-              formData.showList = [1,2]
-            }
-          }
-        } else if (type === '有符号32位整型' || type === '无符号32位整型' || type === 'F32位浮点数IEEE754' || type === '定时器') {
-          if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-            if (e === '位') {
-              formData.letters = 'MD'
-              formData.showList = [1,2]
-            } else if (e === 'DB') {
-              formData.letters = 'DBD'
-              formData.showList = [1,2,3]
-            } else if (e === '输入') {
-              formData.letters = 'ID'
-              formData.showList = [1,2]
-            } else if (e === '输出') {
-              formData.letters = 'QD'
-              formData.showList = [1,2]
-            }
-          }
-        } else if (type === '有符号64位整型' || type === '无符号64位整型' || type === 'F64位浮点数IEEE754' || type === '日期'|| type === '时间'|| type === '日期时间') {
-          if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-            if (e === '位') {
-              formData.showList = [1,4,7]
-            } else if (e === 'DB') {
-              formData.showList = [1,3,4,7]
-            } else if (e === '输入') {
-              formData.showList = [1,4,7]
-            } else if (e === '输出') {
-              formData.showList = [1,4,7]
-            }
-          }
-        } else if (type === '文本变量8位字符集' || type === '文本变量16位字符集') {
-          if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-            if (e === '位') {
-              formData.showList = [1,4,6]
-            } else if (e === 'DB') {
-              formData.showList = [1,3,4,6]
-            } else if (e === '输入') {
-              formData.showList = [1,4,6]
-            } else if (e === '输出') {
-              formData.showList = [1,4,6]
-            }
-          }
-        } else if (type === '字符串' || type === '宽字符串') {
-          if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-            if (e === '位') {
-              formData.showList = [1,4,6,7]
-            } else if (e === 'DB') {
-              formData.showList = [1,3,4,6,7]
-            } else if (e === '输入') {
-              formData.showList = [1,4,6,7]
-            } else if (e === '输出') {
-              formData.showList = [1,4,6,7]
-            }
-          }
-        }
-      }
+    this.setState(state => {
+      let { formData } = state;
+      console.log(formData)
+      // formData[prop] = e
+      // if (type === '二进制变量') {
+      //   if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //     if (e === '位') {
+      //       formData.letters = 'M'
+      //       formData.showList = [1,2,5]
+      //     } else if (e === 'DB') {
+      //       formData.letters = 'DBX'
+      //       formData.showList = [1,2,3,5]
+      //     } else if (e === '输入') {
+      //       formData.letters = 'I'
+      //       formData.showList = [1,2,5]
+      //     } else if (e === '输出') {
+      //       formData.letters = 'Q'
+      //       formData.showList = [1,2,5]
+      //     }
+      //   } else if (type === '有符号8位整型' || type === '无符号8位整型') {
+      //     if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //       if (e === '位') {
+      //         formData.letters = 'MB'
+      //         formData.showList = [1,2]
+      //       } else if (e === 'DB') {
+      //         formData.letters = 'DBB'
+      //         formData.showList = [1,2,3]
+      //       } else if (e === '输入') {
+      //         formData.letters = 'IB'
+      //         formData.showList = [1,2]
+      //       } else if (e === '输出') {
+      //         formData.letters = 'QB'
+      //         formData.showList = [1,2]
+      //       }
+      //     }
+      //   } else if (type === '有符号16位整型' || type === '无符号16位整型') {
+      //     if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //       if (e === '位') {
+      //         formData.letters = 'MW'
+      //         formData.showList = [1,2]
+      //       } else if (e === 'DB') {
+      //         formData.letters = 'DBW'
+      //         formData.showList = [1,2,3]
+      //       } else if (e === '输入') {
+      //         formData.letters = 'IW'
+      //         formData.showList = [1,2]
+      //       } else if (e === '输出') {
+      //         formData.letters = 'QW'
+      //         formData.showList = [1,2]
+      //       }
+      //     }
+      //   } else if (type === '有符号32位整型' || type === '无符号32位整型' || type === 'F32位浮点数IEEE754' || type === '定时器') {
+      //     if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //       if (e === '位') {
+      //         formData.letters = 'MD'
+      //         formData.showList = [1,2]
+      //       } else if (e === 'DB') {
+      //         formData.letters = 'DBD'
+      //         formData.showList = [1,2,3]
+      //       } else if (e === '输入') {
+      //         formData.letters = 'ID'
+      //         formData.showList = [1,2]
+      //       } else if (e === '输出') {
+      //         formData.letters = 'QD'
+      //         formData.showList = [1,2]
+      //       }
+      //     }
+      //   } else if (type === '有符号64位整型' || type === '无符号64位整型' || type === 'F64位浮点数IEEE754' || type === '日期'|| type === '时间'|| type === '日期时间') {
+      //     if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //       if (e === '位') {
+      //         formData.showList = [1,4,7]
+      //       } else if (e === 'DB') {
+      //         formData.showList = [1,3,4,7]
+      //       } else if (e === '输入') {
+      //         formData.showList = [1,4,7]
+      //       } else if (e === '输出') {
+      //         formData.showList = [1,4,7]
+      //       }
+      //     }
+      //   } else if (type === '文本变量8位字符集' || type === '文本变量16位字符集') {
+      //     if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //       if (e === '位') {
+      //         formData.showList = [1,4,6]
+      //       } else if (e === 'DB') {
+      //         formData.showList = [1,3,4,6]
+      //       } else if (e === '输入') {
+      //         formData.showList = [1,4,6]
+      //       } else if (e === '输出') {
+      //         formData.showList = [1,4,6]
+      //       }
+      //     }
+      //   } else if (type === '字符串' || type === '宽字符串') {
+      //     if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+      //       if (e === '位') {
+      //         formData.showList = [1,4,6,7]
+      //       } else if (e === 'DB') {
+      //         formData.showList = [1,3,4,6,7]
+      //       } else if (e === '输入') {
+      //         formData.showList = [1,4,6,7]
+      //       } else if (e === '输出') {
+      //         formData.showList = [1,4,6,7]
+      //       }
+      //     }
+      //   }
+      // }
       return {
         formData: formData
       }
@@ -382,13 +382,14 @@ export default class config extends PureComponent {
       }
     }
     console.log(popupData.dataValue, addressData.len)
-    // $("#addressd"+this.props.key).value(popupData.dataValue)
-    // $("#stringLengthd"+this.props.key).value(addressData.len)
+    return ({
+      address: popupData.dataValue,
+      stringLength: addressData.len
+    })
   }
 
   onFinish = (val) => {
-    this.confirmPop()
-    this.props.onFinish(val);
+    this.props.onFinish(this.confirmPop(), this.props.row);
   }
 
   render() {

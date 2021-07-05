@@ -14,7 +14,8 @@ export default class config extends PureComponent {
     },
     OPC_Tree: [],
     OPC_Table: [],
-    selectedRowKeys: []
+    selectedRowKeys: [],
+    selectedRows: []
   }
 
   componentDidMount(){
@@ -103,8 +104,13 @@ export default class config extends PureComponent {
       }
     },
     {
-      title: '变量名',
+      title: '节点名称',
       dataIndex: 'name',
+      ellipsis: true,
+    },
+    {
+      title: '节点ID',
+      dataIndex: 'id',
       ellipsis: true,
     },
     {
@@ -114,12 +120,13 @@ export default class config extends PureComponent {
     }
   ];
   onFinish = ()=>{
-    this.props.onFinish();
+    this.props.onFinish(this.state.selectedRows, this.props.row);
   }
 
   onSelect=(key, row)=>{
     GetOPCUaNodes(row.node.key).then(res=>{
-      if(res.code === 0){
+      if (res.code === 0) {
+        console.log(res.data)
         this.setState({
           OPC_Table: this.tableDataProcess(res.data.table)
         })
@@ -129,8 +136,8 @@ export default class config extends PureComponent {
     })
   }
   rowSelect = (selectedRowKeys, selectedRows)=>{
-    this.setState({ selectedRowKeys });
-    console.log("_----------",selectedRowKeys, selectedRows)
+    this.setState({ selectedRowKeys, selectedRows });
+    console.log("_----------", selectedRows)
   }
 
   render(){

@@ -26,6 +26,7 @@ import {
 } from 'api/variable'
 
 let deviceStatusTimer = null;
+let getProcessTimer = null;
 class RealTime extends PureComponent{
   state = {
     loading: false, //保存时显示加载中
@@ -71,6 +72,7 @@ class RealTime extends PureComponent{
   }
   componentWillUnmount() {
     clearInterval(deviceStatusTimer)
+    clearInterval(getProcessTimer)
     //取消订阅
     PubSub.unsubscribe("modifyTags")
     PubSub.unsubscribe("canSubmit")
@@ -341,7 +343,7 @@ class RealTime extends PureComponent{
       this.setState({
         visible: true, 
         title: "新增分组", 
-        modalContent: <AddGroupPane key="addGroup"
+        modalContent: <AddGroupPane key={new Date()}
           onCancel={this.handleCancel} 
           onFinish={this.onAddGroupFinish}/>
       })
@@ -542,6 +544,7 @@ class RealTime extends PureComponent{
       return;
     }
     if (!this.state.canSubmit.canSubmit) {
+      console.log(this.state.canSubmit.message)
       message.error(this.state.canSubmit.message)
       return;
     }
@@ -559,8 +562,8 @@ class RealTime extends PureComponent{
       dataTypes: [],
       tags: modifyList,
       total: 0
-    }).then(res=>{
-      if(res.code === 0){
+    }).then(res => {
+      if (res.code === 0) {
         let timer = setInterval(()=>{
           //获取
           GetSaveTagsTaskProgress(res.data).then(val=>{
@@ -571,6 +574,8 @@ class RealTime extends PureComponent{
                 message.info(val.data.message)
               }
               $("div").removeClass("effective-editor")
+              console.log(val)
+        
               this.setState({ loading: false })
               if (val.data.resultData !== null) {
                 let { dataTypes, tree } = val.data.resultData
@@ -644,13 +649,16 @@ class RealTime extends PureComponent{
   delTags = () => {
     let phyDel = [], //物理删除
       dataDel = []; //数据库删除
-    this.state.selectedRowKeys.forEach((item,i)=>{
-      if(item.length !== 36){
+    this.state.selectedRowKeys.forEach((item, i) => {
+      if (item.length !== 36) {
         phyDel.push(item)
-      }else{
+      } else {
         dataDel.push(item)
       }
     })
+    if (dataDel.length === 0) {
+      return ;
+    }
     DeleteTags({
       ids: dataDel,
       type: this.state.activeNodeType
@@ -790,7 +798,7 @@ class RealTime extends PureComponent{
     }).then(res => {
       if (res.code === 0) {
         this.setState({loading: true})
-        let getProcessTimer = setInterval(() => {
+        getProcessTimer = setInterval(() => {
           GetImportTagsTaskProgress(res.data).then(mes => {
             let result = mes.data.resultData
             if ( mes.data.status === 2 ||  mes.data.status === 3) {
@@ -851,20 +859,73 @@ class RealTime extends PureComponent{
       }
     })
   }
-  OpcConfigCommit = ()=>{
-    console.log("OpcConfigCommit-------")
+  OpcConfigCommit = (selectRows, row) => {
     this.opcConfigCancel();
+    let length = this.state.dataSource.length
+    if (selectRows.length > 0) {
+      selectRows.forEach((item, index) => {
+        Object.assign(item, {
+          id: "00000000-0000-0000-0000-000000000000",
+          key: length + index,
+          address: item.id,
+          max: "",
+          min: "",
+          no: length + index,
+          stringLength: "",
+          zoom: "",
+          desc: "",
+          editable: true
+        })
+      })
+    }
+    this.setState(state => {
+      let currentObj = JSON.parse(JSON.stringify(state.dataSource[row.no - 1]))
+
+      //第一条替换点击的那条，其余追加到表格后面
+      Object.assign(state.dataSource[row.no - 1], selectRows[0], {key: row.no-1})
+      
+      //查找编辑列表中是否存在第一条记录，存在则覆盖，不存在则追加
+      if (state.modifyTagsList.length === 0) {
+        state.modifyTagsList.push(currentObj)
+      }else {
+        state.modifyTagsList.forEach(item => {
+          if (item.key === currentObj.key) {
+            Object.assign(item, selectRows[0], {key: row.no-1})
+          }
+        })
+      }
+
+      //删除第一条
+      selectRows.shift();
+
+      return {
+        dataSource: [...state.dataSource, ...selectRows],
+        count: state.count + selectRows.length,
+        modifyTagsList: [...state.modifyTagsList, ...selectRows],
+        canSubmit: {
+          canSubmit: true,
+          message: ""
+        }
+      }
+    })
   }
-  addressFinish = (res) => {
-    console.log(res)
-  }
+  addressFinish = (res, row) => {
+    this.setState(state => {
+      for (let item in res) {
+        state.dataSource[row.no - 1][item] = res[item]
+      }
+      console.log(state.dataSource)
+      return {
+        dataSource: state.dataSource,
+        visible: false
+      }
+    })
+  } 
 
   onDrop = info => {
     let newNodeList = []; //新的节点排序
-    console.log("info", info);
     const dragNode = info.dragNode;
     const dropNode = info.node;
-    console.log(dragNode, dropNode);
 
     const isSameParent = (a, b) => {
       return a.fatherNodeID === b.fatherNodeID;
@@ -893,7 +954,6 @@ class RealTime extends PureComponent{
         }
       };
       const data = [...this.state.treeData];
-      console.log(info.dragNode.pos < info.node.pos,info.dragNode.pos, info.node.pos, info.dropPosition, dropPosition)
       // 找到当前拖动的对象
       let dragObj; 
       loop(data, dragKey, (item, index, arr) => {
@@ -905,7 +965,6 @@ class RealTime extends PureComponent{
 
       if (!info.dropToGap) {
         // Drop on the content
-        console.log("...............")
         loop(data, dragObj.fatherNodeID, (item) => {
           item.children = item.children || [];
           // where to insert 示例添加到尾部，可以是随意位置
@@ -921,7 +980,6 @@ class RealTime extends PureComponent{
       } else if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"
         && dropNode.fatherNodeID === "00000000-0000-0000-0000-000000000000"
       ){
-        console.log("-0-0-0-0")
         //最外层
         loop(data, dragObj.fatherNodeID, (item) => {
           item.splice(dropPosition, 0, dragObj)
@@ -946,13 +1004,13 @@ class RealTime extends PureComponent{
       })
       this.setState({treeData: data});
     }else if(dragNode.fatherNodeID === dropNode.key){
-      console.log("====")
       // dragNode.fatherNodeID === dropNode.nodeID
     }
   };
     
   render() {
     const { activeNodeType, collasped, treeData, dataSource, gist } = this.state
+    
     return (
       <div className={`antProPageContainer ${ collasped ? 'foldToLeft' : "" }`}>
         <Spin spinning={this.state.loading}>
@@ -1047,7 +1105,7 @@ class RealTime extends PureComponent{
             }
           </Modal>
           <Modal
-            width="700px"
+            width="750px"
             bodyStyle={{padding: "30px 30px 20px"}}
             title={this.state.title}
             visible={this.state.opcConfigVisible}

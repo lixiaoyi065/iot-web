@@ -9,18 +9,29 @@ import PubSub from 'pubsub-js';
 
 import './index.less'
 
+import { GetRemote } from 'api/operations'
 import { GetIOTStatus, StartIOT, StopIOT, RestartIoT} from "api/baseIndex"
 
 let timer = null;
 class PageHeader extends PureComponent {
   state = {
-    currentEqu: '定子线',
+    currentEqu: '',
     userName: getCookie("userName"),
     toggleMenu: false,
     status: 1
   }
 
   componentDidMount() {
+    GetRemote().then(res => {
+      if (res.code === 0) {
+        let data = res.data;
+        this.setState({
+          currentEqu: data.name || "",
+        })
+      } else {
+        message.error(res.msg)
+      }
+    })
     timer = setInterval(() => {
       GetIOTStatus().then(res => {
         if (res.code === 0) {

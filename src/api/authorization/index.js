@@ -13,3 +13,10 @@ export function GetAuthState() {
     method: "get"
   })
 }
+
+export function UploadAuthFile() {
+  return axios({
+    url: "/AuthorizationManage/UploadAuthFile",
+    method: "post"
+  })
+}

@@ -12,7 +12,7 @@ class AddGroups extends PureComponent {
     initialValues: {
       deviceId: "",
       groupId: "00000000-0000-0000-0000-000000000000",
-      type: 2,
+      type: 0,
       name: "",
     },
     hidden: false
@@ -40,7 +40,6 @@ class AddGroups extends PureComponent {
     })
 
     if (this.props.node) {
-      //console.log("编辑分组")
       this.setState({ initialValues: this.props.node, hidden: true })
       this.formRef.current.setFieldsValue(this.props.node);
     }
@@ -49,26 +48,23 @@ class AddGroups extends PureComponent {
     this.setState = () => false;
   }
 
-  onFinishFailed = () => {
-  }
-
   changeType = (e) => {
     let type
     if (e === this.state.internalVariable) {
-      type = 2
+      type = 0
     } else {
-      type = 4
+      type = 3
     }
     this.formRef.current.setFieldsValue({
-      Type: type,
+      type: type,
     });
   }
+
   render() {
     return (
       <Form
         ref={this.formRef}
         onFinish={this.props.onFinish}
-        onFinishFailed={this.onFinishFailed}
         initialValues={this.state.initialValues}
       >
         <Form.Item label="所属设备" name="deviceId" hidden={this.state.hidden}>

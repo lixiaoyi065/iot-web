@@ -8,6 +8,24 @@
         color: #F5AB3A;
       }
     }
+    
+    .editable-cell-input-group{
+      display: flex;
+
+      .editable-cell-value-wrap{
+        flex:1;
+      }
+      .edit-cell-btn{
+        margin-left: 8px;
+        border-radius: 4px;
+        padding: 0 8px;
+        background: #f5f7fc;
+        color: #666;
+        letter-spacing: 1px;
+        font-weight: bolder;
+        border-color: #d3d3d3;
+      }
+    }
 
     .editable-cell-value-wrap {
       display: block;
@@ -19,6 +37,10 @@
       border-radius: 3px;
       border: 1px solid transparent;
       cursor: pointer;
+      word-break: keep-all;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     &:hover {

@@ -3,7 +3,8 @@ import {  Button, message } from 'antd';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import project from "assets/img/operation/project.png";
 
-import { GetSerialNumber, GetAuthState } from "api/authorization";
+import { GetSerialNumber, GetAuthState, UploadAuthFile } from "api/authorization";
+import { converTime } from 'utils'
 
 class AuthorizationPane extends PureComponent{
   state = {
@@ -21,10 +22,11 @@ class AuthorizationPane extends PureComponent{
   getSerialNumber = (show = true) => {
     GetSerialNumber().then(res => {
       if (res.code === 0) {
+        console.log(res.data)
+        this.setState({nodeID: res.data})
         if (show) {
           message.info("已生成")
         }
-        this.setState({nodeID: res.data})
       } else {
         message.info("生成失败："+ res.msg)
       }
@@ -43,7 +45,7 @@ class AuthorizationPane extends PureComponent{
         if (show) {
           message.info("刷新成功")
         }
-        let time = res.data.hasExpirationTime ? res.data.expirationTime + "到期" : ""
+        let time = res.data.hasExpirationTime ? converTime(res.data.expirationTime, 10, " ") + "到期" : ""
         let status = res.data.hasExpirationTime ? "已激活" : "未激活"
         this.setState({status: status, time: time})
       } else {
@@ -55,12 +57,36 @@ class AuthorizationPane extends PureComponent{
   //导入授权文件
   exportAuth = () => {
     //当校验通过时，自动刷新授权状态和授权时间
-    this.upDateState();
+    document.getElementById("importFile").click();
+  }
+
+  importProps = (e) => {
+    e.preventDefault();
+    const formdata = new FormData();
+    formdata.append('files', e.target.files[0]);
+    UploadAuthFile({
+      formData: formdata
+    }).then(res => {
+      console.log(res)
+      if (res.code === 0) {
+        this.setState(state => {
+          return {
+            status: res.data.isAuthorization,
+            time: res.data ? converTime(res.data.expirationTime, 10, " ") : "永久激活"
+          }
+        }, () =>{
+          this.upDateState();
+        })
+      } else {
+        message.error(res.mag)
+      }
+    })
   }
 
   render() {
     return (
       <div style={{ padding: "32px 52px" }}>
+        <input type="file" className="upload-file" name="file" multiple="multiple" onChange={this.importProps} id="importFile"/>
         <div className="card-form">
           <div className="card-title">
             <img className="card-title-icon" src={ project } alt=""/>
@@ -81,7 +107,7 @@ class AuthorizationPane extends PureComponent{
               <Button className="ant-btn-opt-normal" onClick={ this.upDateState }>刷新授权状态</Button>
             </div>
             <div className="form-item">
-              <label className="form-item-label">授权时间:</label>
+              <label className="form-item-label">到期时间:</label>
               <span className="form-item-val">{ this.state.time }</span>
             </div>
             <div className="form-item">
