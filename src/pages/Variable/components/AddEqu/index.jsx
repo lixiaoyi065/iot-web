@@ -138,7 +138,7 @@ export default class addDevice extends PureComponent {
       >
         <div className="form-table">
           <Form.Item label="设备ID" name="id" hidden={true}>
-            <Input  autoComplete="off"/>
+            <Input autoComplete="off" />
           </Form.Item>
           <Form.Item label="设备名称" name="name"
             rules={[
@@ -148,10 +148,10 @@ export default class addDevice extends PureComponent {
               }
             ]}
           >
-            <Input  autoComplete="off"/>
+            <Input autoComplete="off" />
           </Form.Item>
           <Form.Item label="设备描述" name="desc" placeholder="请输入设备描述">
-            <Input  autoComplete="off"/>
+            <Input autoComplete="off" />
           </Form.Item>
         </div>
         <Divider></Divider>
@@ -195,7 +195,7 @@ export default class addDevice extends PureComponent {
                     message: "请输入连接名",
                   }
                 ]}>
-                <Input  autoComplete="off"/>
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -213,7 +213,7 @@ export default class addDevice extends PureComponent {
                   // }
                 ]}
               >
-                <Input  autoComplete="off"/>
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -230,7 +230,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input  autoComplete="off"/>
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -247,7 +247,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input type="Number" autoComplete="off"/>
+                <Input type="Number" autoComplete="off" />
               </Form.Item>
             ) : null
           }

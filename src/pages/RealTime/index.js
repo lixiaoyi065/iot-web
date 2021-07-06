@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { message } from 'antd'
+import PubSub from "pubsub-js";
 import { getCookie, getNowFormatDate } from 'utils'
 import {
   HubConnectionBuilder,
@@ -11,9 +12,9 @@ import DataTable from 'components/common/Table'
 import ZTree from 'components/common/Ztree'
 import Search from './components/Search'
 
-import { GetTreeStructure } from 'api/variable'
+import { GetTreeStructure, GetDeviceStatus } from 'api/variable'
 import { EnterPage, LeavePage, InitTags, QueryTags, GetNextPageTags } from 'api/realTime'
-
+let deviceStatusTimer = null;
 let connection = null, getTime = null;
 class RealTime extends PureComponent{
   constructor (props) {
@@ -51,6 +52,7 @@ class RealTime extends PureComponent{
       }
       this.setState({ treeData: res.data, allNodeId: allcheck })
     })
+    this.getDeviceStatus();
 
     // SetSignalr().then(res => {
     //   console.log(res)
@@ -76,6 +78,7 @@ class RealTime extends PureComponent{
 
   componentWillUnmount() {
     LeavePage().then(res => { })
+    clearInterval(deviceStatusTimer)
     connection.stop();
     clearInterval(getTime)
   }
@@ -84,6 +87,12 @@ class RealTime extends PureComponent{
   //     console.log(res)
   //   })
   // }
+
+  getDeviceStatus = () =>{
+    GetDeviceStatus().then(res => {
+      PubSub.publish("deviceStatus", res.data)
+    })
+  }
 
   //收缩设备列表
   toggleLeft = ()=>{

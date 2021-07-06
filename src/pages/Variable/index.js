@@ -230,9 +230,9 @@ class RealTime extends PureComponent{
       AddDevice(equObj).then(res => {
         this.setState({ loading: false })
         if (res.code === 0) {
-          message.info("新增成功");
-          this.getTreeStructure();
           this.handleCancel();
+          this.getTreeStructure();
+          message.info("新增成功");
         } else {
           message.error("新增失败。" + res.msg)
         }
@@ -242,8 +242,8 @@ class RealTime extends PureComponent{
         this.setState({ loading: false })
         if (res.code === 0) {
           this.handleCancel();
-          message.info("编辑成功")
           this.getTreeStructure();
+          message.info("编辑成功")
         } else {
           message.error("编辑失败。" + res.msg)
         }
@@ -392,6 +392,7 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
+    console.log(this.state.modifyTagsList)
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
@@ -399,7 +400,9 @@ class RealTime extends PureComponent{
     //当前节点存在未保存的变量，提示是否继续下面的操作
     if (this.state.modifyTagsList.length > 0) {
       this.confirm('当前节点存在未保存的变量，是否继续？',()=>{
-        this.initTagList(tags,info)
+        this.setState({modifyTagsList: []},()=>{
+          this.initTagList(tags,info)
+        })
       })
     } else {
       this.initTagList(tags,info)
@@ -435,7 +438,7 @@ class RealTime extends PureComponent{
           dataList.push(element)
         });
         this.setState({
-          dataSource: dataList,
+          dataSource: JSON.parse(JSON.stringify(dataList)),
           tableDataTypes: res.data.gridDataTypes,
           gist: JSON.parse(JSON.stringify(dataList)),
           count: res.data.total,
@@ -580,7 +583,9 @@ class RealTime extends PureComponent{
               $("div").removeClass("effective-editor")
               console.log(val)
         
-              this.setState({ loading: false })
+              this.setState({modifyTagsList: []},()=>{
+                this.setState({loading: false})
+              })
               if (val.data.resultData !== null) {
                 let { dataTypes, tree } = val.data.resultData
                 if (dataTypes !== null) {
@@ -595,6 +600,7 @@ class RealTime extends PureComponent{
                   type: this.state.activeNodeType
                 })
               }
+              console.log(this.state.modifyTagsList)
             }
           })
         }, 1000)
@@ -1132,6 +1138,7 @@ class RealTime extends PureComponent{
           {/* 新增编辑模态框 */}
           <Modal 
             title={this.state.title}
+            maskClosable={false}
             visible={this.state.visible}
             onCancel={this.handleCancel}
             footer={null}
@@ -1144,6 +1151,7 @@ class RealTime extends PureComponent{
           <Modal
             width="750px"
             bodyStyle={{padding: "30px 30px 20px"}}
+            maskClosable={false}
             title={this.state.title}
             visible={this.state.opcConfigVisible}
             onCancel={this.opcConfigCancel}

@@ -18,7 +18,7 @@ export default class config extends PureComponent {
     addressData: {
       dataArea: '', // 数据区域
       letters: 'M', // 寄存器字母块（M/DBX/I/Q/MB/DBB/IB/QB/MW/DBW/IW/QW/MD/DBD/ID/QD）
-      lettleValue: 0, // 寄存器字母对应的值
+      lettlesValue: 0, // 寄存器字母对应的值
       DBNum: 1, // DB号
       bit: 0,  //  位
       len: "", // 长度
@@ -37,7 +37,16 @@ export default class config extends PureComponent {
   componentDidMount(){
     this.setState({ formData: JSON.parse(JSON.stringify(this.state.addressData)) }, () => {
       this.openPop()
+
+      //根据变量地址的值以及数据类型，将数据进行初始化处理
+      this.init();
     })
+  }
+  init = ()=>{
+    let {row} = this.props
+    let address = row.address,
+    dataType = row.dataType
+    console.log(this.props.row)
   }
 
   openPop = ()=>{
@@ -77,13 +86,13 @@ export default class config extends PureComponent {
     }else if(popupData.protocolName === 'Modbus_TCP'){
       // 1. 数据区域  2. 偏移地址   3.位  4. 长度
       let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754']
-      let dataArea = formData.dataArea ? formData.dataArea : '线圈状态'
+      newData.dataArea = formData.dataArea ? formData.dataArea : '线圈状态'
       if (popupData.dataType === '二进制变量') {
         newData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
       }  else if (types.includes(popupData.dataType)) {
         // 此处判断赋默认值还是回显值
         let areas = ['输入寄存器', '保持寄存器']
-        dataArea = areas.includes(formData.dataArea) ? formData.dataArea : '输入寄存器'
+        newData.dataArea = areas.includes(formData.dataArea) ? formData.dataArea : '输入寄存器'
         newData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
       } else if (popupData.dataType === '字符串') {
         // 此处判断赋默认值还是回显值
@@ -96,7 +105,7 @@ export default class config extends PureComponent {
       })
       this.setState(state=>{
         return {
-          formData: Object.assign(state.formData, newData),
+          formData: JSON.parse(JSON.stringify(Object.assign(state.formData, newData))),
           type: popupData.dataType
         }
       })
@@ -382,23 +391,23 @@ export default class config extends PureComponent {
   }
 
   //提交弹窗
-  confirmPop = () => {
+  confirmPop = (val) => {
     let {arrayEqual} = this
     let { popupData } = this.state
     // 协议名称： S7_TCP   Modbus_TCP  OPC_DA  OPC_UA  MC3E_Binary_Ethernet  MCA1E_Binary_Ethernet  Fins_TCP
-    let addressData = JSON.parse(JSON.stringify(this.state.formData))
-    
+    let addressData = JSON.parse(JSON.stringify(Object.assign(this.state.formData, val)))
+    console.log(addressData)
     if (popupData.protocolName === 'S7_TCP') {
       // 1: 数据区域  2. 寄存器字母块（M/DBX/I/Q/MB/DBB/IB/QB/MW/DBW/IW/QW/MD/DBD/ID/QD） 3.  DB号  4. 地址偏移量   5. 位   6. 长度   7.  地址类型 
       /* 根据showList中的代码块  处理生成的变量 */
       if (arrayEqual(addressData.showList, [1,2,5])) {
-        popupData.dataValue = `${addressData.letters + addressData.lettleValue}.${addressData.bit}` 
+        popupData.dataValue = `${addressData.letters + addressData.lettlesValue}.${addressData.bit}` 
       } else if (arrayEqual(addressData.showList, [1,2,3,5])) {
-        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.${addressData.letters + addressData.lettleValue}.${addressData.bit}`
+        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.${addressData.letters + addressData.lettlesValue}.${addressData.bit}`
       } else if (arrayEqual(addressData.showList, [1,2])) {
-        popupData.dataValue = `${addressData.letters + addressData.lettleValue}`
+        popupData.dataValue = `${addressData.letters + addressData.lettlesValue}`
       } else if (arrayEqual(addressData.showList, [1,2,3])) {
-        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.${addressData.letters + addressData.lettleValue}`
+        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.${addressData.letters + addressData.lettlesValue}`
       } else if (arrayEqual(addressData.showList, [1,4,7])) {
         if (addressData.dataArea === '位') {
           console.log(addressData.addressType === "字")
@@ -738,25 +747,27 @@ export default class config extends PureComponent {
   }
 
   onFinish = (val) => {
-    this.props.onFinish(this.confirmPop(), this.props.row);
+    console.log(val)
+    this.props.onFinish(this.confirmPop(val), this.props.row);
   }
 
   render() {
     let {type, formData, popupData} = this.state
+    console.log(formData)
     let items = formData.showList || []; 
     let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754', '字符串']
     let binaryarea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)','DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
     'EM bank E','EM bank F','EM bank 10','EM bank 11','EM bank 12','EM bank 13','EM bank 14','EM bank 15','EM bank 16','EM bank 17','EM bank 18']
     console.log(popupData.protocolName, items)
     return (
-      <Form onFinish={this.onFinish} ref={addressForm}>
+      <Form onFinish={this.onFinish} ref={addressForm} initialValues={this.state.formData}>
         <div className="form-table">
           {
             popupData.protocolName === "S7_TCP" ? (
               <>
               {
                 items.includes(1) ? 
-                  <Form.Item label="数据区域" name="dataArea" initialValue="位">
+                  <Form.Item label="数据区域" name="dataArea">
                     <Select onChange={(e)=>{this.changeData(e,'dataArea', type)}} >
                       <Select.Option value="位">位</Select.Option>
                       <Select.Option value="DB">DB</Select.Option>
@@ -766,22 +777,22 @@ export default class config extends PureComponent {
                   </Form.Item> : <></>
               }{
                 items.includes(2) ?
-                  <Form.Item label={formData.letters} name={formData.letters} initialValue={ formData.lettleValue }>
-                    <Input onBlur={ (e)=>{this.blurData(e, 'lettleValue', 'S7_TCP')} }/>
+                  <Form.Item label={formData.letters} name={"lettlesValue"} rules={[{required: true, message: "必填"}]}>
+                    <Input autoComplete="off" onBlur={ (e)=>{this.blurData(e, 'lettlesValue', 'S7_TCP')} }/>
                   </Form.Item> : <></>
               }{
                 items && items.includes(3) ?
-                <Form.Item label="DB号" name="DBNum" initialValue={ formData.DBNum }>
-                  <Input type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'DBNum', 'S7_TCP')} }/>
+                <Form.Item label="DB号" name="DBNum" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'DBNum', 'S7_TCP')} }/>
                 </Form.Item> : <></>
               }{
                 items && items.includes(4) ?
-                <Form.Item label="地址偏移量" name="addressOffset" initialValue={ formData.addressOffset }>
-                  <Input type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'addressOffset', 'S7_TCP')} }/>
+                <Form.Item label="地址偏移量" name="addressOffset" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'addressOffset', 'S7_TCP')} }/>
                 </Form.Item> : <></>
               }{
                 items.includes(5) ?
-                <Form.Item label="位" name="bit" initialValue="1">
+                <Form.Item label="位" name="bit">
                   <Select onChange={(e) => { this.changeData(e, 'bit', type) }}>
                     <Select.Option value="1">1</Select.Option>
                     <Select.Option value="2">2</Select.Option>
@@ -794,17 +805,17 @@ export default class config extends PureComponent {
                 </Form.Item> : <></>
               }{
                 items && items.includes(6) ?
-                <Form.Item label="长度" name="len" initialValue={ formData.len }>
-                  <Input onBlur={ (e)=>{this.blurData(e, 'len', 'S7_TCP')} }/>
+                <Form.Item label="长度" name="len" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'S7_TCP')} }/>
                 </Form.Item> : <></>
               }{
                 items && items.includes(7) ?
-                <Form.Item label="地址类型" name="addressType" initialValue="字节">
+                <Form.Item label="地址类型" name="addressType">
                   <Select onChange={ (e)=>{this.changeData(e, 'addressType', type)} }>
                     <Select.Option value="字节">字节</Select.Option>   
                     <Select.Option value="字">字</Select.Option>
                     {
-                      ['字符串', '宽字符串'].includes(type) ? 
+                      !['字符串', '宽字符串'].includes(type) ? 
                       <Select.Option value="双字">双字</Select.Option> : <></>
                     }
                   </Select>
@@ -817,7 +828,7 @@ export default class config extends PureComponent {
               <>
                 {
                   !types.includes(type) ? 
-                    <Form.Item label="数据区域" name="dataArea" initialValue="线圈状态">
+                    <Form.Item label="数据区域" name="dataArea">
                       <Select onChange={(e)=>{this.changeModbus_TCPData(e,'dataArea', type)}} >
                         <Select.Option value="线圈状态">线圈状态</Select.Option>
                         <Select.Option value="离散输入状态">离散输入状态</Select.Option>
@@ -825,7 +836,7 @@ export default class config extends PureComponent {
                         <Select.Option value="保持寄存器">保持寄存器</Select.Option>
                       </Select>
                     </Form.Item> : 
-                    <Form.Item label="数据区域" name="dataArea" initialValue="输入寄存器">
+                    <Form.Item label="数据区域" name="dataArea">
                       <Select onChange={(e)=>{this.changeModbus_TCPData(e,'dataArea', type)}} >
                         <Select.Option value="输入寄存器">输入寄存器</Select.Option>
                         <Select.Option value="保持寄存器">保持寄存器</Select.Option>
@@ -833,13 +844,14 @@ export default class config extends PureComponent {
                     </Form.Item>
                 }{
                   items && items.includes(2) ? 
-                  <Form.Item label="偏移地址" name="address" initialValue={ formData.address }>
-                    <Input type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'Modbus_TCP')} }/>
+                  <Form.Item label="偏移地址" name="address" rules={[{required: true, message: "必填"}]}>
+                    <Input autoComplete="off" type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'address', 'Modbus_TCP')} }/>
                   </Form.Item> : <></>
                 }{
                   items && items.includes(3) ? 
-                  <Form.Item label="位" name="bit" initialValue="1">
+                  <Form.Item label="位" name="bit">
                     <Select onChange={(e)=>{this.changeModbus_TCPData(e,'bit', type)}} >
+                      <Select.Option value="0">0</Select.Option>
                       <Select.Option value="1">1</Select.Option>
                       <Select.Option value="2">2</Select.Option>
                       <Select.Option value="3">3</Select.Option>
@@ -858,46 +870,48 @@ export default class config extends PureComponent {
                   </Form.Item> : <></>
                 }{
                   items && items.includes(4) ? 
-                  <Form.Item label="长度" name="address" initialValue={ formData.len }>
-                    <Input type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'Modbus_TCP')} }/>
+                  <Form.Item label="长度" name="len" rules={[{required: true, message: "必填"}]}>
+                    <Input autoComplete="off" type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'Modbus_TCP')} }/>
                   </Form.Item> : <></>
                 }
               </> : <></>
           }{
             popupData.protocolName === "MC3E_Binary_Ethernet" ? <>
               {
-                items.includes(1) ? 
-                <Form.Item label="数据区域" name="dataArea" initialValue="输入寄存器（X）">
-                  <Select onChange={(e)=>{this.changeMBEData(e,'dataArea', type)}} >
-                    <Select.Option value="输入寄存器（X）">输入寄存器（X）</Select.Option>
-                    <Select.Option value="输出寄存器（Y）">输出寄存器（Y）</Select.Option>
-                    <Select.Option value="内部继电器（M）">内部继电器（M）</Select.Option>
-                    <Select.Option value="定时器（触点）（TS）">定时器（触点）（TS）</Select.Option>
-                    <Select.Option value="定时器（线圈）（TC）">定时器（线圈）（TC）</Select.Option>
-                    <Select.Option value="计数器（触点）（CS）">计数器（触点）（CS）</Select.Option>
-                    <Select.Option value="计数器（线圈）（CC）">计数器（线圈）（CC）</Select.Option>
-                    <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
-                    <Select.Option value="链接寄存器（W）">链接寄存器（W）</Select.Option>
-                    <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
-                    <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
-                  </Select>
-                </Form.Item> : 
-                <Form.Item label="数据区域" name="dataArea" initialValue="数据寄存器（D）">
-                  <Select onChange={(e)=>{this.changeMBEData(e,'dataArea', type)}} >
-                    <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
-                    <Select.Option value="链接寄存器（W）">链接寄存器（W）</Select.Option>
-                    <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
-                    <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
-                  </Select>
-                </Form.Item>
+                items.includes(1) ? (
+                  type === '二进制变量' ? 
+                  <Form.Item label="数据区域" name="dataArea">
+                    <Select onChange={(e)=>{this.changeMBEData(e,'dataArea', type)}} >
+                      <Select.Option value="输入寄存器（X）">输入寄存器（X）</Select.Option>
+                      <Select.Option value="输出寄存器（Y）">输出寄存器（Y）</Select.Option>
+                      <Select.Option value="内部继电器（M）">内部继电器（M）</Select.Option>
+                      <Select.Option value="定时器（触点）（TS）">定时器（触点）（TS）</Select.Option>
+                      <Select.Option value="定时器（线圈）（TC）">定时器（线圈）（TC）</Select.Option>
+                      <Select.Option value="计数器（触点）（CS）">计数器（触点）（CS）</Select.Option>
+                      <Select.Option value="计数器（线圈）（CC）">计数器（线圈）（CC）</Select.Option>
+                      <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
+                      <Select.Option value="链接寄存器（W）">链接寄存器（W）</Select.Option>
+                      <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
+                      <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
+                    </Select>
+                  </Form.Item> : 
+                  <Form.Item label="数据区域" name="dataArea">
+                    <Select onChange={(e)=>{this.changeMBEData(e,'dataArea', type)}} >
+                      <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
+                      <Select.Option value="链接寄存器（W）">链接寄存器（W）</Select.Option>
+                      <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
+                      <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
+                    </Select>
+                  </Form.Item>
+                ) : <></>
               }{
                 items && items.includes(2) ? 
-                <Form.Item label="偏移地址" name="address" initialValue={ formData.address }>
-                  <Input type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MC3E_Binary_Ethernet')} }/>
+                <Form.Item label="偏移地址" name="address" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MC3E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }{
                 items && items.includes(3) ? 
-                <Form.Item label="位" name="bit" initialValue="1">
+                <Form.Item label="位" name="bit">
                   <Select onChange={(e)=>{this.changeModbus_TCPData(e,'bit', type)}} >
                     <Select.Option value="1">1</Select.Option>
                     <Select.Option value="2">2</Select.Option>
@@ -918,45 +932,47 @@ export default class config extends PureComponent {
                 </Form.Item> : <></>
               }{
                 items && items.includes(4) ? 
-                <Form.Item label="长度" name="address" initialValue={ formData.len }>
-                  <Input type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'MC3E_Binary_Ethernet')} }/>
+                <Form.Item label="长度" name="len" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'MC3E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }
             </> : <></>
           }{
             popupData.protocolName === "MCA1E_Binary_Ethernet" ? <>
               {
-                items.includes(1) ? 
-                <Form.Item label="数据区域" name="dataArea" initialValue="输入寄存器（X）">
-                  <Select onChange={(e)=>{this.changeMABEData(e,'dataArea', type)}} >
-                    <Select.Option value="输入寄存器（X）">输入寄存器（X）</Select.Option>
-                    <Select.Option value="输出寄存器（Y）">输出寄存器（Y）</Select.Option>
-                    <Select.Option value="辅助继电器（M）">辅助继电器（M）</Select.Option>
-                    <Select.Option value="状态（S）">状态（S）</Select.Option>
-                    <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
-                    <Select.Option value="扩展寄存器（R）">扩展寄存器（R）</Select.Option>
-                    <Select.Option value="定时器（触点）（TS）">定时器（触点）（TS）</Select.Option>
-                    <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
-                    <Select.Option value="计数器（触点）（CS）">计数器（触点）（CS）</Select.Option>
-                    <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
-                  </Select>
-                </Form.Item> : 
-                <Form.Item label="数据区域" name="dataArea" initialValue="数据寄存器（D）">
-                  <Select onChange={(e)=>{this.changeMBEData(e,'dataArea', type)}} >
-                    <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
-                    <Select.Option value="扩展寄存器（R）">扩展寄存器（R）</Select.Option>
-                    <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
-                    <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
-                  </Select>
-                </Form.Item>
+                items.includes(1) ? (
+                  type === '二进制变量' ? 
+                  <Form.Item label="数据区域" name="dataArea">
+                    <Select onChange={(e)=>{this.changeMABEData(e,'dataArea', type)}} >
+                      <Select.Option value="输入寄存器（X）">输入寄存器（X）</Select.Option>
+                      <Select.Option value="输出寄存器（Y）">输出寄存器（Y）</Select.Option>
+                      <Select.Option value="辅助继电器（M）">辅助继电器（M）</Select.Option>
+                      <Select.Option value="状态（S）">状态（S）</Select.Option>
+                      <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
+                      <Select.Option value="扩展寄存器（R）">扩展寄存器（R）</Select.Option>
+                      <Select.Option value="定时器（触点）（TS）">定时器（触点）（TS）</Select.Option>
+                      <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
+                      <Select.Option value="计数器（触点）（CS）">计数器（触点）（CS）</Select.Option>
+                      <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
+                    </Select>
+                  </Form.Item> : 
+                  <Form.Item label="数据区域" name="dataArea">
+                    <Select onChange={(e)=>{this.changeMBEData(e,'dataArea', type)}} >
+                      <Select.Option value="数据寄存器（D）">数据寄存器（D）</Select.Option>
+                      <Select.Option value="扩展寄存器（R）">扩展寄存器（R）</Select.Option>
+                      <Select.Option value="定时器（当前值）（TN）">定时器（当前值）（TN）</Select.Option>
+                      <Select.Option value="计数器（当前值）（CN）">计数器（当前值）（CN）</Select.Option>
+                    </Select>
+                  </Form.Item>
+                ) : <></>
               }{
                 items && items.includes(2) ? 
-                <Form.Item label="偏移地址" name="address" initialValue={ formData.address }>
-                  <Input type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MCA1E_Binary_Ethernet')} }/>
+                <Form.Item label="偏移地址" name="address" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MCA1E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }{
                 items && items.includes(3) ? 
-                <Form.Item label="位" name="bit" initialValue="1">
+                <Form.Item label="位" name="bit">
                   <Select onChange={(e)=>{this.changeMABEData(e,'bit', type)}} >
                     <Select.Option value="1">1</Select.Option>
                     <Select.Option value="2">2</Select.Option>
@@ -977,8 +993,8 @@ export default class config extends PureComponent {
                 </Form.Item> : <></>
               }{
                 items && items.includes(4) ? 
-                <Form.Item label="长度" name="address" initialValue={ formData.len }>
-                  <Input type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'MCA1E_Binary_Ethernet')} }/>
+                <Form.Item label="长度" name="len" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'MCA1E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }
             </> : <></>
@@ -987,7 +1003,7 @@ export default class config extends PureComponent {
               {
                 items.includes(1) ? (
                   type === '二进制变量' ? 
-                  <Form.Item label="数据区域" name="dataArea" initialValue={binaryarea[0]}>
+                  <Form.Item label="数据区域" name="dataArea">
                     <Select onChange={(e)=>{this.changeFins_TCPData(e,'dataArea', type)}} >
                     {
                       binaryarea.map((item,index) => {
@@ -996,7 +1012,7 @@ export default class config extends PureComponent {
                     }
                     </Select>
                   </Form.Item> : 
-                  <Form.Item label="数据区域" name="dataArea" initialValue={binaryarea[0]}>
+                  <Form.Item label="数据区域" name="dataArea">
                     <Select onChange={(e)=>{this.changeFins_TCPData(e,'dataArea', type)}} >
                       {
                         binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)').map((item,index) => {
@@ -1008,12 +1024,12 @@ export default class config extends PureComponent {
                 ) : <></>
               }{
                 items.includes(2) ? 
-                <Form.Item label="偏移地址" name="address" initialValue={ formData.address }>
-                  <Input type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'Fins_TCP')} }/>
+                <Form.Item label="偏移地址" name="address" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'Fins_TCP')} }/>
                 </Form.Item> : <></>
               }{
                 items.includes(3) ? 
-                <Form.Item label="位" name="bit" initialValue="1">
+                <Form.Item label="位" name="bit">
                   <Select onChange={(e)=>{this.changeMABEData(e,'bit', type)}} >
                     <Select.Option value="1">1</Select.Option>
                     <Select.Option value="2">2</Select.Option>
@@ -1034,8 +1050,8 @@ export default class config extends PureComponent {
                 </Form.Item> : <></>
               }{
                 items.includes(4)  ? 
-                <Form.Item label="长度" name="address" initialValue={ formData.len }>
-                  <Input type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'MCA1E_Binary_Ethernet')} }/>
+                <Form.Item label="长度" name="len" rules={[{required: true, message: "必填"}]}>
+                  <Input autoComplete="off" type="number" min="1" max="255" onBlur={ (e)=>{this.blurData(e, 'len', 'MCA1E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }
             </> : <></>

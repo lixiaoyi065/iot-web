@@ -10,7 +10,7 @@ import { addressVerify, descVerify, nameVerify } from './verify'
 const EditableContext = React.createContext(null);
 const { Option } = Select;
 
-let modifyTags = [];
+let modifyTags = []
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -180,11 +180,14 @@ class EditableTable extends React.Component {
       dataSource: [],
       gist: [],
       changeTags: false,
-      columns: this.props.columns
+      columns: this.props.columns,
     };
   }
 
   componentDidMount() {
+    PubSub.subscribe("modifyTags", (res) => {
+      modifyTags = res
+    })
     this.setState({ gist: this.props.gist })
     setTimeout(() => {
       this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
@@ -196,6 +199,7 @@ class EditableTable extends React.Component {
 
   componentWillUnmount() {
     PubSub.unsubscribe("changeTags")
+    PubSub.unsubscribe("modifyTags")
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -204,7 +208,6 @@ class EditableTable extends React.Component {
   }
 
   handleSave = (dataIndex, val, row, flag = true) => {
-    console.log(row)
     this.setState(state => {
       for (let i = 0; i < state.dataSource.length; i++) {
         if (state.dataSource[i].key === row.key) {
@@ -213,10 +216,11 @@ class EditableTable extends React.Component {
         }
       }
       return {
-        dataSource: state.dataSource
+        dataSource: JSON.parse(JSON.stringify(state.dataSource))
       }
     })
 
+    console.log(modifyTags)
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
@@ -247,10 +251,11 @@ class EditableTable extends React.Component {
       //否则添加
       modifyTags.push(row)
     }
-    PubSub.publish("modifyTags", modifyTags)
+    let newList = JSON.parse(JSON.stringify(modifyTags));
+    PubSub.publish("modifyTags", newList)
     PubSub.publish("canSubmit", {
-      canSubmit: modifyTags.length > 0 ? true : false,
-      message: modifyTags.length > 0 ? "" : "当前没有修改的内容"
+      canSubmit: newList.length > 0 ? true : false,
+      message: newList.length > 0 ? "" : "当前没有修改的内容"
     })
   };
   handleResize = index => (e, { size }) => {

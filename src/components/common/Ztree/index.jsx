@@ -55,9 +55,11 @@ class ZTree extends PureComponent {
     if (this.props.option) {
       if (data.canBeDeleted) {
         nodeData.title = (<>
-          <span className={`iot-status ${nodeData.nodeStatus === 1 ? 'iot-status-normal' : (
-            nodeData.nodeStatus === 2 ? 'iot-status-danger' : 'iot-status-disable'
-          )}`}></span>
+          {
+            nodeData.nodeType === 3 ? <span className={`iot-status ${nodeData.nodeStatus === 1 ? 'iot-status-normal' : (
+              nodeData.nodeStatus === 2 ? 'iot-status-danger' : 'iot-status-disable'
+            )}`}></span> : <></>
+          }
           <span>{data.nodeName}</span>
           <Dropdown trigger={["click"]} overlay={() => {
             return this.props.optionDeviceMenu(data, data.children.length)
@@ -69,7 +71,6 @@ class ZTree extends PureComponent {
         </>)
       } else {
         nodeData.title = (<>
-          <span className={`iot-status`}></span>
           <span>{data.nodeName}</span>
           <Dropdown trigger={["click"]} overlay={() => {
             return this.props.interVariable(data, data.children.length)
@@ -81,7 +82,12 @@ class ZTree extends PureComponent {
         </>)
       }
     } else {
-      nodeData.title = data.nodeName
+      nodeData.title = nodeData.nodeType === 3 ? (<>
+        <span className={`iot-status ${nodeData.nodeStatus === 1 ? 'iot-status-normal' : (
+          nodeData.nodeStatus === 2 ? 'iot-status-danger' : 'iot-status-disable'
+        )}`}></span>
+        <span>{data.nodeName}</span>
+      </>) : <span>{data.nodeName}</span>
     }
 
     if (data.children.length > 0) {
