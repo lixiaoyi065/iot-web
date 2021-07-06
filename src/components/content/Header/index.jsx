@@ -32,17 +32,17 @@ class PageHeader extends PureComponent {
         message.error(res.msg)
       }
     })
-    timer = setInterval(() => {
-      GetIOTStatus().then(res => {
-        if (res.code === 0) {
-          this.setState({
-            status: res.data
-          })
-        } else {
-          message.error(res.msg)
-        }
-      })
-    }, 5000)
+    // timer = setInterval(() => {
+    //   GetIOTStatus().then(res => {
+    //     if (res.code === 0) {
+    //       this.setState({
+    //         status: res.data
+    //       })
+    //     } else {
+    //       message.error(res.msg)
+    //     }
+    //   })
+    // }, 5000)
   }
 
   componentWillUnmount() {

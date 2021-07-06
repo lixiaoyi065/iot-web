@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Select, Input, Button,Tree } from 'antd'
+import { Form, Select, Input, Button } from 'antd'
 import "./index.less"
 
 let addressForm = React.createRef()
@@ -88,31 +88,31 @@ export default class config extends PureComponent {
       } else if (popupData.dataType === '字符串') {
         // 此处判断赋默认值还是回显值
         let areas = ['输入寄存器', '保持寄存器']
-        dataArea = areas.includes(formData.dataArea) ? formData.dataArea : '输入寄存器'
+        newData.dataArea = areas.includes(formData.dataArea) ? formData.dataArea : '输入寄存器'
         newData.showList = formData.showList.length === 0 ?  [1,2,4] : formData.showList
       } 
       addressForm.current.setFieldsValue({
-        dataArea: dataArea
+        dataArea: newData.dataArea
       })
       this.setState(state=>{
         return {
-          formData: Object.assign(state.formData, newData, {dataArea: dataArea}),
+          formData: Object.assign(state.formData, newData),
           type: popupData.dataType
         }
       })
     }else if (popupData.protocolName === 'MC3E_Binary_Ethernet') { //  渲染 MC3E_Binary_Ethernet 弹窗
-      let dataArea = formData.dataArea ? formData.dataArea : '输入寄存器（X）'
+      newData.dataArea = formData.dataArea ? formData.dataArea : '输入寄存器（X）'
       if (popupData.dataType === '二进制变量') {
         newData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
       } else if (popupData.dataType === '字符串') {
         // 此处判断赋默认值还是回显值
         let areas = ['数据寄存器（D）', '链接寄存器（W）', '定时器（当前值）（TN）', '计数器（当前值）（CN）']
-        newData.dataArea = areas.includes(dataArea) ? formData.dataArea : '数据寄存器（D）'
+        newData.dataArea = areas.includes(newData.dataArea) ? formData.dataArea : '数据寄存器（D）'
         newData.showList = formData.showList.length === 0 ?  [1,2,4] : formData.showList
       } else {
         // 此处判断赋默认值还是回显值
         let areas = ['数据寄存器（D）', '链接寄存器（W）', '定时器（当前值）（TN）', '计数器（当前值）（CN）']
-        newData.dataArea = areas.includes(dataArea) ? formData.dataArea : '数据寄存器（D）'
+        newData.dataArea = areas.includes(newData.dataArea) ? formData.dataArea : '数据寄存器（D）'
         newData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
       }
       this.setState(state=>{
@@ -401,7 +401,7 @@ export default class config extends PureComponent {
         popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.${addressData.letters + addressData.lettleValue}`
       } else if (arrayEqual(addressData.showList, [1,4,7])) {
         if (addressData.dataArea === '位') {
-          console.log(addressData.addressType == "字")
+          console.log(addressData.addressType === "字")
           if (addressData.addressType === '字节') {
             popupData.dataValue = `MB${addressData.addressOffset}`
           } else if (addressData.addressType === '字') {

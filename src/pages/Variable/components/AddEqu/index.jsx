@@ -138,7 +138,7 @@ export default class addDevice extends PureComponent {
       >
         <div className="form-table">
           <Form.Item label="设备ID" name="id" hidden={true}>
-            <Input />
+            <Input  autoComplete="off"/>
           </Form.Item>
           <Form.Item label="设备名称" name="name"
             rules={[
@@ -148,10 +148,10 @@ export default class addDevice extends PureComponent {
               }
             ]}
           >
-            <Input />
+            <Input  autoComplete="off"/>
           </Form.Item>
           <Form.Item label="设备描述" name="desc" placeholder="请输入设备描述">
-            <Input />
+            <Input  autoComplete="off"/>
           </Form.Item>
         </div>
         <Divider></Divider>
@@ -195,7 +195,7 @@ export default class addDevice extends PureComponent {
                     message: "请输入连接名",
                   }
                 ]}>
-                <Input />
+                <Input  autoComplete="off"/>
               </Form.Item>
             ) : null
           }
@@ -213,7 +213,7 @@ export default class addDevice extends PureComponent {
                   // }
                 ]}
               >
-                <Input />
+                <Input  autoComplete="off"/>
               </Form.Item>
             ) : null
           }
@@ -225,12 +225,12 @@ export default class addDevice extends PureComponent {
                     required: true,
                     message: '请输入设备ID',
                   }, {
-                    pattern: /^\+?[1-9][0-9]*$/,
+                    pattern: /^\+?[0-9]*$/,
                     message: '请输入输入数字',
                   }
                 ]}
               >
-                <Input />
+                <Input  autoComplete="off"/>
               </Form.Item>
             ) : null
           }
@@ -247,7 +247,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input type="Number" />
+                <Input type="Number" autoComplete="off"/>
               </Form.Item>
             ) : null
           }
@@ -264,7 +264,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input suffix="毫秒" />
+                <Input suffix="毫秒" autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -290,7 +290,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input />
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -304,7 +304,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input />
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -321,7 +321,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input suffix="mSec" />
+                <Input suffix="mSec" autoComplete="off" />
               </Form.Item>
             ) : null
           }{
@@ -337,7 +337,7 @@ export default class addDevice extends PureComponent {
                   }
                 ]}
               >
-                <Input type="number" suffix="%FS" />
+                <Input type="number" suffix="%FS" autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -385,7 +385,7 @@ export default class addDevice extends PureComponent {
                   message: "请输入用户名"
                 }]
               }>
-                <Input />
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }{
@@ -396,7 +396,7 @@ export default class addDevice extends PureComponent {
                   message: "请输入密码"
                 }]
               }>
-                <Input.Password />
+                <Input.Password autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -408,7 +408,7 @@ export default class addDevice extends PureComponent {
                   message: "请输入机架号"
                 }]
               }>
-                <Input />
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }
@@ -420,7 +420,7 @@ export default class addDevice extends PureComponent {
                   message: "请输入CPU插槽"
                 }]
               }>
-                <Input />
+                <Input autoComplete="off" />
               </Form.Item>
             ) : null
           }{

@@ -3,6 +3,7 @@ import axios from 'axios'
 import {getCookie} from 'utils'
 
 const service = axios.create({
+  // baseURL: "/api",
   baseURL: "http://localhost:3000/api1/api",
   timeout: 5000,
   async: true,

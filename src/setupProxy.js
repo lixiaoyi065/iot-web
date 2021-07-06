@@ -7,10 +7,5 @@ module.exports = function(app){
 			changeOrigin:true,//控制服务器收到的请求头中Host的值
 			pathRewrite:{'^/api1':''} //重写请求路径(必须)
 		}),
-		// proxy('/api2',{
-		// 	target:'https://www.fastmock.site/mock/252af95046512548bd771bcf6a08b05b/src_iot',
-		// 	changeOrigin:true,  
-		// 	pathRewrite:{'^/api2':''}
-		// }),
 	)
 }

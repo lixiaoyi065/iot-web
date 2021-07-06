@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@aspnet/signalr": "^1.0.27",
+    "@microsoft/signalr": "^3.1.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -24,11 +26,13 @@
     "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^17.0.1",
     "react-draggable": "^4.4.3",
+    "react-native-signalr": "^1.0.6",
     "react-resizable": "^3.0.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
     "react-window": "^1.8.6",
     "redux": "^4.1.0",
+    "signalr": "^2.2.1",
     "web-vitals": "^0.2.4",
     "ztree": "^3.5.24",
     "ztree-for-react": "^1.2.0"
@@ -56,5 +60,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {}
 }

@@ -21,7 +21,7 @@ import {
   GetTreeStructure, GetDevice, DeleteDevice, DelGroup,
   InitTags, GetNextPageTags, QueryTags, SaveTags, ExportTags, DeleteTags,
   GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress, GetAddressEditInfo,
-  SortTreeNode, TestOPCUaConnect,
+  SortTreeNode, TestOPCUaConnect, CloseOPCUaWindows,
   GetDeviceStatus,StartDevice,StopDevice
 } from 'api/variable'
 
@@ -192,8 +192,12 @@ class RealTime extends PureComponent{
   handleCancel = ()=>{
     this.setState({visible: false})
   }
-  opcConfigCancel = ()=>{
-    this.setState({opcConfigVisible: false})
+  opcConfigCancel = () => {
+    this.setState({ opcConfigVisible: false }, () => {
+      //关闭OPC_UA变量选择弹窗，断开连接
+      CloseOPCUaWindows().then(res => {
+      })
+    })
   }
   confirm = (content,callback)=> {
     Modal.confirm({

@@ -266,3 +266,11 @@ export function InitOPCUaWindows(params) {
     method: 'get'
   })
 }
+
+//关闭OPC_UA变量选择弹窗
+export function CloseOPCUaWindows() {
+  return axios({
+    url: "/VariableManage/CloseOPCUaWindows",
+    method: 'put'
+  })
+}

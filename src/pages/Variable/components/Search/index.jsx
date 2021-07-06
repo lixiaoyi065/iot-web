@@ -64,7 +64,7 @@ class Search extends PureComponent {
             </Select>
           </Form.Item>
           <Form.Item name="key">
-            <Input placeholder="请输入关键字" style={{ width: '240px' }} />
+            <Input placeholder="请输入关键字" autoComplete="off" style={{ width: '240px' }} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submint" className="btn-submint"><img className="btn-icon" src={searchLogo} alt="" />查询</Button>

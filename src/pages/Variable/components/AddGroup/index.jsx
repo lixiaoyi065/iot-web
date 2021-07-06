@@ -77,10 +77,10 @@ class AddGroups extends PureComponent {
           </Select>
         </Form.Item>
         <Form.Item label="分组Id" name="groupId" hidden>
-          <Input />
+          <Input autoComplete="off" />
         </Form.Item>
         <Form.Item label="设备类型" name="type" hidden>
-          <Input />
+          <Input autoComplete="off" />
         </Form.Item>
         <Form.Item label="分组名称" name="name" rules={[
           {
@@ -89,7 +89,7 @@ class AddGroups extends PureComponent {
           },
         ]}
         >
-          <Input placeholder="请输入分组名称" />
+          <Input autoComplete="off" placeholder="请输入分组名称" />
         </Form.Item>
         <Form.Item className="form-footer">
           <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
