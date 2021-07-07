@@ -13,6 +13,7 @@ class ZTree extends PureComponent {
     pathname: "",
     defaultExpandedKeys: [],
     deviceStatus: [],
+    selectNode:[],
     selectCallbackFn: function (keys) { },//选中节点 回调函数
   }
 
@@ -36,7 +37,7 @@ class ZTree extends PureComponent {
   //数据处理
   node = (data) => {
     let nodeStatus = 0;
-    this.state.deviceStatus.forEach(item => {
+    this.state.deviceStatus   && this.state.deviceStatus.forEach(item => {
       if (item.id === data.nodeID) {
         nodeStatus = item.status
       }
@@ -94,6 +95,7 @@ class ZTree extends PureComponent {
       data.children.map(child => {
         const childNode = {
           key: child.nodeID,
+          id: child.nodeID,
           nodeNo: child.nodeNo,
           fatherNodeID: child.fatherNodeID,
           nodeType: child.nodeType,
@@ -146,7 +148,7 @@ class ZTree extends PureComponent {
   };
 
   onSelect = (keys, info) => {
-    this.state.selectCallbackFn(keys, info);
+    // this.state.selectCallbackFn(keys, info);
   };
 
   onExpand = (e) => {

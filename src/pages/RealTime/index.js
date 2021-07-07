@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { message } from 'antd'
-import PubSub from "pubsub-js";
 import { getCookie, getNowFormatDate } from 'utils'
 import {
   HubConnectionBuilder,
@@ -12,9 +11,9 @@ import DataTable from 'components/common/Table'
 import ZTree from 'components/common/Ztree'
 import Search from './components/Search'
 
-import { GetTreeStructure, GetDeviceStatus } from 'api/variable'
+import { GetTreeStructure } from 'api/variable'
 import { EnterPage, LeavePage, InitTags, QueryTags, GetNextPageTags } from 'api/realTime'
-let deviceStatusTimer = null;
+
 let connection = null, getTime = null;
 class RealTime extends PureComponent{
   constructor (props) {
@@ -35,7 +34,6 @@ class RealTime extends PureComponent{
 
   componentDidMount() {
     let token = getCookie("accessToken")
-    this.getDateTime();
     EnterPage().then(res => {})
     //获取整棵设备列表树结构
     GetTreeStructure().then(res => {
@@ -52,13 +50,9 @@ class RealTime extends PureComponent{
       }
       this.setState({ treeData: res.data, allNodeId: allcheck })
     })
-    this.getDeviceStatus();
 
-    // SetSignalr().then(res => {
-    //   console.log(res)
-    // })
     connection = new HubConnectionBuilder()
-      .withUrl("/api1/api/iotTagHub", { accessTokenFactory: () => token })
+      .withUrl("/api/iotTagHub", { accessTokenFactory: () => token })
       .withHubProtocol(new JsonHubProtocol())
       .configureLogging(LogLevel.Information)
       .build();
@@ -72,26 +66,26 @@ class RealTime extends PureComponent{
     };
     start() 
     connection.on('receiveTagValue', res => {
-      console.log(res)
+      this.setState(state => {
+        for (let i in res) {
+          state.dataSource.map(item => {
+            if (item.key === i) {
+              item.value = res[i]
+            }
+            return item
+          })
+        }
+        return {
+          dataSource: JSON.parse(JSON.stringify(state.dataSource))
+        }
+      })
     });
   }
 
   componentWillUnmount() {
     LeavePage().then(res => { })
-    clearInterval(deviceStatusTimer)
     connection.stop();
     clearInterval(getTime)
-  }
-  // getSignalr = () => {
-  //   SetSignalr().then(res => {
-  //     console.log(res)
-  //   })
-  // }
-
-  getDeviceStatus = () =>{
-    GetDeviceStatus().then(res => {
-      PubSub.publish("deviceStatus", res.data)
-    })
   }
 
   //收缩设备列表
@@ -129,9 +123,22 @@ class RealTime extends PureComponent{
     this.getList(nodesList)
   }
   getDateTime = () => {
-    getTime = setInterval(() => {
-      return getNowFormatDate()
-    }, 1000)
+    if (this.state.dataSource.length > 0) {
+      getTime = setInterval(() => {
+        this.setState(state => {
+          state.dataSource.forEach(item => {
+            item.time = getNowFormatDate()
+          })
+
+          console.log(state.dataSource)
+          return {  
+            dataSource: JSON.parse(JSON.stringify(state.dataSource))
+          }
+        })
+      }, 1000)
+    } else {
+      clearInterval(getTime)
+    }
   }
   allUnCheck = () => {
     this.setState({checkedKeys: [], selectNodeList: []})
@@ -153,7 +160,9 @@ class RealTime extends PureComponent{
     InitTags(nodesList).then(res => {
       if (res.code === 0) {
         console.log(res.data.tagValues)
-        this.setState({dataSource: res.data.tagValues, count: res.data.total, dataTypes: res.data.dataTypes})
+        this.setState({dataSource: res.data.tagValues, count: res.data.total, dataTypes: res.data.dataTypes}, () => {
+          this.getDateTime()
+        })
       } else {
         message.error(res.msg)
       }
@@ -175,27 +184,32 @@ class RealTime extends PureComponent{
     console.log(obj)
     QueryTags(obj).then(res => {
       if (res.code === 0) {
-        this.setState({count: res.data.total, dataSource: res.data.tagValues})
+        this.setState({ count: res.data.total, dataSource: res.data.tagValues })
       } else {
         message.error(res.msg)
       }
     })
+  }
+  onSelect = (selectRows, row) => {
+    console.log(selectRows, row)
   }
 
   render() {
     return (
       <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
         <div className="leftContent">
-          {/* <Button onClick={this.getSignalr}>测试</Button> */}
           <div className="fullContain">
             {
               this.state.treeData ?
                 <ZTree
                   checkable
                   title="设备列表"
+                  move={false}
+                  selectNodeList={[]}
                   nodeDatas={this.state.treeData}
                   zTreeOption={this.zTreeOption()}
                   onCheck={this.onCheck}
+                  onSelect={this.onSelect}
                   checkedKeys={this.state.checkedKeys}
                   defaultExpandedKeys={ this.state.defaultExpandedKeys }
                 />
@@ -261,8 +275,14 @@ class RealTime extends PureComponent{
                 ellipsis: true
               },
               {
+                title: '变量值',
+                dataIndex: 'value',
+                width: '180px',
+                ellipsis: true
+              },
+              {
                 title: '时间戳',
-                dataIndex: '$DateTime',
+                dataIndex: 'time',
                 width: '180px',
                 ellipsis: true
               }

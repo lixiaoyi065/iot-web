@@ -1,5 +1,7 @@
 import React, { PureComponent, createRef } from 'react'
 import { Form, Input, Button, message } from 'antd';
+import PubSub from "pubsub-js";
+
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import project from "assets/img/operation/project.png";
 
@@ -43,11 +45,16 @@ class OperationsPane extends PureComponent {
         "id": this.state.nodeID,
         "name": res.name,
         "verificationCode": res.verificationCode
-      }).then(res => {
-        if (res.code === 0) {
-          message.info("保存成功")
+      }).then(result => {
+        if (result.code === 0) {
+          this.setState({
+            isSaved: true
+          }, () => {
+            message.info("保存成功")
+            PubSub.publish("projectName", res.name)
+          })
         } else {
-          message.error(res.msg)
+          message.error(result.msg)
         }
       })
     }
@@ -81,7 +88,7 @@ class OperationsPane extends PureComponent {
           </div>
           <Form ref={refForm} onFinish={this.onProjectFinish} className="form">
             <Form.Item label="项目名称" name="name">
-              <Input autoComplete="off" onBlur={ (e)=>{this.change(e, "name")} }/>
+              <Input autoComplete="off" onChange={ (e)=>{this.change(e, "name")} }/>
             </Form.Item>
             <Form.Item label="节点ID">
               <div>{ nodeID }</div>
@@ -90,7 +97,7 @@ class OperationsPane extends PureComponent {
               require: true,
               message: "请输入验证码"
             }]}>
-              <Input autoComplete="off" onBlur={ (e)=>{this.change(e, "verificationCode")} }/>
+              <Input autoComplete="off" onChange={ (e)=>{this.change(e, "verificationCode")} }/>
             </Form.Item>
             <Form.Item className="form-footer">
               <CopyToClipboard onCopy={this.copySerialNumber} text={copyText}>

@@ -5,7 +5,7 @@ import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import { getCookie } from 'utils'
-import PubSub from 'pubsub-js';
+import PubSub from 'pubsub-js'
 
 import './index.less'
 
@@ -29,20 +29,29 @@ class PageHeader extends PureComponent {
           currentEqu: data.name || "",
         })
       } else {
-        message.error(res.msg)
       }
     })
-    // timer = setInterval(() => {
-    //   GetIOTStatus().then(res => {
-    //     if (res.code === 0) {
-    //       this.setState({
-    //         status: res.data
-    //       })
-    //     } else {
-    //       message.error(res.msg)
-    //     }
-    //   })
-    // }, 5000)
+
+    PubSub.subscribe("projectName", (res,data) => {
+      this.setState({currentEqu: data})
+    })
+
+    timer = setInterval(() => {
+      GetIOTStatus().then(res => {
+        if (res.code === 0) {
+          this.setState({
+            status: res.data
+          })
+        } else {
+          if (getCookie("Authorization") === "") {
+            message.error("登录失效，即将跳转登录页")
+            setTimeout(() => {
+              this.props.history.replace("/login")
+            }, 2000)
+          }
+        }
+      })
+    }, 5000)
   }
 
   componentWillUnmount() {

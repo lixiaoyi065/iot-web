@@ -375,8 +375,11 @@
   width: 40px;
 }
 
-.ant-table-selection-column {
-  width: 50px;
+.ant-table-selection{ 
+  // width: 50px;
+  width: 100%;
+  padding-left: 9px;
+  text-align: left;
 
   .ant-checkbox {
     width: 20px;
@@ -416,6 +419,31 @@
 .ant-table-container,
 .ant-table-body {
   height: 100%;
+  
+  .ant-checkbox-inner {
+    position: relative;
+    left: -1px;
+    top: -1px;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid #B1B1B1;
+
+    &::after {
+      top: 48%;
+      height: 12.142857px;
+    }
+  }
+
+  .ant-checkbox-indeterminate {
+    .ant-checkbox-inner {
+
+      &::after {
+        top: 50%;
+        height: 8px;
+      }
+    }
+  }
 }
 
 .form-table {
@@ -560,8 +588,10 @@
 
       .form-item-val {
         display: inline-block;
-        width: 520px;
+        width: 550px;
         color: #333333;
+        word-break: keep-all;
+        white-space: nowrap;
       }
 
       .ant-btn-opt-normal {

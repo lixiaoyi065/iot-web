@@ -16,6 +16,7 @@ class Login extends Component {
   }
 
   componentDidMount() {
+    console.log(this.props)
     // 设置时间为负数, 取消设置的 cookie
     setCookie('login', '', -1)
     setCookie('accessToken', '', -1)
@@ -26,12 +27,9 @@ class Login extends Component {
     // 打哪儿来回哪去
     const { location } = this.props
     const from = location.state && location.state.from
-    //  const article = location.state && location.state.article
     this.props.history.push({
       pathname: from || "/index",
-      state: {
-          // article
-      }
+      state: {}
     })
   }
   text = (<div>
@@ -48,12 +46,12 @@ class Login extends Component {
         this.setState({loading: false})
         if (res.code === 0) {
             // 设置cookie之后跳转回来时的页面
-            setCookie('login', true, 0.1)
-            setCookie('accessToken', res.data, 0.1)
-            setCookie('userName', e.user, 0.1)
+            setCookie('login', true, 1)
+            setCookie('accessToken', res.data, 1)
+            setCookie('userName', e.user, 1)
             this.jumpBack()
         } else {
-          message.error(res.msg)
+          message.error("用户名或密码不正确")
         }
       })
     } catch(err) {
@@ -66,12 +64,7 @@ class Login extends Component {
     return (
       <div className="login">
         <div className="login-pane">
-          <Form className="card" onFinish={this.onFinish} initialValues={
-            {
-              user: "SuperAdmin",
-              password: "SYC888888"
-            }
-          }>
+          <Form className="card" onFinish={this.onFinish}>
             <div className="card-head">盛云圈IOT平台</div>
             <Form.Item name="user" className="card-item" rules={[{
               required: true,

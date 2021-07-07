@@ -1,6 +1,7 @@
 import { message } from 'antd'
 import axios from 'axios'
-import {getCookie} from 'utils'
+import {getCookie, setCookie} from 'utils'
+// import { Route, Redirect } from 'react-router-dom'
 
 const service = axios.create({
   // baseURL: "/api",
@@ -14,10 +15,17 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     let token = getCookie("accessToken")
-    if (token) {
-      config.headers['Authorization'] = token;
+    let url = config.url
+    if (url.substring(1, 6) === "Login") {
+      return config;
+    } else {
+      if (token) {
+        config.headers['Authorization'] = token;
+      } else if(token === ""){
+        setCookie("login", -1)
+      }
+      return config;
     }
-    return config;
   },
   error => {
     console.log(error)
@@ -29,7 +37,8 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     if (res.Code === 4002) {
-      message.error("登录失效，请重新登录")
+      setCookie('login', '', -1)
+      // message.error("登录失效，请重新登录")
       return []
     } else {
       return res
@@ -39,7 +48,8 @@ service.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          message.error("登录失效，请重新登录")
+          setCookie('login', '', -1)
+          // message.error("登录失效，请重新登录")
           break;
         case 504:
           message.error("服务器未响应")

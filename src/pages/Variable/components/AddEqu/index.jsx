@@ -37,16 +37,16 @@ export default class addDevice extends PureComponent {
     activeProto: "Modbus_TCP", // 当前选中的协议
     initialValues: {
       id: "00000000-0000-0000-0000-000000000000",
-      name: "测试设备",
-      desc: "这是一段描述",
+      name: "",
+      desc: "",
       // nodeType: "3",
       protocolName: "Modbus_TCP", //协议名称
       supplier: "通用",//设备厂家
       model: "通用",
-      IPAddress: "127.0.0.1",
-      DeviceID: "1234",
-      Port: "5000",
-      TimeOut: "5000",
+      IPAddress: "",
+      DeviceID: "",
+      Port: "",
+      TimeOut: "",
       ByteOrder: "1234",
       IsActive: "True",
       SecurityMode: "不加密",
@@ -457,9 +457,7 @@ export default class addDevice extends PureComponent {
               </> : <></>
           }
           <Button type="default" className="login-form-button" onClick={this.props.onCancel}>取消</Button>
-          <Button type="primary" htmlType="submit" className="login-form-button" ref="submit">
-            确认
-          </Button>
+          <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
         </Form.Item>
       </Form>
     )

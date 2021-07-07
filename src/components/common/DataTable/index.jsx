@@ -70,6 +70,7 @@ const EditableCell = ({
     let gistIndex = dataSource && dataSource.indexOf(record);
     let isSame = true
 
+    // console.log(dataSource, gist)
     if (dataIndex && record.editable) {
       isSame = gistIndex >= gist.length ? false : (
         val === gist[gistIndex][dataIndex]
@@ -121,7 +122,6 @@ const EditableCell = ({
 
   let childNode = children;
 
-
   if (record && record.editable) {
     childNode = record && record[dataIndex]
 
@@ -164,8 +164,8 @@ const EditableCell = ({
         </div>
     )
   }
-
-  return <td {...restProps} title={record && record[dataIndex]}
+    
+  return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)}
     className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}
       ${!checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
@@ -220,7 +220,7 @@ class EditableTable extends React.Component {
       }
     })
 
-    console.log(modifyTags)
+    // console.log(modifyTags)
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
@@ -237,7 +237,7 @@ class EditableTable extends React.Component {
         return false
       }
     })
-    console.log(isHas, flag)
+    // console.log(isHas, flag)
 
     if (isHas) {
       if (isFit(this.props.gist, row)) {//新旧对象一致,modifyTags移除该对象
@@ -323,21 +323,19 @@ class EditableTable extends React.Component {
         </div>
         <div className="paging">
           {
-            dataSource && dataSource.length > 0 ? (
-              <>
-                {
-                  this.props.count - dataSource.length > 0 ? (
-                    <label className="load-more" onClick={this.props.loadMore}>
-                      <span>...加载更多</span>
-                      <span style={{ color: '#999' }}>(剩余{this.props.count - dataSource.length}条数据)</span>
-                    </label>) : <></>
-                }
-                <label style={{ float: 'right', color: '#666', 'paddingRight': '20px' }}>
-                  <span>总条数：</span>
-                  <span>{this.props.count}</span>
-                </label>
-              </>
-            ) : <></>
+            <>
+              {
+                dataSource && (this.props.count - dataSource.length) > 0 && this.props.count - dataSource.length > 0 ? (
+                  <label className="load-more" onClick={this.props.loadMore}>
+                    <span>...加载更多</span>
+                    <span style={{ color: '#999' }}>(剩余{this.props.count - dataSource.length}条数据)</span>
+                  </label>) : <></>
+              }
+              <label style={{ float: 'right', color: '#666', 'paddingRight': '20px' }}>
+                <span>总条数：</span>
+                <span>{this.props.count}</span>
+              </label>
+            </>
           }
         </div>
       </>

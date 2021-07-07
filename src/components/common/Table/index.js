@@ -1,5 +1,25 @@
 import React from 'react';
 import { Table } from 'antd';
+import { Resizable } from 'react-resizable';
+
+const ResizeableTitle = props => {
+  const { onResize, width, ...restProps } = props;
+
+  if (!width) {
+    return <th {...restProps} />;
+  }
+
+  return (
+    <Resizable
+      width={width}
+      height={0}
+      onResize={onResize}
+      draggableOpts={{ enableUserSelectHack: false }}
+    >
+      <th {...restProps} />
+    </Resizable>
+  );
+};
 
 export default class EditableTable extends React.Component {
   constructor(props) {
@@ -18,6 +38,12 @@ export default class EditableTable extends React.Component {
 
   render() {
     const { dataSource } = this.props;
+
+    const components = {
+      header: {
+        cell: ResizeableTitle,
+      },
+    };
    
     return (
       <>
@@ -25,6 +51,7 @@ export default class EditableTable extends React.Component {
           <Table
             rowSelection={this.props.rowSelection}
             rowClassName={() => 'editable-row'}
+            components={components}
             dataSource={dataSource}
             columns={this.props.columns}
             pagination={ false } scroll={{y: this.state.height }}

@@ -6,7 +6,6 @@ import $ from "jquery"
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
 import EditableTable from 'components/common/DataTable'
-// import EditableTable from 'components/common/EditDataTable'
 
 import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
@@ -52,6 +51,7 @@ class RealTime extends PureComponent{
     canSubmit: {},
     tableLoading: false,
     pageIndex: 0, //当前页面
+    selectedKeys: [],
     opcConfigVisible: false,
     opcConfigContent: "",
   }
@@ -86,7 +86,7 @@ class RealTime extends PureComponent{
   //获取整棵设备列表树结构
   getTreeStructure = () => {
     GetTreeStructure().then(res => {
-      console.log("设备树：",res.data)
+      // console.log("设备树：",res.data)
       this.setState({treeData: res.data})
     })
   }
@@ -128,7 +128,7 @@ class RealTime extends PureComponent{
         }
       ]}
       onClick={(e) => {
-        console.log(el)
+        // console.log(el)
         e.domEvent.stopPropagation();
         this.menuClick(e, el)
       }}
@@ -161,7 +161,7 @@ class RealTime extends PureComponent{
         }
       ]}
       onClick={(e) => {
-        console.log(el)
+        // console.log(el)
         e.domEvent.stopPropagation();
         this.menuClick(e, el, length)
       }}
@@ -211,7 +211,6 @@ class RealTime extends PureComponent{
 
   //添加设备提交函数
   onAddDeviceFinish = val => {
-    this.setState({ loading: true })
     const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
     //数据二次处理
     const equObj = { params: {} }
@@ -228,7 +227,6 @@ class RealTime extends PureComponent{
     }
     if (val.id === "00000000-0000-0000-0000-000000000000") {
       AddDevice(equObj).then(res => {
-        this.setState({ loading: false })
         if (res.code === 0) {
           this.handleCancel();
           this.getTreeStructure();
@@ -239,7 +237,6 @@ class RealTime extends PureComponent{
       })
     } else {
       ModifyDevice(equObj).then(res => {
-        this.setState({ loading: false })
         if (res.code === 0) {
           this.handleCancel();
           this.getTreeStructure();
@@ -267,9 +264,12 @@ class RealTime extends PureComponent{
     if (val.groupId === "00000000-0000-0000-0000-000000000000") {
       AddGroup(val).then(res => {
         if (res.code === 0) {
-          this.getTreeStructure();
-          message.info("新增成功")
-          this.handleCancel();
+          this.setState({
+            visible: false
+          }, () => {
+            this.getTreeStructure();
+            message.info("新增成功")
+          })
         } else {
           message.error("新增失败。" + res.msg)
         }
@@ -277,9 +277,12 @@ class RealTime extends PureComponent{
     } else {
       ModifyGroup(val).then(res => {
         if (res.code === 0) {
-          this.getTreeStructure();
-          message.info("编辑成功")
-          this.handleCancel();
+          this.setState({
+            visible: false
+          }, () => {
+            this.getTreeStructure();
+            message.info("编辑成功")
+          })
         } else {
           message.error("编辑失败。" + res.msg)
         }
@@ -290,8 +293,8 @@ class RealTime extends PureComponent{
   delDevice = (id) => {
     DeleteDevice(id).then(res=>{
       if(res.code === 0){
-        message.info("删除成功") 
         this.getTreeStructure();
+        message.info("删除成功") 
       }else{
         message.error(res.msg)
       }
@@ -392,7 +395,9 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
-    console.log(this.state.modifyTagsList)
+    console.log(info.node.key)
+    this.setState({selectedKeys: [info.node.key]})
+    // console.log(this.state.modifyTagsList)
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
@@ -509,10 +514,16 @@ class RealTime extends PureComponent{
     GetNextPageTags(this.state.activeNode).then(res => {
       this.setState((state) => {
         state.dataSource.splice(state.total, 0, ...res.data)
+        state.dataSource.forEach((item, index) => {
+          item.no = index+1
+        })
         return {
-          dataSource: [...state.dataSource],
-          total: state.total + res.data,
+          gist: JSON.parse(JSON.stringify([...state.gist, ...res.data])),
+          dataSource: JSON.parse(JSON.stringify(state.dataSource)),
+          total: state.total + res.data.length,
         }
+      }, () => {
+        // console.log(this.state.gist)
       })
     })
   }
@@ -545,13 +556,13 @@ class RealTime extends PureComponent{
 
   //保存变量列表
   saveList = () => {
-    console.log(this.state.modifyTagsList)
+    // console.log(this.state.modifyTagsList)
     if(this.state.modifyTagsList.length === 0){
       message.warning("当前没有更改的内容")
       return;
     }
     if (!this.state.canSubmit.canSubmit) {
-      console.log(this.state.canSubmit.message)
+      // console.log(this.state.canSubmit.message)
       message.error(this.state.canSubmit.message)
       return;
     }
@@ -581,7 +592,7 @@ class RealTime extends PureComponent{
                 message.info(val.data.message)
               }
               $("div").removeClass("effective-editor")
-              console.log(val)
+              // console.log(val)
         
               this.setState({modifyTagsList: []},()=>{
                 this.setState({loading: false})
@@ -600,7 +611,7 @@ class RealTime extends PureComponent{
                   type: this.state.activeNodeType
                 })
               }
-              console.log(this.state.modifyTagsList)
+              // console.log(this.state.modifyTagsList)
             }
           })
         }, 1000)
@@ -659,6 +670,7 @@ class RealTime extends PureComponent{
   delTags = () => {
     let phyDel = [], //物理删除
       dataDel = []; //数据库删除
+    // console.log(this.state.selectedRowKeys)
     this.state.selectedRowKeys.forEach((item, i) => {
       if (item.length !== 36) {
         phyDel.push(item)
@@ -666,7 +678,39 @@ class RealTime extends PureComponent{
         dataDel.push(item)
       }
     })
-    if (dataDel.length === 0) {
+    if (dataDel.length === 0 ) {
+      if (phyDel.length > 0) {
+        this.setState(state => {
+          let targetObj = [...state.dataSource]
+          let gist = [...state.gist]
+          let modify = [...state.modifyTagsList]
+          phyDel.forEach((id)=>{
+            for (let i = 0; i < targetObj.length;i++){ 
+              if (targetObj[i].key === id) {
+                targetObj.splice(i, 1);
+                break;
+              }
+            }
+            //移除modifyTagsList中删除的变量
+            for (let i = 0; i < modify.length; i++){
+              if (modify[i].key === id) {
+                modify.splice(i, 1);
+                break;
+              }
+            }
+          })
+          
+          targetObj.forEach((item,index) => {
+            item.no = index+1
+          })
+          return {
+            dataSource: [...targetObj],
+            gist: [...gist],
+            modifyTagsList: modify,
+            count: state.count - phyDel.length
+          }
+        })
+      }
       return ;
     }
     DeleteTags({
@@ -677,11 +721,13 @@ class RealTime extends PureComponent{
         message.info("删除成功")
         this.setState((state) => {
           let targetObj = [...state.dataSource]
+          let gist = [...state.gist]
           let modify = [...state.modifyTagsList]
           res.data.forEach((id) => {
             for (let i = 0; i < targetObj.length;i++){ 
               if (targetObj[i].key === id) {
                 targetObj.splice(i, 1);
+                gist.splice(i, 1);
                 break;
               }
             }
@@ -708,10 +754,14 @@ class RealTime extends PureComponent{
               }
             }
           })
+          targetObj.forEach((item,index) => {
+            item.no = index+1
+          })
           return {
-            dataSource: targetObj,
+            dataSource: [...targetObj],
+            gist: [...gist],
             modifyTagsList: modify,
-            count: state.count - res.data.length
+            count: state.count - res.data.length - phyDel.length
           }
         })
       } else {
@@ -727,10 +777,7 @@ class RealTime extends PureComponent{
         title: '序号',
         dataIndex: 'no',
         width: 50,
-        editable: false,
-        render: (key, i) => {
-          return <span className="serialNum">{this.state.dataSource.indexOf(i) +1}</span>
-        }
+        editable: false
       },{
         title: '变量名',
         dataIndex: 'name',
@@ -818,14 +865,16 @@ class RealTime extends PureComponent{
                 if (mes.data.message === "导入成功") {
                   $(".effective-editor").removeClass("effective-editor")
                 }
+                // console.log(mes.data.message === "导入成功")
+                // console.log(result.tags)
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
-                  gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify(result.tags)) : state.gist,
+                  gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
                   dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
                   treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
                   dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
-                  modifyTagsList: mes.data.message === "导入成功" ? [] : state.modifyTagsList //导入成功，清空编辑项
+                  modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项
                 }
               })
               PubSub.publish("changeTags", true)
@@ -941,7 +990,7 @@ class RealTime extends PureComponent{
 
       if(isEdit){
         if (state.modifyTagsList.length === 0) {
-          console.log(state.dataSource[row.no -1])
+          // console.log(state.dataSource[row.no -1])
           state.modifyTagsList.push(state.dataSource[row.no -1])
         }else {
           state.modifyTagsList.forEach(mod => {
@@ -1074,6 +1123,7 @@ class RealTime extends PureComponent{
                     interVariable={this.interVariable}
                     optionDeviceMenu={this.optionDeviceMenu}
                     optionGroupMenu={this.optionGroupMenu}
+                    selectedKeys={this.state.selectedKeys}
                     onSelect={this.onSelect}
                     draggable
                     blockNode
@@ -1113,6 +1163,7 @@ class RealTime extends PureComponent{
                 tableDataTypes={this.state.tableDataTypes}
                 loadMore={this.loadMore}
                 count={this.state.count}
+                total={this.state.total}
                 rowKey={record => {
                   return record.id
                 }}

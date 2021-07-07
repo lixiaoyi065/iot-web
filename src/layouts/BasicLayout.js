@@ -6,6 +6,7 @@ import Load from 'utils/lazy'
 import './index.less'
 
 const { Content } = Layout;
+
 let Variable = Load(() => import('pages/Variable/index')),
 RealTime = Load(() => import('pages/RealTime')),
 Operations = Load(() => import('pages/Operations')),
