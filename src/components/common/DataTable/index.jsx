@@ -4,7 +4,7 @@ import { Resizable } from 'react-resizable';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
-import { isFit } from 'utils'
+import { isFit, deepClone } from 'utils'
 import { addressVerify, descVerify, nameVerify } from './verify'
 
 const EditableContext = React.createContext(null);
@@ -67,14 +67,21 @@ const EditableCell = ({
   }, [editing]);
 
   const checkIsSame = (val) => {
-    let gistIndex = dataSource && dataSource.indexOf(record);
-    let isSame = true
-
-    // console.log(dataSource, gist)
+    let isSame = false
     if (dataIndex && record.editable) {
-      isSame = gistIndex >= gist.length ? false : (
-        val === gist[gistIndex][dataIndex]
-      )
+      for (let i = 0; i < gist.length; i++) {
+        if (gist[i].key === record.key) {
+          if (gist[i][dataIndex] === val) {
+            isSame = false
+            return
+          } else {
+            isSame = true
+            return
+          }
+        } else {
+          isSame = true
+        }
+      }
     }
     return isSame
   }
@@ -164,10 +171,10 @@ const EditableCell = ({
         </div>
     )
   }
-    
+
   return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)}
     className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}
-      ${!checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
+      ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
 };
 
@@ -185,8 +192,8 @@ class EditableTable extends React.Component {
   }
 
   componentDidMount() {
-    PubSub.subscribe("modifyTags", (res) => {
-      modifyTags = res
+    PubSub.subscribe("modifyTags", (res, data) => {
+      modifyTags = data
     })
     this.setState({ gist: this.props.gist })
     setTimeout(() => {
@@ -228,6 +235,7 @@ class EditableTable extends React.Component {
      */
     let index = -1;
     //判断是否已经存在
+    console.log(modifyTags)
     let isHas = modifyTags.some((item, i) => {
       if (item.key === row.key) {
         index = i;

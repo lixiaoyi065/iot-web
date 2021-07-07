@@ -557,6 +557,7 @@ class RealTime extends PureComponent{
   //保存变量列表
   saveList = () => {
     // console.log(this.state.modifyTagsList)
+    console.log(this.state.modifyTagsList)
     if(this.state.modifyTagsList.length === 0){
       message.warning("当前没有更改的内容")
       return;
@@ -566,7 +567,7 @@ class RealTime extends PureComponent{
       message.error(this.state.canSubmit.message)
       return;
     }
-
+    console.log("---------------")
     let modifyList = []
     deepClone(this.state.modifyTagsList).map(item => {
       item.key = item.id
@@ -616,6 +617,7 @@ class RealTime extends PureComponent{
           })
         }, 1000)
       }else{
+        console.log(this.state.modifyTagsList)
         message.error(res.msg)
         this.setState({loading: false})
       }

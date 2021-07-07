@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Dropdown, message } from 'antd'
+import { Dropdown, message, Modal } from 'antd'
 import { withRouter } from "react-router-dom";
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
 
@@ -10,7 +10,7 @@ import PubSub from 'pubsub-js'
 import './index.less'
 
 import { GetRemote } from 'api/operations'
-import { GetIOTStatus, StartIOT, StopIOT, RestartIoT} from "api/baseIndex"
+import { GetIOTStatus, StartIOT, StopIOT, RestartIoT } from "api/baseIndex"
 
 let timer = null;
 class PageHeader extends PureComponent {
@@ -32,8 +32,8 @@ class PageHeader extends PureComponent {
       }
     })
 
-    PubSub.subscribe("projectName", (res,data) => {
-      this.setState({currentEqu: data})
+    PubSub.subscribe("projectName", (res, data) => {
+      this.setState({ currentEqu: data })
     })
 
     timer = setInterval(() => {
@@ -68,7 +68,14 @@ class PageHeader extends PureComponent {
   }
 
   logout = () => {
-    this.props.history.push('/')
+    Modal.confirm({
+      title: "是否确认退出",
+      cancelText: "取消",
+      okText: "确认",
+      onOk: () => {
+        this.props.history.push('/')
+      }
+    })
   }
 
   menu = () => {
@@ -144,7 +151,7 @@ class PageHeader extends PureComponent {
           })}
           <div className="divider"></div>
           <label className="equ-tags">
-            <span className={`iot-status ${this.state.status === 1 ? 'iot-status-normal' : ( this.state.status === 2 ? 'iot-status-danger' : 'iot-status-disable')}`}></span>
+            <span className={`iot-status ${this.state.status === 1 ? 'iot-status-normal' : (this.state.status === 2 ? 'iot-status-danger' : 'iot-status-disable')}`}></span>
             <span className="equ-name">{this.state.currentEqu}</span>
             {<Dropdown overlay={this.menu} trigger={['click']} placement="bottomCenter" arrow>
               <div className="equ-option"></div>
@@ -154,7 +161,7 @@ class PageHeader extends PureComponent {
         {<div className="userComp">
           <span className="userName">{this.state.userName}</span>
           <span className="divider"></span>
-          <div className="logout" onClick={ this.logout }></div>
+          <div className="logout" onClick={this.logout}></div>
         </div>}
       </div>
     )
