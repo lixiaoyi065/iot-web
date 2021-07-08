@@ -293,10 +293,10 @@ export default class config extends PureComponent {
         }
 
       } else if (popupData.dataType === '文本变量8位字符集' || popupData.dataType === '文本变量16位字符集') {
-        let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
+        let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
+        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+        let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
+        let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
 
         if (bitReg.test(address)) {
           let arr =  address.match(bitReg) 
@@ -1826,14 +1826,14 @@ export default class config extends PureComponent {
         }
       } else if (arrayEqual(addressData.showList, [1,4,6])) {
         if (addressData.dataArea === '位') {
-          popupData.dataValue = `MB${addressData.addressOffset}`
+          popupData.dataValue = `MW${addressData.addressOffset}`
         } else if (addressData.dataArea === '输入') {
-          popupData.dataValue = `IB${addressData.addressOffset}`
+          popupData.dataValue = `IW${addressData.addressOffset}`
         } else if (addressData.dataArea === '输出') {
-          popupData.dataValue = `QB${addressData.addressOffset}`
+          popupData.dataValue = `QW${addressData.addressOffset}`
         }
       } else if (arrayEqual(addressData.showList, [1,3,4,6])) {
-        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBB${addressData.addressOffset}`
+        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBW${addressData.addressOffset}`
       } else if (arrayEqual(addressData.showList, [1,4,6,7])) {
         if (addressData.dataArea === '位') {
           if (addressData.addressType === '字节') {
@@ -1884,7 +1884,7 @@ export default class config extends PureComponent {
           popupData.dataValue = `4${addressData.address.toString().padStart(5, '0')}.${addressData.bit}`
         }
       }
-    }else if (popupData.protocolName === 'MC3E_Binary_Ethernet') {
+    } else if (popupData.protocolName === 'MC3E_Binary_Ethernet') {
       // 1. 数据区域    2.  地址    3.  位    4. 长度
       if (arrayEqual(addressData.showList, [1,2]) || arrayEqual(addressData.showList, [1,2,4])) {
         if (addressData.dataArea === '输入寄存器（X）') {
