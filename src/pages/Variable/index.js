@@ -911,6 +911,7 @@ class RealTime extends PureComponent{
           modalContent : (
             <AddressConfig data={data} row={row} node={this.state.node}
               key={new Date()}
+              addressValue={value}
               onCancel={this.handleCancel}
               onFinish={this.addressFinish}/>
           ),

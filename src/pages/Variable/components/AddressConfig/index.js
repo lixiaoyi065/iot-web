@@ -38,7 +38,6 @@ export default class config extends PureComponent {
     this.setState({ formData: JSON.parse(JSON.stringify(this.state.addressData)) }, () => {
         //根据变量地址的值以及数据类型，将数据进行初始化处理
       this.init();
-
       this.openPop()
 
     })
@@ -46,12 +45,13 @@ export default class config extends PureComponent {
 
   //输入框回显
   init = () => {
-    let { row } = this.props
-    let { formData, popupData } = this.state,
-      address = row.address
-    console.log(this.props.row, address)
+    let { row, addressValue } = this.props
 
-    let initValue = {}
+    let { formData, popupData } = this.state,
+    address = addressValue
+    console.log(this.props.row, addressValue)
+
+    // let initValue = {}
 
     // initValue.dataValue = address
     popupData.dataValue = address
@@ -1421,7 +1421,7 @@ export default class config extends PureComponent {
       }
     }
 
-    console.log(formData)
+
     this.setState(state=> {
       return {
         formData,
