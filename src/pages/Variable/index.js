@@ -889,7 +889,7 @@ class RealTime extends PureComponent{
     })
   }
 
-  addressSearch = (value, event, row) => {
+  addressSearch = (value, event, row, codeLen) => {
     GetAddressEditInfo({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType
@@ -912,6 +912,7 @@ class RealTime extends PureComponent{
             <AddressConfig data={data} row={row} node={this.state.node}
               key={new Date()}
               addressValue={value}
+              codeLen={codeLen}
               onCancel={this.handleCancel}
               onFinish={this.addressFinish}/>
           ),

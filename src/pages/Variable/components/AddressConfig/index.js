@@ -45,8 +45,7 @@ export default class config extends PureComponent {
 
   //输入框回显
   init = () => {
-    let { row, addressValue } = this.props
-
+    let { row, addressValue, codeLen } = this.props
     let { formData, popupData } = this.state,
     address = addressValue
     console.log(this.props.row, addressValue)
@@ -55,6 +54,7 @@ export default class config extends PureComponent {
 
     // initValue.dataValue = address
     popupData.dataValue = address
+    popupData.dataLen = codeLen
     /* 
       正则：
       ^   以后面的字符开始

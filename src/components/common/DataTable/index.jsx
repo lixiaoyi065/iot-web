@@ -146,7 +146,7 @@ const EditableCell = ({
       ) : (type === "input-group" ? (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
           <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···"
-            onSearch={(value, event) => { addressSearch(value, event, record) }} />
+            onSearch={(value, event) => { addressSearch(value, event, record, record['stringLength']) }} />
         </Form.Item>
       ) : (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
@@ -162,7 +162,7 @@ const EditableCell = ({
           >
             {childNode}
           </div>
-          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record) }}>···</Button>
+          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record, record['stringLength']) }}>···</Button>
         </div> : <div id={record.key}
           className="editable-cell-value-wrap"
           onClick={toggleEdits}
