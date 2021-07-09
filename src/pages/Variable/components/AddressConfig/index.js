@@ -13,6 +13,8 @@ export default class config extends PureComponent {
       dataType: this.props.row.dataType,
       dataValue: '',  // 变量地址
       dataLen: '',  // 字符长度
+      supplier: '', // S7-TCP 设备厂家
+      model: '',  // S7_TCP 设备型号
     },
     // 定义一个提交的数据结构， 用来填写默认值与回显
     addressData: {
@@ -45,16 +47,17 @@ export default class config extends PureComponent {
 
   //输入框回显
   init = () => {
-    let { row, addressValue, codeLen } = this.props
+    let { row, addressValue, codeLen, data } = this.props
     let { formData, popupData } = this.state,
     address = addressValue
     console.log(this.props.row, addressValue)
-
     // let initValue = {}
 
     // initValue.dataValue = address
     popupData.dataValue = address
     popupData.dataLen = codeLen
+    popupData.supplier = data.supplier
+    popupData.model = data.model
     /* 
       正则：
       ^   以后面的字符开始
@@ -92,290 +95,511 @@ export default class config extends PureComponent {
     // }
     if (popupData.protocolName === 'S7_TCP') {
       // 1: 数据区域  2. 寄存器字母块（M/DBX/I/Q/MB/DBB/IB/QB/MW/DBW/IW/QW/MD/DBD/ID/QD） 3.  DB号  4. 地址偏移量   5. 位   6. 长度   7.  地址类型 
-      if (row.dataType === '二进制变量') {  
-        let bitReg = /^[M]([0-9]{1,})([.]{1})([0-7]{1})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBX){1})([0-9]{1,})([.]{1})([0-7]{1,})$/ // DB号匹配正则
-        let IReg = /^[I]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输入匹配正则
-        let QReg = /^[Q]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输出匹配正则
-        if (bitReg.test(address)) {
-          console.log("-------------1")
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.letters = 'M'
-          formData.lettlesValue = arr[1]
-          formData.bit = arr[3]
-          formData.showList = [1, 2, 5]
-          console.log(formData)
-        } else if (dbReg.test(address)) {
-          console.log("-------------2")
-          let arr =  address.match(dbReg) 
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.letters = 'DBX'
-          formData.lettlesValue = arr[6]
-          formData.bit = arr[8]
-          formData.showList = [1,2,3,5]
-          console.log(formData)
-        } else if (IReg.test(address)) {
-          console.log("-------------3")
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.letters = 'I'
-          formData.lettlesValue = arr[1]
-          formData.bit = arr[3]
-          formData.showList = [1,2,5]
-        } else if (QReg.test(address)) {
-          console.log("-------------4")
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.letters = 'Q'
-          formData.lettlesValue = arr[1]
-          formData.bit = arr[3]
-          formData.showList = [1,2,5]
-        } else {
-          formData.dataArea = '位'
+      if (popupData.model === 'S7-200Smart') {  //S7_TCP S7-200Smart型号
+        if (popupData.dataType === '二进制变量') {
+          let bitReg = /^[M]([0-9]{1,})([.]{1})([0-7]{1})$/     // 位匹配正则
+          // let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBX){1})([0-9]{1,})([.]{1})([0-7]{1,})$/ // DB号匹配正则
+          let VReg = /^[V]([0-9]{1,})([.]{1})([0-7]{1})$/
+          let IReg = /^[I]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输入匹配正则
+          let QReg = /^[Q]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输出匹配正则
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = 'M'
+            formData.letters = 'M'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1, 2, 5]
+          } else if (VReg.test(address)) {
+            let arr =  address.match(VReg) 
+            formData.dataArea = 'V'
+            formData.letters = 'V'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1, 2, 5]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = 'I'
+            formData.letters = 'I'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1,2,5]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = 'Q'
+            formData.letters = 'Q'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1,2,5]
+          } else {
+            formData.dataArea = 'M'
+          }
+        } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
+          let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
+          // let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
+          let VReg = /^(VB)([0-9]{1,})$/
+          let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = 'M'
+            formData.letters = 'MB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (VReg.test(address)) {
+            let arr =  address.match(VReg) 
+            formData.dataArea = 'V'
+            formData.letters = 'VB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = 'I'
+            formData.letters = 'IB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = 'Q'
+            formData.letters = 'QB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          }
+        } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
+          let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
+          // let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let VReg = /^(VW)([0-9]{1,})$/ 
+          let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = 'M'
+            formData.letters = 'MW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (VReg.test(address)) {
+            let arr =  address.match(VReg) 
+            formData.dataArea = 'V'
+            formData.letters = 'VW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.letters = 'IW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.letters = 'QW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          }
+        } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754') {
+          let bitReg = /^(MD)([0-9]{1,})$/     // 位匹配正则
+          // let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBD){1})([0-9]{1,})$/ // DB号匹配正则
+          let VReg = /^(VD)([0-9]{1,})$/
+          let IReg = /^(ID)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QD)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = 'M'
+            formData.letters = 'MD'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (VReg.test(address)) {
+            let arr =  address.match(VReg) 
+            formData.dataArea = 'V'
+            formData.letters = 'VB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = 'I'
+            formData.letters = 'ID'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = 'Q'
+            formData.letters = 'QD'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          }
+        } else if (popupData.dataType === '文本变量8位字符集') {
+          let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
+          // let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let VReg = /^(VB)([0-9]{1,})$/ 
+          let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = 'M'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (VReg.test(address)) {
+            let arr =  address.match(VReg) 
+            formData.dataArea = 'V'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = 'I'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = 'Q'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          }
+        } else if (popupData.dataType === '字符串') {
+          let bitReg = /^(MB|MW)([0-9]{1,})$/     // 位匹配正则
+          // let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let VReg = /^(VB|VW)([0-9]{1,})$/ 
+          let IReg = /^(IB|IW)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB|QW)([0-9]{1,})$/ // 输出匹配正则
+          
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = 'M'
+            formData.len = popupData.dataLen
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'MB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'MW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          } else if (VReg.test(address)) {
+            let arr =  address.match(VReg) 
+            formData.dataArea = 'V'
+            formData.len = popupData.dataLen
+            formData.addressOffset = arr[2]
+            if (arr[4] === 'VB') {
+              formData.addressType = '字节'
+            } else if (arr[4] === 'VW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = 'I'
+            formData.len = popupData.dataLen
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'IB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'IW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = 'Q'
+            formData.len = popupData.dataLen
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'QB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'QW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          }
         }
-      } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
-        let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
+      } else {
+        if (row.dataType === '二进制变量') {  
+          let bitReg = /^[M]([0-9]{1,})([.]{1})([0-7]{1})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBX){1})([0-9]{1,})([.]{1})([0-7]{1,})$/ // DB号匹配正则
+          let IReg = /^[I]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输入匹配正则
+          let QReg = /^[Q]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输出匹配正则
+          if (bitReg.test(address)) {
+            console.log("-------------1")
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.letters = 'M'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1, 2, 5]
+            console.log(formData)
+          } else if (dbReg.test(address)) {
+            console.log("-------------2")
+            let arr =  address.match(dbReg) 
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.letters = 'DBX'
+            formData.lettlesValue = arr[6]
+            formData.bit = arr[8]
+            formData.showList = [1,2,3,5]
+            console.log(formData)
+          } else if (IReg.test(address)) {
+            console.log("-------------3")
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.letters = 'I'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1,2,5]
+          } else if (QReg.test(address)) {
+            console.log("-------------4")
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.letters = 'Q'
+            formData.lettlesValue = arr[1]
+            formData.bit = arr[3]
+            formData.showList = [1,2,5]
+          } else {
+            formData.dataArea = '位'
+          }
+        } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
+          let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
 
-        if (bitReg.test(address)) {
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.letters = 'MB'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        } else if (dbReg.test(address)) {
-          let arr =  address.match(dbReg) 
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.letters = 'DBB'
-          formData.lettlesValue = arr[6]
-          formData.showList = [1,2,3]
-        } else if (IReg.test(address)) {
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.letters = 'IB'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        } else if (QReg.test(address)) {
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.letters = 'QB'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.letters = 'MB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.letters = 'DBB'
+            formData.lettlesValue = arr[6]
+            formData.showList = [1,2,3]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.letters = 'IB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.letters = 'QB'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          }
+
+        } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
+          let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.letters = 'MW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.letters = 'DBW'
+            formData.lettlesValue = arr[6]
+            formData.showList = [1,2,3]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.letters = 'IW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.letters = 'QW'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          }
+
+        } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754' || popupData.dataType === '定时器') {
+          let bitReg = /^(MD)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBD){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(ID)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QD)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.letters = 'MD'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.letters = 'DBD'
+            formData.lettlesValue = arr[6]
+            formData.showList = [1,2,3]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.letters = 'ID'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.letters = 'QD'
+            formData.lettlesValue = arr[2]
+            formData.showList = [1,2]
+          }
+
+        } else if (popupData.dataType === '有符号64位整型' || popupData.dataType === '无符号64位整型' || popupData.dataType === 'F64位浮点数IEEE754' || popupData.dataType === '日期'|| popupData.dataType === '时间'|| popupData.dataType === '日期时间') {
+          let bitReg = /^(MB|MD|MW)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW|DBD){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(IB|IW|ID)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB|QW|QD)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'MB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'MW') {
+              formData.addressType = '字'
+            } else if (arr[1] === 'MD') {
+              formData.addressType = '双字'
+            }
+            formData.showList = [1,4,7]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            console.log(arr)
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.addressOffset = arr[6]
+            if (arr[4] === 'DBB') {
+              formData.addressType = '字节'
+            } else if (arr[4] === 'DBW') {
+              formData.addressType = '字'
+            } else if (arr[4] === 'DBD') {
+              formData.addressType = '双字'
+            }
+            formData.showList = [1,3,4,7]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'IB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'IW') {
+              formData.addressType = '字'
+            } else if (arr[1] === 'ID') {
+              formData.addressType = '双字'
+            }
+            formData.showList = [1,4,7]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'QB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'QW') {
+              formData.addressType = '字'
+            } else if (arr[1] === 'QD') {
+              formData.addressType = '双字'
+            }
+            formData.showList = [1,4,7]
+          }
+
+        } else if (popupData.dataType === '文本变量8位字符集' || popupData.dataType === '文本变量16位字符集') {
+          let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            console.log(arr)
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.addressOffset = arr[6]
+            formData.len = popupData.dataLen
+            formData.showList = [1,3,4,6]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          }
+
+        } else if (popupData.dataType === '字符串' || popupData.dataType === '宽字符串') {
+          let bitReg = /^(MB|MW)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(IB|IW)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB|QW)([0-9]{1,})$/ // 输出匹配正则
+          
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'MB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'MW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            console.log(arr)
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.addressOffset = arr[6]
+            if (arr[4] === 'DBB') {
+              formData.addressType = '字节'
+            } else if (arr[4] === 'DBW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,3,4,6,7]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'IB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'IW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.addressOffset = arr[2]
+            if (arr[1] === 'QB') {
+              formData.addressType = '字节'
+            } else if (arr[1] === 'QW') {
+              formData.addressType = '字'
+            }
+            formData.showList = [1,4,6,7]
+          }
+          
         }
-
-      } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
-        let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
-
-        if (bitReg.test(address)) {
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.letters = 'MW'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        } else if (dbReg.test(address)) {
-          let arr =  address.match(dbReg) 
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.letters = 'DBW'
-          formData.lettlesValue = arr[6]
-          formData.showList = [1,2,3]
-        } else if (IReg.test(address)) {
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.letters = 'IW'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        } else if (QReg.test(address)) {
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.letters = 'QW'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        }
-
-      } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754' || popupData.dataType === '定时器') {
-        let bitReg = /^(MD)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBD){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(ID)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QD)([0-9]{1,})$/ // 输出匹配正则
-
-        if (bitReg.test(address)) {
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.letters = 'MD'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        } else if (dbReg.test(address)) {
-          let arr =  address.match(dbReg) 
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.letters = 'DBD'
-          formData.lettlesValue = arr[6]
-          formData.showList = [1,2,3]
-        } else if (IReg.test(address)) {
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.letters = 'ID'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        } else if (QReg.test(address)) {
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.letters = 'QD'
-          formData.lettlesValue = arr[2]
-          formData.showList = [1,2]
-        }
-
-      } else if (popupData.dataType === '有符号64位整型' || popupData.dataType === '无符号64位整型' || popupData.dataType === 'F64位浮点数IEEE754' || popupData.dataType === '日期'|| popupData.dataType === '时间'|| popupData.dataType === '日期时间') {
-        let bitReg = /^(MB|MD|MW)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW|DBD){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(IB|IW|ID)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QB|QW|QD)([0-9]{1,})$/ // 输出匹配正则
-
-        if (bitReg.test(address)) {
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.addressOffset = arr[2]
-          if (arr[1] === 'MB') {
-            formData.addressType = '字节'
-          } else if (arr[1] === 'MW') {
-            formData.addressType = '字'
-          } else if (arr[1] === 'MD') {
-            formData.addressType = '双字'
-          }
-          formData.showList = [1,4,7]
-        } else if (dbReg.test(address)) {
-          let arr =  address.match(dbReg) 
-          console.log(arr)
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.addressOffset = arr[6]
-          if (arr[4] === 'DBB') {
-            formData.addressType = '字节'
-          } else if (arr[4] === 'DBW') {
-            formData.addressType = '字'
-          } else if (arr[4] === 'DBD') {
-            formData.addressType = '双字'
-          }
-          formData.showList = [1,3,4,7]
-        } else if (IReg.test(address)) {
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.addressOffset = arr[2]
-          if (arr[1] === 'IB') {
-            formData.addressType = '字节'
-          } else if (arr[1] === 'IW') {
-            formData.addressType = '字'
-          } else if (arr[1] === 'ID') {
-            formData.addressType = '双字'
-          }
-          formData.showList = [1,4,7]
-        } else if (QReg.test(address)) {
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.addressOffset = arr[2]
-          if (arr[1] === 'QB') {
-            formData.addressType = '字节'
-          } else if (arr[1] === 'QW') {
-            formData.addressType = '字'
-          } else if (arr[1] === 'QD') {
-            formData.addressType = '双字'
-          }
-          formData.showList = [1,4,7]
-        }
-
-      } else if (popupData.dataType === '文本变量8位字符集' || popupData.dataType === '文本变量16位字符集') {
-        let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
-
-        if (bitReg.test(address)) {
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.addressOffset = arr[2]
-          formData.len = popupData.dataLen
-          formData.showList = [1,4,6]
-        } else if (dbReg.test(address)) {
-          let arr =  address.match(dbReg) 
-          console.log(arr)
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.addressOffset = arr[6]
-          formData.len = popupData.dataLen
-          formData.showList = [1,3,4,6]
-        } else if (IReg.test(address)) {
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.addressOffset = arr[2]
-          formData.len = popupData.dataLen
-          formData.showList = [1,4,6]
-        } else if (QReg.test(address)) {
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.addressOffset = arr[2]
-          formData.len = popupData.dataLen
-          formData.showList = [1,4,6]
-        }
-
-      } else if (popupData.dataType === '字符串' || popupData.dataType === '宽字符串') {
-        let bitReg = /^(MB|MW)([0-9]{1,})$/     // 位匹配正则
-        let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW){1})([0-9]{1,})$/ // DB号匹配正则
-        let IReg = /^(IB|IW)([0-9]{1,})$/ // 输入匹配正则
-        let QReg = /^(QB|QW)([0-9]{1,})$/ // 输出匹配正则
-        
-        if (bitReg.test(address)) {
-          let arr =  address.match(bitReg) 
-          formData.dataArea = '位'
-          formData.addressOffset = arr[2]
-          if (arr[1] === 'MB') {
-            formData.addressType = '字节'
-          } else if (arr[1] === 'MW') {
-            formData.addressType = '字'
-          }
-          formData.showList = [1,4,6,7]
-        } else if (dbReg.test(address)) {
-          let arr =  address.match(dbReg) 
-          console.log(arr)
-          formData.dataArea = 'DB'
-          formData.DBNum = arr[2]
-          formData.addressOffset = arr[6]
-          if (arr[4] === 'DBB') {
-            formData.addressType = '字节'
-          } else if (arr[4] === 'DBW') {
-            formData.addressType = '字'
-          }
-          formData.showList = [1,3,4,6,7]
-        } else if (IReg.test(address)) {
-          let arr =  address.match(IReg) 
-          formData.dataArea = '输入'
-          formData.addressOffset = arr[2]
-          if (arr[1] === 'IB') {
-            formData.addressType = '字节'
-          } else if (arr[1] === 'IW') {
-            formData.addressType = '字'
-          }
-          formData.showList = [1,4,6,7]
-        } else if (QReg.test(address)) {
-          let arr =  address.match(QReg) 
-          formData.dataArea = '输出'
-          formData.addressOffset = arr[2]
-          if (arr[1] === 'QB') {
-            formData.addressType = '字节'
-          } else if (arr[1] === 'QW') {
-            formData.addressType = '字'
-          }
-          formData.showList = [1,4,6,7]
-        }
-        
       }
     } else if (popupData.protocolName === 'Modbus_TCP') {
       let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754']
@@ -1436,25 +1660,46 @@ export default class config extends PureComponent {
     if (popupData.protocolName === 'S7_TCP') {    //  渲染 S7_TCP弹窗
       // 1: 数据区域  2. 寄存器字母块（M/DBX/I/Q/MB/DBB/IB/QB/MW/DBW/IW/QW/MD/DBD/ID/QD） 3.  DB号  4. 地址偏移量   5. 位   6. 长度   7.  地址类型 
       // 数据区域 需要赋予默认值或回显
-      let dataArea = formData.dataArea ? formData.dataArea : '位'
-      formData.dataArea = dataArea
-      if (popupData.dataType === '二进制变量') {
-        formData.showList = formData.showList.length === 0 ?  [1,2,5] : formData.showList
-      } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
-        formData.letters = dataArea === '位' ?  formData.letters = 'MB' : formData.letters
-        formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
-      } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
-        formData.letters = dataArea === '位' ?  formData.letters = 'MW' : formData.letters
-        formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
-      } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754' || popupData.dataType === '定时器') {
-        formData.letters = dataArea === '位' ?  formData.letters = 'MD' : formData.letters
-        formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
-      } else if (popupData.dataType === '有符号64位整型' || popupData.dataType === '无符号64位整型' || popupData.dataType === 'F64位浮点数IEEE754' || popupData.dataType === '日期'|| popupData.dataType === '时间'|| popupData.dataType === '日期时间') {
-        formData.showList = formData.showList.length === 0 ?  [1,4,7] : formData.showList
-      } else if (popupData.dataType === '文本变量8位字符集' || popupData.dataType === '文本变量16位字符集') {
-        formData.showList = formData.showList.length === 0 ?  [1,4,6] : formData.showList
-      } else if (popupData.dataType === '字符串' || popupData.dataType === '宽字符串') {
-        formData.showList = formData.showList.length === 0 ?  [1,4,6,7] : formData.showList
+      if (popupData.model === 'S7-200Smart') { // S7_TCP协议 S7-200Smart型号
+        let dataArea = formData.dataArea ? formData.dataArea : 'M'
+        formData.dataArea = dataArea
+        if (popupData.dataType === '二进制变量') {
+          formData.showList = formData.showList.length === 0 ?  [1,2,5] : formData.showList
+        } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
+          formData.letters = dataArea === 'M' ?  formData.letters = 'MB' : formData.letters
+          formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
+        } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
+          formData.letters = dataArea === 'M' ?  formData.letters = 'MW' : formData.letters
+          formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
+        } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754') {
+          formData.letters = dataArea === 'M' ?  formData.letters = 'MD' : formData.letters
+          formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
+        } else if (popupData.dataType === '文本变量8位字符集') {
+          formData.showList = formData.showList.length === 0 ?  [1,4,6] : formData.showList
+        } else if (popupData.dataType === '字符串') {
+          formData.showList = formData.showList.length === 0 ?  [1,4,6,7] : formData.showList
+        }
+      } else {
+        let dataArea = formData.dataArea ? formData.dataArea : '位'
+        formData.dataArea = dataArea
+        if (popupData.dataType === '二进制变量') {
+          formData.showList = formData.showList.length === 0 ?  [1,2,5] : formData.showList
+        } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
+          formData.letters = dataArea === '位' ?  formData.letters = 'MB' : formData.letters
+          formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
+        } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
+          formData.letters = dataArea === '位' ?  formData.letters = 'MW' : formData.letters
+          formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
+        } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754' || popupData.dataType === '定时器') {
+          formData.letters = dataArea === '位' ?  formData.letters = 'MD' : formData.letters
+          formData.showList = formData.showList.length === 0 ?  [1,2] : formData.showList
+        } else if (popupData.dataType === '有符号64位整型' || popupData.dataType === '无符号64位整型' || popupData.dataType === 'F64位浮点数IEEE754' || popupData.dataType === '日期'|| popupData.dataType === '时间'|| popupData.dataType === '日期时间') {
+          formData.showList = formData.showList.length === 0 ?  [1,4,7] : formData.showList
+        } else if (popupData.dataType === '文本变量8位字符集' || popupData.dataType === '文本变量16位字符集') {
+          formData.showList = formData.showList.length === 0 ?  [1,4,6] : formData.showList
+        } else if (popupData.dataType === '字符串' || popupData.dataType === '宽字符串') {
+          formData.showList = formData.showList.length === 0 ?  [1,4,6,7] : formData.showList
+        }
       }
       console.log(formData.showList, formData, popupData.dataType)
       // this.renderS7_TCPHTML(formData.showList, formData, popupData.dataType)
@@ -1553,11 +1798,101 @@ export default class config extends PureComponent {
   // 选择下拉内容 -- S7_TCP协议
   changeData = (e, prop, type)=>{
     let obj={};
+    let { popupData } = this.state
     obj[prop] = e
-    console.log(e, prop)
+    if (popupData.model === 'S7-200Smart') {
       if (type === '二进制变量') {
         if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
-          
+          if (e === 'M') {
+            obj.letters = 'M'
+            obj.showList = [1,2,5]
+          } else if (e === 'V') {
+            obj.letters = 'V'
+            obj.showList = [1,2,5]
+          } else if (e === 'I') {
+            obj.letters = 'I'
+            obj.showList = [1,2,5]
+          } else if (e === 'Q') {
+            obj.letters = 'Q'
+            obj.showList = [1,2,5]
+          }
+        }
+      } else if (type === '有符号8位整型' || type === '无符号8位整型') {
+        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+          if (e === 'M') {
+            obj.letters = 'MB'
+            obj.showList = [1,2]
+          } else if (e === 'V') {
+            obj.letters = 'VB'
+            obj.showList = [1,2]
+          } else if (e === 'I') {
+            obj.letters = 'IB'
+            obj.showList = [1,2]
+          } else if (e === 'Q') {
+            obj.letters = 'QB'
+            obj.showList = [1,2]
+          }
+        }
+      } else if (type === '有符号16位整型' || type === '无符号16位整型') {
+        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+          if (e === 'M') {
+            obj.letters = 'MW'
+            obj.showList = [1,2]
+          } else if (e === 'V') {
+            obj.letters = 'VW'
+            obj.showList = [1,2]
+          } else if (e === 'I') {
+            obj.letters = 'IW'
+            obj.showList = [1,2]
+          } else if (e === 'Q') {
+            obj.letters = 'QW'
+            obj.showList = [1,2]
+          }
+        }
+      } else if (type === '有符号32位整型' || type === '无符号32位整型' || type === 'F32位浮点数IEEE754') {
+        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+          if (e === 'M') {
+            obj.letters = 'MD'
+            obj.showList = [1,2]
+          } else if (e === 'V') {
+            obj.letters = 'VD'
+            obj.showList = [1,2]
+          } else if (e === 'I') {
+            obj.letters = 'ID'
+            obj.showList = [1,2]
+          } else if (e === 'Q') {
+            obj.letters = 'QD'
+            obj.showList = [1,2]
+          }
+        }
+      } else if (type === '文本变量8位字符集') {
+        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+          if (e === 'M') {
+            obj.showList = [1,4,6]
+          } else if (e === 'V') {
+            obj.showList = [1,4,6]
+          } else if (e === 'I') {
+            obj.showList = [1,4,6]
+          } else if (e === 'Q') {
+            obj.showList = [1,4,6]
+          }
+        }
+      } else if (type === '字符串') {
+        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
+          if (e === 'M') {
+            obj.showList = [1,4,6,7]
+          } else if (e === 'V') {
+            obj.showList = [1,4,6,7]
+          } else if (e === 'I') {
+            obj.showList = [1,4,6,7]
+          } else if (e === 'Q') {
+            obj.showList = [1,4,6,7]
+          }
+        }
+      }
+    } else {
+      if (type === '二进制变量') {
+        if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
           if (e === '位') {
             obj.letters = 'M'
             obj.showList = [1,2,5]
@@ -1589,7 +1924,7 @@ export default class config extends PureComponent {
               obj.showList = [1,2]
             }
           }
-        } else if (type === '有符号16位整型' || type === '无符号16位整型') {
+      } else if (type === '有符号16位整型' || type === '无符号16位整型') {
           if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
             if (e === '位') {
               obj.letters = 'MW'
@@ -1605,7 +1940,7 @@ export default class config extends PureComponent {
               obj.showList = [1,2]
             }
           }
-        } else if (type === '有符号32位整型' || type === '无符号32位整型' || type === 'F32位浮点数IEEE754' || type === '定时器') {
+      } else if (type === '有符号32位整型' || type === '无符号32位整型' || type === 'F32位浮点数IEEE754' || type === '定时器') {
           if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
             if (e === '位') {
               obj.letters = 'MD'
@@ -1621,7 +1956,7 @@ export default class config extends PureComponent {
               obj.showList = [1,2]
             }
           }
-        } else if (type === '有符号64位整型' || type === '无符号64位整型' || type === 'F64位浮点数IEEE754' || type === '日期'|| type === '时间'|| type === '日期时间') {
+      } else if (type === '有符号64位整型' || type === '无符号64位整型' || type === 'F64位浮点数IEEE754' || type === '日期'|| type === '时间'|| type === '日期时间') {
           if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
             if (e === '位') {
               obj.showList = [1,4,7]
@@ -1634,7 +1969,7 @@ export default class config extends PureComponent {
               obj.showList = [1,4,7]
             }
           }
-        } else if (type === '文本变量8位字符集' || type === '文本变量16位字符集') {
+      } else if (type === '文本变量8位字符集' || type === '文本变量16位字符集') {
           if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
             if (e === '位') {
               obj.showList = [1,4,6]
@@ -1646,7 +1981,7 @@ export default class config extends PureComponent {
               obj.showList = [1,4,6]
             }
           }
-        } else if (type === '字符串' || type === '宽字符串') {
+      } else if (type === '字符串' || type === '宽字符串') {
           if (prop === 'dataArea') {  // 数据区域部分需要重新渲染弹窗html元素
             if (e === '位') {
               obj.showList = [1,4,6,7]
@@ -1659,6 +1994,7 @@ export default class config extends PureComponent {
             }
           }
         }
+    }
     this.setState(state => {
       return {
         formData: JSON.parse(JSON.stringify(Object.assign(state.formData, obj)))
@@ -1825,12 +2161,24 @@ export default class config extends PureComponent {
           popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBD${addressData.addressOffset}`
         }
       } else if (arrayEqual(addressData.showList, [1,4,6])) {
-        if (addressData.dataArea === '位') {
-          popupData.dataValue = `MW${addressData.addressOffset}`
-        } else if (addressData.dataArea === '输入') {
-          popupData.dataValue = `IW${addressData.addressOffset}`
-        } else if (addressData.dataArea === '输出') {
-          popupData.dataValue = `QW${addressData.addressOffset}`
+        if (popupData.model === 'S7-200Smart') {
+          if (addressData.dataArea === 'M') {
+            popupData.dataValue = `MB${addressData.addressOffset}`
+          } else if (addressData.dataArea === 'V') {
+            popupData.dataValue = `VB${addressData.addressOffset}`
+          } else if (addressData.dataArea === 'I') {
+            popupData.dataValue = `IB${addressData.addressOffset}`
+          } else if (addressData.dataArea === 'Q') {
+            popupData.dataValue = `QB${addressData.addressOffset}`
+          }
+        } else {
+          if (addressData.dataArea === '位') {
+            popupData.dataValue = `MW${addressData.addressOffset}`
+          } else if (addressData.dataArea === '输入') {
+            popupData.dataValue = `IW${addressData.addressOffset}`
+          } else if (addressData.dataArea === '输出') {
+            popupData.dataValue = `QW${addressData.addressOffset}`
+          }
         }
       } else if (arrayEqual(addressData.showList, [1,3,4,6])) {
         popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBW${addressData.addressOffset}`
@@ -2147,7 +2495,18 @@ export default class config extends PureComponent {
             popupData.protocolName === "S7_TCP" ? (
               <>
               {
-                items.includes(1) ? 
+                items.includes(1) ? popupData.model === "S7-200Smart" ? 
+                <>
+                  <Form.Item label="数据区域" name="dataArea">
+                    <Select onChange={(e)=>{this.changeData(e,'dataArea', type)}} >
+                      <Select.Option value="M">M</Select.Option>
+                      <Select.Option value="V">V</Select.Option>
+                      <Select.Option value="I">I</Select.Option>
+                      <Select.Option value="Q">Q</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </>
+                :
                   <Form.Item label="数据区域" name="dataArea">
                     <Select onChange={(e)=>{this.changeData(e,'dataArea', type)}} >
                       <Select.Option value="位">位</Select.Option>
