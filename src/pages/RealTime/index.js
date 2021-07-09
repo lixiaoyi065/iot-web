@@ -130,7 +130,7 @@ class RealTime extends PureComponent{
             item.time = getNowFormatDate()
           })
 
-          console.log(state.dataSource)
+          // console.log(state.dataSource)
           return {  
             dataSource: JSON.parse(JSON.stringify(state.dataSource))
           }
@@ -159,7 +159,7 @@ class RealTime extends PureComponent{
   getList = (nodesList) => {
     InitTags(nodesList).then(res => {
       if (res.code === 0) {
-        console.log(res.data.tagValues)
+        // console.log(res.data.tagValues)
         this.setState({dataSource: res.data.tagValues, count: res.data.total, dataTypes: res.data.dataTypes}, () => {
           this.getDateTime()
         })
@@ -181,7 +181,7 @@ class RealTime extends PureComponent{
   //查询
   search = (obj) => {
     obj.nodes = this.state.selectNodeList;
-    console.log(obj)
+    // console.log(obj)
     QueryTags(obj).then(res => {
       if (res.code === 0) {
         this.setState({ count: res.data.total, dataSource: res.data.tagValues })
@@ -229,61 +229,61 @@ class RealTime extends PureComponent{
               {
                 title: '变量名',
                 dataIndex: 'name',
-                width: '150px',
+                width: 150,
                 ellipsis: true
               },
               {
                 title: '变量描述',
                 dataIndex: 'desc',
-                width: '200px',
+                width: 200,
                 ellipsis: true
               },
               {
                 title: '数据类型',
                 dataIndex: 'dataType',
-                width: '200px',
+                width: 200,
                 ellipsis: true
               },
               {
                 title: '变量地址',
                 dataIndex: 'address',
-                width: '150px',
+                width: 150,
                 ellipsis: true
               },
               {
                 title: '最大值',
                 dataIndex: 'max',
-                width: '100px',
+                width: 100,
                 ellipsis: true
               },
               {
                 title: '最小值',
                 dataIndex: 'min',
-                width: '100px',
+                width: 100,
                 ellipsis: true
               },
               {
                 title: '字符长度',
                 dataIndex: 'stringLength',
-                width: '100px',
+                width: 100,
                 ellipsis: true
               },
               {
                 title: '缩放比',
                 dataIndex: ' zoom',
-                width: '100px',
+                width: 100,
                 ellipsis: true
               },
               {
                 title: '变量值',
                 dataIndex: 'value',
-                width: '180px',
+                width: 100,
                 ellipsis: true
               },
               {
                 title: '时间戳',
                 dataIndex: 'time',
-                width: '180px',
+                width: 180,
                 ellipsis: true
               }
             ] }/>

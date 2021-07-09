@@ -172,6 +172,9 @@ export function callObj(dataList, key, val) {
 export function debounce(fn, wait, immediate = false){
   let timer, startTimeStamp = 0;
   let context, args;
+  console.log(context, args)
+
+  console.log("-----")
  
   let run = (timerInterval) => {
     timer = setTimeout(() => {
@@ -182,8 +185,10 @@ export function debounce(fn, wait, immediate = false){
         run(wait - interval);
       } else {
         if (!immediate) {
-          fn.apply(context, args);
+          console.log("执行函数")
+          fn();
         }
+        console.log("清除定时器")
         clearTimeout(timer);
         timer = null;
       }
@@ -199,11 +204,27 @@ export function debounce(fn, wait, immediate = false){
  
     if (!timer) {
       if (immediate) {
-        fn.apply(context, args);
+        fn();
       }
       run(wait);
     }
   }
+}
+
+export function throttle(func, delay) {
+  var prev = Date.now();
+  console.log("上一次时间：",prev)
+  return (()=>{
+    var context = this;
+    var args = arguments;
+    var now = Date.now();
+    console.log("时间差：",now - prev)
+    if (now - prev >= delay) {
+      console.log("执行函数")
+      func.apply(context, args);
+      prev = Date.now();
+    }            
+  })()
 }
 
 export function converTime (str, index, char){

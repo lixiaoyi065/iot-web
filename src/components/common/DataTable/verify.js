@@ -2,7 +2,7 @@ import { message } from 'antd';
 import PubSub from 'pubsub-js'
 import { isRepeat } from 'utils'
 
-import { VerifyTagName, VerifyAddress } from 'api/variable'
+import { VerifyTagName, VerifyAddress, VerifyMax, VerifyMin } from 'api/variable'
 
 //变量地址校验
 export function addressVerify(value, obj) {
@@ -85,4 +85,46 @@ export function nameVerify(value, dataSource, record, dataIndex, activeNodeType)
   } else {
       message.error("变量名" + value + "已存在")
   }
+}
+
+//校验最大值
+export function verifyMax(value, dataType) {
+  VerifyMax({
+    value,
+    dataType
+  }).then(res => {
+    if (res.code !== 0) {
+      message.error(res.msg)
+      PubSub.publish("canSubmit", {
+        canSubmit: false,
+        message: res.msg
+      })
+    } else {
+      PubSub.publish("canSubmit", {
+        canSubmit: true,
+        message: ""
+      })
+    }
+  })
+}
+
+//校验最小值
+export function verifyMin(value, dataType) {
+  VerifyMin({
+    value,
+    dataType
+  }).then(res => {
+    if (res.code !== 0) {
+      message.error(res.msg)
+      PubSub.publish("canSubmit", {
+        canSubmit: false,
+        message: res.msg
+      })
+    } else {
+      PubSub.publish("canSubmit", {
+        canSubmit: true,
+        message: ""
+      })
+    }
+  })
 }

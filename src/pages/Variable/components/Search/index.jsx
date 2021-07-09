@@ -34,7 +34,7 @@ class Search extends PureComponent {
   render() {
     return (
       <div className="search-contain">
-        <input type="file" className="upload-file" name="file" multiple="multiple" onChange={this.props.importProps} id="importFile"
+        <input type="file" className="upload-file" name="file" onChange={this.props.importProps} id="importFile"
         accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
         <Form
           ref="formRef"
@@ -73,19 +73,22 @@ class Search extends PureComponent {
         <div className="option-area" onClick={this.props.optionClick}>
           <Button className="ant-button-normal"
             onClick={this.props.saveList}
-            disabled={this.props.type === 1 ? true : false}>保存</Button>
-          <Button type="primary" onClick={this.props.resetTags} style={{ margin: 0 }}>重置</Button>
+            disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>保存</Button>
+          <Button type="primary" onClick={this.props.resetTags} style={{ margin: 0 }}
+            disabled={this.props.activeNode === "" ? true : false}>重置</Button>
           <span className="divider"></span>
-          <Button className="ant-btn-opt-sm ant-btn-opt-primary" onClick={this.props.addTags} disabled={this.props.type === 1 ? true : false}>
+          <Button className="ant-btn-opt-sm ant-btn-opt-primary" onClick={this.props.addTags} disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>
             <img className="btn-icon" src={addOpt} alt="" />
           </Button>
-          <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={this.props.delTags} disabled={this.props.type === 1 ? true : false}>
+          <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={this.props.delTags} disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>
             <img className="btn-icon" src={delOpt} alt="" />
           </Button>
           {
             this.props.type === 1 || this.props.type === 2 || this.props.type === 4 ?
             <Dropdown overlay={this.moreMenu} trigger={['click']} placement="bottomRight" arrow>
-              <Button className="ant-btn-opt-sm ant-btn-opt-normal"><img className="btn-icon" src={moreOpt} alt="" /></Button>
+              <Button className="ant-btn-opt-sm ant-btn-opt-normal">
+                <img className="btn-icon" src={moreOpt} alt="" />
+              </Button>
             </Dropdown> : <></>
           }
         </div>

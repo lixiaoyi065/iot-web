@@ -77,6 +77,7 @@ export default class addDevice extends PureComponent {
   onChangUserIdentity = e => {
     e === "登录验证" ? this.setState({ userPane: true }) : this.setState({ userPane: false })
   }
+
   componentDidMount() {
     console.log(this.props)
     if (this.props.node) {
