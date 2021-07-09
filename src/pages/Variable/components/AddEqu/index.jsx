@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
-import { Form, Input, Select, Button, Checkbox, Divider } from 'antd'
+import { Form, Input, Select, Button, Checkbox, Divider, Tooltip } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 const { Option } = Select;
 export default class addDevice extends PureComponent {
@@ -429,7 +430,10 @@ export default class addDevice extends PureComponent {
                 this.state.activeProto === "Fins_TCP" || this.state.activeProto === "MCA1E_Binary_Ethernet" || this.state.activeProto === "MC3E_Binary_Ethernet" ?
                   (
                     <Form.Item valuePropName="checked" name="StrByteOrder1" className="form-block">
-                      <Checkbox>字符串字节顺序</Checkbox>
+                      <Checkbox>字符串字节反转</Checkbox>
+                      <Tooltip placement="top" title="报文默认以1234顺序解析，勾选后字符串字节反转，以2143顺序解析">
+                        <QuestionCircleOutlined />
+                      </Tooltip>
                     </Form.Item>
                   ) : (
                     <Form.Item label="字符串字节顺序" name="StrByteOrder"
