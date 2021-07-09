@@ -186,13 +186,13 @@ export default class config extends PureComponent {
             formData.showList = [1,2]
           } else if (IReg.test(address)) {
             let arr =  address.match(IReg) 
-            formData.dataArea = '输入'
+            formData.dataArea = 'I'
             formData.letters = 'IW'
             formData.lettlesValue = arr[2]
             formData.showList = [1,2]
           } else if (QReg.test(address)) {
             let arr =  address.match(QReg) 
-            formData.dataArea = '输出'
+            formData.dataArea = 'Q'
             formData.letters = 'QW'
             formData.lettlesValue = arr[2]
             formData.showList = [1,2]
@@ -558,6 +558,7 @@ export default class config extends PureComponent {
           if (bitReg.test(address)) {
             let arr =  address.match(bitReg) 
             formData.dataArea = '位'
+            formData.len = popupData.dataLen
             formData.addressOffset = arr[2]
             if (arr[1] === 'MB') {
               formData.addressType = '字节'
@@ -567,8 +568,8 @@ export default class config extends PureComponent {
             formData.showList = [1,4,6,7]
           } else if (dbReg.test(address)) {
             let arr =  address.match(dbReg) 
-            console.log(arr)
             formData.dataArea = 'DB'
+            formData.len = popupData.dataLen
             formData.DBNum = arr[2]
             formData.addressOffset = arr[6]
             if (arr[4] === 'DBB') {
@@ -580,6 +581,7 @@ export default class config extends PureComponent {
           } else if (IReg.test(address)) {
             let arr =  address.match(IReg) 
             formData.dataArea = '输入'
+            formData.len = popupData.dataLen
             formData.addressOffset = arr[2]
             if (arr[1] === 'IB') {
               formData.addressType = '字节'
@@ -590,6 +592,7 @@ export default class config extends PureComponent {
           } else if (QReg.test(address)) {
             let arr =  address.match(QReg) 
             formData.dataArea = '输出'
+            formData.len = popupData.dataLen
             formData.addressOffset = arr[2]
             if (arr[1] === 'QB') {
               formData.addressType = '字节'
@@ -2183,23 +2186,51 @@ export default class config extends PureComponent {
       } else if (arrayEqual(addressData.showList, [1,3,4,6])) {
         popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBW${addressData.addressOffset}`
       } else if (arrayEqual(addressData.showList, [1,4,6,7])) {
-        if (addressData.dataArea === '位') {
-          if (addressData.addressType === '字节') {
-            popupData.dataValue = `MB${addressData.addressOffset}`
-          } else if (addressData.addressType === '字') {
-            popupData.dataValue = `MW${addressData.addressOffset}`
+        if (popupData.model === 'S7-200Smart') {
+          if (addressData.dataArea === 'M') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `MB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `MW${addressData.addressOffset}`
+            }
+          } else if (addressData.dataArea === 'V') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `VB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `VW${addressData.addressOffset}`
+            }
+          } else if (addressData.dataArea === 'I') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `IB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `IW${addressData.addressOffset}`
+            }
+          } else if (addressData.dataArea === 'Q') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `QB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `QW${addressData.addressOffset}`
+            }
           }
-        } else if (addressData.dataArea === '输入') {
-          if (addressData.addressType === '字节') {
-            popupData.dataValue = `IB${addressData.addressOffset}`
-          } else if (addressData.addressType === '字') {
-            popupData.dataValue = `IW${addressData.addressOffset}`
-          }
-        } else if (addressData.dataArea === '输出') {
-          if (addressData.addressType === '字节') {
-            popupData.dataValue = `QB${addressData.addressOffset}`
-          } else if (addressData.addressType === '字') {
-            popupData.dataValue = `QW${addressData.addressOffset}`
+        } else { 
+          if (addressData.dataArea === '位') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `MB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `MW${addressData.addressOffset}`
+            }
+          } else if (addressData.dataArea === '输入') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `IB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `IW${addressData.addressOffset}`
+            }
+          } else if (addressData.dataArea === '输出') {
+            if (addressData.addressType === '字节') {
+              popupData.dataValue = `QB${addressData.addressOffset}`
+            } else if (addressData.addressType === '字') {
+              popupData.dataValue = `QW${addressData.addressOffset}`
+            }
           }
         }
       } else if (arrayEqual(addressData.showList, [1,3,4,6,7])) {
