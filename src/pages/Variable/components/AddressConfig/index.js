@@ -1655,7 +1655,7 @@ export default class config extends PureComponent {
       }
     })
     
-    this.addressForm.current.setFieldsValue(formData)
+    // this.addressForm.current.setFieldsValue(formData)
   }
 
   openPop = ()=>{
@@ -1796,6 +1796,7 @@ export default class config extends PureComponent {
         }
       })
     }
+    this.addressForm.current.setFieldsValue(this.state.formData)
   }
 
   // 选择下拉内容 -- S7_TCP协议
