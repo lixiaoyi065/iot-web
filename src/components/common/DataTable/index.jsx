@@ -100,12 +100,17 @@ const EditableCell = ({
       if (dataIndex === "name") {
         nameVerify(val, dataSource, record, dataIndex, activeNodeType)
       } else if (dataIndex === "address") { //变量地址校验
-        addressVerify(val, {
+        record[dataIndex] = val
+        await addressVerify(val, {
           nodeId: activeNode,
           type: activeNodeType,
           dataType: record.dataType,
           address: val,
           length: record.stringLength
+        }).then(res => {
+          if (res === false) {
+            e.target.value = ''
+          }
         })
       } else if (dataIndex === "desc") {
         descVerify(val)

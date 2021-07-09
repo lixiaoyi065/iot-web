@@ -151,8 +151,8 @@ export function VerifyTagName(params) {
 }
 //校验IO变量地址是否合法
 //params: object
-export function VerifyAddress(params) {
-  return axios({
+export async function VerifyAddress(params) {
+  return await axios({
     url: "/VariableManage/VerifyAddress",
     params,
     method: 'get'

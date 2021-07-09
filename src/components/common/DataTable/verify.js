@@ -6,30 +6,34 @@ import { VerifyTagName, VerifyAddress } from 'api/variable'
 
 //变量地址校验
 export function addressVerify(value, obj) {
-  console.log("变量地址校验")
-  if (value === "") {
-    message.error("变量地址不能为空，请重新输入")
-    PubSub.publish("canSubmit", {
-      canSubmit: false,
-      message: "变量地址不能为空，请重新输入"
-    })
-  } else {
-    VerifyAddress(obj).then(res => {
-      console.log(res)
-      if (res.code !== 0) {
-        message.error(res.msg)
-        PubSub.publish("canSubmit", {
-          canSubmit: false,
-          message: res.msg
-        })
-      } else {
-        PubSub.publish("canSubmit", {
-          canSubmit: true,
-          message: ""
-        })
-      }
-    })
-  }
+  return new Promise(async function (resolve, reject) {
+    if (value === "") {
+      message.error("变量地址不能为空，请重新输入")
+      PubSub.publish("canSubmit", {
+        canSubmit: false,
+        message: "变量地址不能为空，请重新输入"
+      })
+      resolve(false)
+    } else {
+       await VerifyAddress(obj).then(res => {
+        console.log(res)
+        if (res.code !== 0) {
+          message.error(res.msg)
+          PubSub.publish("canSubmit", {
+            canSubmit: false,
+            message: res.msg
+          })
+          resolve(false)
+        } else {
+          PubSub.publish("canSubmit", {
+            canSubmit: true,
+            message: ""
+          })
+          resolve(true)
+        }
+      })
+    }
+  })
 }
 
 //描述校验
