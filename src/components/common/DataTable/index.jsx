@@ -4,13 +4,11 @@ import { Resizable } from 'react-resizable';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
-import { isFit, deepClone } from 'utils'
-import { addressVerify, descVerify, nameVerify } from './verify'
+import { addressVerify, descVerify, nameVerify, verifyMax, verifyMin } from './verify'
 
 const EditableContext = React.createContext(null);
 const { Option } = Select;
 
-let modifyTags = []
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -67,19 +65,15 @@ const EditableCell = ({
   }, [editing]);
 
   const checkIsSame = (val) => {
-    let isSame = false
+    let isSame = true
     if (dataIndex && record.editable) {
-      for (let i = 0; i < gist.length; i++) {
-        if (gist[i].key === record.key) {
-          if (gist[i][dataIndex] === val) {
-            isSame = false
-            return
-          } else {
-            isSame = true
-            return
+      if (gist.length === 0) {
+        return isSame = true;
+      } else {
+        for (let i = 0; i < gist.length; i++) {
+          if (gist[i].key === record.key) {
+            return isSame = gist[i][dataIndex] !== val
           }
-        } else {
-          isSame = true
         }
       }
     }
@@ -100,15 +94,24 @@ const EditableCell = ({
       if (dataIndex === "name") {
         nameVerify(val, dataSource, record, dataIndex, activeNodeType)
       } else if (dataIndex === "address") { //变量地址校验
-        addressVerify(val, {
+        record[dataIndex] = val
+        await addressVerify(val, {
           nodeId: activeNode,
           type: activeNodeType,
           dataType: record.dataType,
           address: val,
           length: record.stringLength
+        }).then(res => {
+          if (res === false) {
+            e.target.value = ''
+          }
         })
       } else if (dataIndex === "desc") {
         descVerify(val)
+      } else if (dataIndex === "min") {
+        verifyMin(val, record.dataType)
+      } else if (dataIndex === "max") {
+        verifyMax(val, record.dataType)
       }
       record[dataIndex] = e.target.value
       handleSave(dataIndex, val, record, checkIsSame(val))
@@ -119,9 +122,9 @@ const EditableCell = ({
 
   const selectChange = (e, id) => {
     try {
-      toggleEdits()
       record[dataIndex] = e
-      handleSave(dataIndex, e, record, false);
+      toggleEdits()
+      handleSave(dataIndex, e, record, checkIsSame(e));
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -145,12 +148,15 @@ const EditableCell = ({
         </Form.Item>
       ) : (type === "input-group" ? (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···"
-            onSearch={(value, event) => { addressSearch(value, event, record) }} />
+          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onPressEnter={false}
+            onSearch={(value, event) => { addressSearch(value, event, record, record['stringLength']) }} />
         </Form.Item>
       ) : (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-          <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
+          {
+            dataIndex === "min" || dataIndex === "max" ? <Input ref={inputRef} min="0" type="number" id={dataIndex + record.key} onBlur={check} autoComplete='off' />
+              : <Input ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' />
+          }
         </Form.Item>
       ))
     ) : (
@@ -162,7 +168,7 @@ const EditableCell = ({
           >
             {childNode}
           </div>
-          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record) }}>···</Button>
+          <Button className="edit-cell-btn" onClick={(event) => { addressSearch(record[dataIndex], event, record, record['stringLength']) }}>···</Button>
         </div> : <div id={record.key}
           className="editable-cell-value-wrap"
           onClick={toggleEdits}
@@ -173,8 +179,7 @@ const EditableCell = ({
   }
 
   return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)}
-    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}
-      ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
+    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""} ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
 };
 
@@ -192,9 +197,6 @@ class EditableTable extends React.Component {
   }
 
   componentDidMount() {
-    PubSub.subscribe("modifyTags", (res, data) => {
-      modifyTags = data
-    })
     this.setState({ gist: this.props.gist })
     setTimeout(() => {
       this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
@@ -206,7 +208,6 @@ class EditableTable extends React.Component {
 
   componentWillUnmount() {
     PubSub.unsubscribe("changeTags")
-    PubSub.unsubscribe("modifyTags")
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -227,44 +228,7 @@ class EditableTable extends React.Component {
       }
     })
 
-    // console.log(modifyTags)
-    /**
-     * 1、判断在modifyTags中存在，
-     * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
-     * 3、不存在在加入
-     */
-    let index = -1;
-    //判断是否已经存在
-    console.log(modifyTags)
-    let isHas = modifyTags.some((item, i) => {
-      if (item.key === row.key) {
-        index = i;
-        return true
-      } else {
-        index = -1;
-        return false
-      }
-    })
-    // console.log(isHas, flag)
-
-    if (isHas) {
-      if (isFit(this.props.gist, row)) {//新旧对象一致,modifyTags移除该对象
-        modifyTags.splice(index, 1)
-      } else {
-        modifyTags[index][dataIndex] = val
-      }
-    } else if (flag) {
-      return
-    } else {
-      //否则添加
-      modifyTags.push(row)
-    }
-    let newList = JSON.parse(JSON.stringify(modifyTags));
-    PubSub.publish("modifyTags", newList)
-    PubSub.publish("canSubmit", {
-      canSubmit: newList.length > 0 ? true : false,
-      message: newList.length > 0 ? "" : "当前没有修改的内容"
-    })
+    this.props.handleSave(dataIndex, val, row, flag);
   };
   handleResize = index => (e, { size }) => {
     this.setState(({ columns }) => {
@@ -279,6 +243,7 @@ class EditableTable extends React.Component {
 
   render() {
     const { dataSource } = this.state;
+    // console.log(dataSource,this.props.gist)
     const components = {
       header: {
         cell: ResizeableTitle,
