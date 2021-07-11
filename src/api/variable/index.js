@@ -151,9 +151,27 @@ export function VerifyTagName(params) {
 }
 //校验IO变量地址是否合法
 //params: object
-export function VerifyAddress(params) {
-  return axios({
+export async function VerifyAddress(params) {
+  return await axios({
     url: "/VariableManage/VerifyAddress",
+    params,
+    method: 'get'
+  })
+}
+//校验最大值是否合法
+//params: object
+export function VerifyMax(params) {
+  return axios({
+    url: "/VariableManage/VerifyMax",
+    params,
+    method: 'get'
+  })
+}
+//校验最小值是否合法
+//params: object
+export function VerifyMin(params) {
+  return axios({
+    url: "/VariableManage/VerifyMin",
     params,
     method: 'get'
   })
@@ -254,7 +272,7 @@ export function GetOPCUaNodes(nodeId) {
     url: '/VariableManage/GetOPCUaNodes',
     params: {
       nodeId
-    },
+    }, 
     method: 'get'
   })
 }
