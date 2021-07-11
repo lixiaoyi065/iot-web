@@ -13,7 +13,7 @@ import Search from './components/Search'
 import AddressConfig from './components/AddressConfig'
 import OpcConfig from './components/AddressConfig/OpcConfig'
 
-import { downFile, deepClone } from "utils";
+import { downFile, deepClone, isFit } from "utils";
 
 import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
@@ -54,6 +54,8 @@ class RealTime extends PureComponent{
     selectedKeys: [],
     opcConfigVisible: false,
     opcConfigContent: "",
+    preTime: 0,
+    nowTime: ""
   }
   searchRef = React.createRef();
   componentDidMount() {
@@ -395,7 +397,6 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
-    console.log(info.node.key)
     this.setState({selectedKeys: [info.node.key]})
     // console.log(this.state.modifyTagsList)
     let tags = {
@@ -461,6 +462,45 @@ class RealTime extends PureComponent{
     })
   }
 
+  handleSave = (dataIndex, val, row, flag = true) => {
+    /**
+     * 1、判断在modifyTags中存在，
+     * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
+     * 3、不存在在加入
+     */
+
+    let index = -1;
+    //判断是否已经存在
+    let isHas = this.state.modifyTagsList.some((item, i) => {
+      if (item.key === row.key) {
+        index = i;
+        return true
+      }else {
+        index = -1;
+        return false
+      }
+    })
+
+    this.setState(state => {
+      if (isHas) {
+        if (isFit(state.gist, row)) {//新旧对象一致,modifyTags移除该对象
+          state.modifyTagsList.splice(index, 1)
+        } else {
+          state.modifyTagsList[index][dataIndex] = val
+        }
+      } else if (!flag) { //完善点击输入框，没有输入时的bug
+        return
+      }else {
+        //否则添加
+        state.modifyTagsList.push(row)
+      }
+
+      return {
+        modifyTagsList: state.modifyTagsList
+      }
+    })
+  };
+
   hintSave = (callback) => {
     if (this.state.modifyTagsList.length > 0) {
       Modal.confirm({
@@ -498,7 +538,7 @@ class RealTime extends PureComponent{
     $(".effective-editor").removeClass("effective-editor")
     QueryTags(queryCondition).then(res => {
       if (res.code === 0) {
-        this.setState({dataSource: res.data.tags, count: res.data.total})
+        this.setState({dataSource: res.data.tags, count: res.data.total, gist: [...res.data.tags]})
       } else {
         message.error(res.msg)
       }
@@ -562,11 +602,11 @@ class RealTime extends PureComponent{
       message.warning("当前没有更改的内容")
       return;
     }
-    if (!this.state.canSubmit.canSubmit) {
-      // console.log(this.state.canSubmit.message)
-      message.error(this.state.canSubmit.message)
-      return;
-    }
+    // if (!this.state.canSubmit.canSubmit) {
+    //   // console.log(this.state.canSubmit.message)
+    //   message.error(this.state.canSubmit.message)
+    //   return;
+    // }
     console.log("---------------")
     let modifyList = []
     deepClone(this.state.modifyTagsList).map(item => {
@@ -801,7 +841,6 @@ class RealTime extends PureComponent{
       columArr.push({
         title: '最大值',
         dataIndex: 'max',
-        width: 100,
         editable: true,
       },
       {
@@ -821,13 +860,11 @@ class RealTime extends PureComponent{
       {
         title: '字符长度',
         dataIndex: 'stringLength',
-        width: 100,
         editable: true,
       },
       {
         title: '缩放比',
         dataIndex: 'zoom',
-        width: 100,
         editable: true,
       })
     }
@@ -889,7 +926,25 @@ class RealTime extends PureComponent{
     })
   }
 
-  addressSearch = (value, event, row) => {
+  throttle = (func, delay) => {
+    return ((...rest) => {
+      let now = Date.now()
+      if (now - this.state.preTime >= delay) {
+        this.setState({
+          preTime: Date.now()
+        }, () => {
+          func(...rest);
+        })
+      }
+    })
+  }
+
+  addressSearch = (value, event, row, codeLen) => {
+    console.log(value)
+    this.throttle(this.addressCommit, 1000)(value, event, row, codeLen)
+  }
+
+  addressCommit = (value, event, row, codeLen) => {
     GetAddressEditInfo({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType
@@ -910,7 +965,9 @@ class RealTime extends PureComponent{
         this.setState({
           modalContent : (
             <AddressConfig data={data} row={row} node={this.state.node}
-              key={new Date()}
+              key={Date.now()}
+              addressValue={value}
+              codeLen={codeLen}
               onCancel={this.handleCancel}
               onFinish={this.addressFinish}/>
           ),
@@ -972,17 +1029,23 @@ class RealTime extends PureComponent{
   }
   addressFinish = (res, row) => {
     this.setState(state => {
-      for (let item in res) {
-        state.dataSource[row.no - 1][item] = res[item]
-      }
-      
+      let rowIndex = 0;
+      console.log(res, row)
+      state.dataSource.forEach((item, index)=>{
+        if(item.key === row.key){
+          rowIndex = index
+          for (let key in res) {
+            item[key] = res[key]
+          }
+        }
+      })
       let isEdit = false;
-
+      console.log(state.dataSource[rowIndex])
       //判断当前记录是否被编辑了
       state.gist.forEach(item=>{
-        if(item.key === state.dataSource[row.no -1].key){
+        if(item.key === state.dataSource[rowIndex].key){
           for(let val in item){
-            if(item[val] !== state.dataSource[row.no -1][val]){
+            if(item[val] !== state.dataSource[rowIndex][val]){
               isEdit = true;
               return 
             }
@@ -993,11 +1056,11 @@ class RealTime extends PureComponent{
       if(isEdit){
         if (state.modifyTagsList.length === 0) {
           // console.log(state.dataSource[row.no -1])
-          state.modifyTagsList.push(state.dataSource[row.no -1])
+          state.modifyTagsList.push(state.dataSource[rowIndex])
         }else {
           state.modifyTagsList.forEach(mod => {
-            if (mod.key === state.dataSource[row.no -1].key) {
-              Object.assign(mod, state.dataSource[row.no -1])
+            if (mod.key === state.dataSource[rowIndex].key) {
+              Object.assign(mod, state.dataSource[rowIndex])
             }
           })
         }
@@ -1016,7 +1079,6 @@ class RealTime extends PureComponent{
   } 
 
   onDrop = info => {
-    let newNodeList = []; //新的节点排序
     const dragNode = info.dragNode;
     const dropNode = info.node;
 
@@ -1025,81 +1087,86 @@ class RealTime extends PureComponent{
     };
 
     const sameParent = isSameParent(dragNode, dropNode);
-
-    if (sameParent && !dropNode.dragOverGapBottom) {
-      const dragKey = info.dragNode.props.eventKey;
-
-      //如果dragPos 小于 dropPos ，那要减一
-      const dropPosition = info.dragNode.pos < info.node.pos ? info.dropPosition - 1: info.dropPosition;
-
-      const loop = (data, key, callback) => {
-        if(key === "00000000-0000-0000-0000-000000000000"){
-          return callback(data);
-        }else{
-          for (let i = 0; i < data.length; i++) {
-            if (data[i].nodeID === key) {
-              return callback(data[i], i, data);
-            }
-            if (data[i].children) {
-              loop(data[i].children, key, callback);
-            }
-          }
-        }
-      };
-      const data = [...this.state.treeData];
-      // 找到当前拖动的对象
-      let dragObj; 
-      loop(data, dragKey, (item, index, arr) => {
-        arr.splice(index, 1);
-        dragObj = item;
-      });
-
-      console.log(dropNode.dragOverGapBottom)
-
+    if (sameParent && dragNode.fatherNodeID === "00000000-0000-0000-0000-000000000000"){
       if (!info.dropToGap) {
-        // Drop on the content
-        loop(data, dragObj.fatherNodeID, (item) => {
-          item.children = item.children || [];
-          // where to insert 示例添加到尾部，可以是随意位置
-          item.children.splice(dropPosition + 1, 0, dragObj)
-          // item.children.push(dragObj);
-        });
-      } else if (
-        (info.node.props.children || []).length > 0 && // Has children
-        info.node.props.expanded && // Is expanded
-        dropPosition === 1 // On the bottom gap
-      ) {
-
-      } else if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"
-        && dropNode.fatherNodeID === "00000000-0000-0000-0000-000000000000"
-      ){
-        //最外层
-        loop(data, dragObj.fatherNodeID, (item) => {
-          item.splice(dropPosition, 0, dragObj)
-        });
+        return
+      } else {
+        this.dropEvent(info, dropNode)
       }
-
-      data.forEach(item=>{
-        if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"){
-          newNodeList.push(item.nodeID)
-        }else if(dragObj.fatherNodeID === item.nodeID){
-          item.children.forEach(child=>{
-            newNodeList.push(child.nodeID)
-          })
-        }
-      })
-
-      SortTreeNode({
-        nodeId: dragObj.fatherNodeID,
-        children: newNodeList
-      }).then(res=>{
-
-      })
-      this.setState({treeData: data});
-    }else if(dragNode.fatherNodeID === dropNode.key){
-      // dragNode.fatherNodeID === dropNode.nodeID
+    }else if (sameParent && !dropNode.dragOverGapBottom) {
+      this.dropEvent(info, dropNode)
+    } else if (dragNode.fatherNodeID === dropNode.key) {
     }
   };
+
+  dropEvent = (info, dropNode) => {
+    let newNodeList = []; //新的节点排序
+    const dragKey = info.dragNode.key;
+
+    //如果dragPos 小于 dropPos ，那要减一
+    const dropPosition = info.dragNode.pos < info.node.pos ? info.dropPosition - 1: info.dropPosition;
+
+    const loop = (data, key, callback) => {
+      if(key === "00000000-0000-0000-0000-000000000000"){
+        return callback(data);
+      }else{
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].nodeID === key) {
+            return callback(data[i], i, data);
+          }
+          if (data[i].children) {
+            loop(data[i].children, key, callback);
+          }
+        }
+      }
+    };
+    const data = [...this.state.treeData];
+    // 找到当前拖动的对象
+    let dragObj; 
+    loop(data, dragKey, (item, index, arr) => {
+      arr.splice(index, 1);
+      dragObj = item;
+    });
+
+    if (!info.dropToGap) {
+      // Drop on the content
+      loop(data, dragObj.fatherNodeID, (item) => {
+        item.children = item.children || [];
+        // where to insert 示例添加到尾部，可以是随意位置
+        item.children.splice(dropPosition + 1, 0, dragObj)
+      });
+    } else if (
+      (info.node.children || []).length > 0 && // Has children
+      info.node.expanded && // Is expanded
+      dropPosition === 1 // On the bottom gap
+    ) {
+    } else if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"
+      && dropNode.fatherNodeID === "00000000-0000-0000-0000-000000000000"
+    ){
+      //最外层
+      loop(data, dragObj.fatherNodeID, (item) => {
+        item.splice(dropPosition, 0, dragObj)
+      });
+    }
+
+    data.forEach(item=>{
+      if(dragObj.fatherNodeID === "00000000-0000-0000-0000-000000000000"){
+        newNodeList.push(item.nodeID)
+      }else if(dragObj.fatherNodeID === item.nodeID){
+        item.children.forEach(child=>{
+          newNodeList.push(child.nodeID)
+        })
+      }
+    })
+
+    SortTreeNode({
+      nodeId: dragObj.fatherNodeID,
+      children: newNodeList
+    }).then(res=>{
+
+    })
+    this.setState({treeData: data});
+  }
     
   render() {
     const { activeNodeType, collasped, treeData, dataSource, gist } = this.state
@@ -1140,6 +1207,7 @@ class RealTime extends PureComponent{
             <Search
               ref={this.searchRef}
               importProps={this.importProps}
+              activeNode={this.state.activeNode}
               dataTypes={this.state.dataTypes}
               type={activeNodeType}
               searchForm={this.searchForm}
@@ -1152,7 +1220,7 @@ class RealTime extends PureComponent{
             <div className="tableContain">
               <EditableTable
                 rowSelection={{
-                  columnWidth: "56px",
+                  columnWidth: 56,
                   selectedRowKeys: this.state.selectedRowKeys,
                   onChange: this.onSelectChange,
                 }}
@@ -1169,13 +1237,14 @@ class RealTime extends PureComponent{
                 rowKey={record => {
                   return record.id
                 }}
+                handleSave={this.handleSave}
                 addressSearch={ this.addressSearch }
                 loading={this.state.tableLoading}
                 columns={this.tableColums(activeNodeType).map(el => {
                   return {
                     title: el.title,
                     dataIndex: el.dataIndex,
-                    width: el.width || 150,
+                    width: el.width,
                     ellipsis: {
                       showTitle: false,
                     },
