@@ -2,6 +2,8 @@ import React from 'react';
 import { Table } from 'antd';
 import { Resizable } from 'react-resizable';
 
+import '../DataTable/index.less'
+
 const ResizeableTitle = props => {
   const { onResize, width, ...restProps } = props;
 
@@ -26,7 +28,8 @@ export default class EditableTable extends React.Component {
     super(props)
     this.ref = React.createRef();
     this.state = {
-      height: 0
+      height: 0,
+      columns: this.props.columns,
     }
   }
 
@@ -36,6 +39,18 @@ export default class EditableTable extends React.Component {
     })
   }
 
+  handleResize = index => (e, { size }) => {
+    console.log(size)
+    this.setState(({ columns }) => {
+      const nextColumns = [...columns];
+      nextColumns[index] = {
+        ...nextColumns[index],
+        width: size.width,
+      };
+      return { columns: nextColumns };
+    });
+  };
+
   render() {
     const { dataSource } = this.props;
 
@@ -44,6 +59,16 @@ export default class EditableTable extends React.Component {
         cell: ResizeableTitle,
       },
     };
+
+    const columns = this.state.columns.map((col, index) => {
+      return {
+        ...col,
+        onHeaderCell: column => ({
+          width: column.width,
+          onResize: this.handleResize(index),
+        }),
+      }
+    })
    
     return (
       <>
@@ -53,7 +78,7 @@ export default class EditableTable extends React.Component {
             rowClassName={() => 'editable-row'}
             components={components}
             dataSource={dataSource}
-            columns={this.props.columns}
+            columns={columns}
             pagination={ false } scroll={{y: this.state.height }}
           />
         </div>

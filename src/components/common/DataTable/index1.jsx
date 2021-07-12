@@ -1,8 +1,6 @@
 import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Table, Input, Form, Select, Button } from 'antd';
 import { Resizable } from 'react-resizable';
-import { VariableSizeGrid as Grid } from 'react-window';
-import ResizeObserver from 'rc-resize-observer';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
@@ -96,12 +94,17 @@ const EditableCell = ({
       if (dataIndex === "name") {
         nameVerify(val, dataSource, record, dataIndex, activeNodeType)
       } else if (dataIndex === "address") { //变量地址校验
-        addressVerify(val, {
+        record[dataIndex] = val
+        await addressVerify(val, {
           nodeId: activeNode,
           type: activeNodeType,
           dataType: record.dataType,
           address: val,
           length: record.stringLength
+        }).then(res => {
+          if (res === false) {
+            e.target.value = ''
+          }
         })
       } else if (dataIndex === "desc") {
         descVerify(val)
@@ -119,9 +122,9 @@ const EditableCell = ({
 
   const selectChange = (e, id) => {
     try {
-      toggleEdits()
       record[dataIndex] = e
-      handleSave(dataIndex, e, record, false);
+      toggleEdits()
+      handleSave(dataIndex, e, record, checkIsSame(e));
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -145,8 +148,8 @@ const EditableCell = ({
         </Form.Item>
       ) : (type === "input-group" ? (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
-          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···"
-            onPressEnter={false} onSearch={(value, event) => { addressSearch(value, event, record, record['stringLength']) }} />
+          <Input.Search ref={inputRef} id={dataIndex + record.key} onBlur={check} autoComplete='off' enterButton="···" onPressEnter={false}
+            onSearch={(value, event) => { addressSearch(value, event, record, record['stringLength']) }} />
         </Form.Item>
       ) : (
         <Form.Item name={dataIndex} initialValue={record[dataIndex]}>
@@ -176,8 +179,7 @@ const EditableCell = ({
   }
 
   return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)}
-    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}
-      ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
+    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""} ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
 };
 
@@ -185,21 +187,20 @@ class EditableTable extends React.Component {
   constructor(props) {
     super(props);
     this.ref = React.createRef();
-    this.gridRef = React.createRef();
     this.state = {
       height: 0,
       dataSource: [],
       gist: [],
       changeTags: false,
       columns: this.props.columns,
-      tableWidth: 0,
-      tableHeight: 0,
-      cellWidth: []
     };
   }
 
   componentDidMount() {
     this.setState({ gist: this.props.gist })
+    setTimeout(() => {
+      this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
+    })
     PubSub.subscribe("changeTags", (msg, data) => {
       this.setState({ changeTags: data })
     })
@@ -230,86 +231,27 @@ class EditableTable extends React.Component {
     this.props.handleSave(dataIndex, val, row, flag);
   };
   handleResize = index => (e, { size }) => {
-    let widthGroup = [...this.state.cellWidth]
-    this.setState((state, { columns }) => {
+    this.setState(({ columns }) => {
       const nextColumns = [...columns];
       nextColumns[index] = {
         ...nextColumns[index],
         width: size.width,
       };
-      console.log(state.tableWidth, widthGroup[index])
-      return {
-        columns: nextColumns,
-        tableWidth: state.tableWidth + size.width - widthGroup[index]
-      };
+      return { columns: nextColumns };
     });
   };
 
-  connectObject = () => {
-    const obj = {};
-    Object.defineProperty(obj, 'scrollLeft', {
-      get: () => null,
-      set: (scrollLeft) => {
-        if (this.gridRef.current) {
-          this.gridRef.current.scrollTo({
-            scrollLeft,
-          });
-        }
-      },
-    });
-    return obj;
-  }
-
   render() {
     const { dataSource } = this.state;
-    const scroll = {
-      y: this.state.tableHeight,
-      x: '100vw',
-    }
-    const renderVirtualList = (rawData, { scrollbarSize, ref, onScroll }) => {
-      ref.current = this.connectObject();
-      const totalHeight = rawData.length * 43;
-      return (
-        <Grid
-          ref={this.gridRef}
-          className="virtual-grid"
-          columnCount={mergedColumns.length}
-          columnWidth={(index) => {
-            const { width } = mergedColumns[index];
-            console.log(width)
-            this.setState(state => {
-              return { cellWidth: [state.cellWidth, width] }
-            })
-            return totalHeight > scroll.y && index === mergedColumns.length - 1
-              ? width - scrollbarSize - 1
-              : width;
-          }}
-          height={scroll.y}
-          rowCount={rawData.length}
-          rowHeight={() => 43}
-          width={this.state.tableWidth}
-          onScroll={({ scrollLeft }) => {
-            onScroll({
-              scrollLeft,
-            });
-          }}
-        >
-          {({ columnIndex, rowIndex, style }) => (
-            <div
-              className={'virtual-table-cell'}
-              style={style}
-            >
-              {rawData[rowIndex][mergedColumns[columnIndex].dataIndex]}
-            </div>
-          )}
-        </Grid>
-      );
-    };
+    // console.log(dataSource,this.props.gist)
     const components = {
       header: {
         cell: ResizeableTitle,
       },
-      body: renderVirtualList,
+      body: {
+        row: EditableRow,
+        cell: EditableCell,
+      },
     };
     const columns = this.state.columns.map((col, index) => {
       if (!col.editable) {
@@ -339,33 +281,18 @@ class EditableTable extends React.Component {
         }),
       };
     });
-    const widthColumnCount = columns.filter(({ width }) => !width).length;
-    const mergedColumns = columns.map((column) => {
-
-      if (column.width) {
-        return column;
-      }
-      return { ...column, width: Math.floor(this.state.tableWidth / widthColumnCount) };
-    });
     return (
       <>
         <div className="table-contain" ref={this.ref}>
-          <ResizeObserver
-            onResize={({ width, height }) => {
-              this.setState({ tableWidth: width, tableHeight: height - 43 })
-            }}
-          >
-            <Table
-              // rowSelection={this.props.rowSelection}
-              components={components}
-              rowClassName={() => 'editable-row'}
-              dataSource={dataSource}
-              // columns={columns}
-              columns={mergedColumns}
-              loading={this.props.loading}
-              pagination={false} scroll={{ y: this.state.height }}
-            />
-          </ResizeObserver>
+          <Table
+            rowSelection={this.props.rowSelection}
+            components={components}
+            rowClassName={() => 'editable-row'}
+            dataSource={dataSource}
+            columns={columns}
+            loading={this.props.loading}
+            pagination={false} scroll={{ y: this.state.height }}
+          />
         </div>
         <div className="paging">
           {

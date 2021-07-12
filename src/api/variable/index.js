@@ -158,6 +158,24 @@ export async function VerifyAddress(params) {
     method: 'get'
   })
 }
+//校验最大值是否合法
+//params: object
+export function VerifyMax(params) {
+  return axios({
+    url: "/VariableManage/VerifyMax",
+    params,
+    method: 'get'
+  })
+}
+//校验最小值是否合法
+//params: object
+export function VerifyMin(params) {
+  return axios({
+    url: "/VariableManage/VerifyMin",
+    params,
+    method: 'get'
+  })
+}
 //获取地址编辑信息
 //params: object
 export function GetAddressEditInfo(params) {
@@ -254,7 +272,7 @@ export function GetOPCUaNodes(nodeId) {
     url: '/VariableManage/GetOPCUaNodes',
     params: {
       nodeId
-    },
+    }, 
     method: 'get'
   })
 }

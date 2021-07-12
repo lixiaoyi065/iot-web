@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Modal, message } from 'antd'
 
-import { GetUserList, AddUser, UpdateUser, DeleteUser,UpdateUserPassword } from 'api/user'
+import { GetUserList, AddUser, UpdateUser, DeleteUser, UpdateUserPassword } from 'api/user'
 
 import DataTable from 'components/common/Table'
 import Search from './components/Search'
@@ -9,7 +9,7 @@ import ModifyPw from './components/ModifyPw'
 import AddUserPane from './components/AddUser'
 import img404 from 'assets/img/common/404.png'
 
-import {getCookie} from 'utils'
+import { getCookie } from 'utils'
 
 class UserList extends PureComponent {
   state = {
@@ -17,7 +17,8 @@ class UserList extends PureComponent {
     count: 0,
     isShow: false,
     modalContent: "",
-    selectedRowKeys: []
+    selectedRowKeys: [],
+    title: ""
   }
 
   componentDidMount() {
@@ -38,11 +39,11 @@ class UserList extends PureComponent {
           count: res.data.length
         })
       } else {
-        message.error("发生错误："+ res.msg)
+        message.error("发生错误：" + res.msg)
       }
     })
   }
-  
+
   //查询
   search = (res) => {
     console.log(res)
@@ -56,7 +57,7 @@ class UserList extends PureComponent {
         this.GetUserList("");
         this.onCancel();
       } else {
-        message.error("添加失败："+ res.msg)
+        message.error("添加失败：" + res.msg)
       }
     })
   }
@@ -67,7 +68,7 @@ class UserList extends PureComponent {
         this.GetUserList("");
         this.onCancel();
       } else {
-        message.error("编辑失败："+ res.msg)
+        message.error("编辑失败：" + res.msg)
       }
     })
   }
@@ -75,14 +76,16 @@ class UserList extends PureComponent {
   addUser = () => {
     this.setState({
       isShow: true,
-      modalContent: <AddUserPane key={ Date() } onCancel={this.onCancel} onFinish={ this.addUserForm }/>
+      title: "添加用户",
+      modalContent: <AddUserPane key={Date()} onCancel={this.onCancel} onFinish={this.addUserForm} />
     })
   }
   //编辑用户
   modifyUser = (obj) => {
     this.setState({
       isShow: true,
-      modalContent: <AddUserPane key={ Date() } userkey={ obj } onCancel={this.onCancel} onFinish={ this.modifyUserForm }/>
+      title: "编辑用户",
+      modalContent: <AddUserPane key={Date()} userkey={obj} onCancel={this.onCancel} onFinish={this.modifyUserForm} />
     })
   }
   //删除用户
@@ -93,7 +96,7 @@ class UserList extends PureComponent {
           message.info("删除成功")
           this.GetUserList("");
         } else {
-          message.error("删除失败："+ res.msg)
+          message.error("删除失败：" + res.msg)
         }
       })
     } else {
@@ -118,103 +121,108 @@ class UserList extends PureComponent {
   modifyPw = (key) => {
     this.setState({
       isShow: true,
-      modalContent: <ModifyPw userkey={key} onCancel={this.onCancel} onFinish={ (res)=>{this.ModifyPwForm(key,res)} }/>
+      title: "修改密码",
+      modalContent: <ModifyPw userkey={key} onCancel={this.onCancel} onFinish={(res) => { this.ModifyPwForm(key, res) }} />
     })
   }
 
   onCancel = () => {
-    this.setState({isShow: false})
+    this.setState({ isShow: false })
   }
 
   onSelectChange = selectedRowKeys => {
     this.setState({ selectedRowKeys });
   };
-  
+
   render() {
 
     return (
-      <div className="tableList" style={{'paddingLeft': '25px'}}>
+      <div className="tableList" style={{ 'paddingLeft': '25px' }}>
         {
           getCookie("userName") === "SuperAdmin" ? (
             <>
-              <Search searchForm={this.search} addUser={this.addUser} delUser={ this.delUser }/>
+              <Search searchForm={this.search} addUser={this.addUser} delUser={this.delUser} />
               <div className="tableContain">
                 <DataTable
                   dataSource={this.state.dataSource}
                   rowSelection={{
-                    columnWidth: "50px",
+                    columnWidth: 50,
                     selectedRowKeys: this.state.selectedRowKeys,
                     onChange: this.onSelectChange,
                   }}
                   loadMore={this.loadMore}
                   count={this.state.count}
                   columns={[
-                  {
-                    title: '序号',
-                    dataIndex: 'key',
-                    width: "70px",
-                    render: (key, i) => {
-                      return <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span>
-                    }
-                  },
-                  {
-                    title: '用户账号',
-                    dataIndex: 'userAccount',
-                  },
-                  {
-                    title: '用户名称',
-                    dataIndex: 'userName',
-                  },
-                  {
-                    title: '电话号码',
-                    dataIndex: 'phone',
-                    width: '200px',
-                  },
-                  {
-                    title: '操作',
-                    dataIndex: 'userID',
-                    render: (key, obj) => {
-                      if (obj.userAccount === "SuperAdmin") {
-                        return <></>
-                      } else {
-                        return (
-                          <>
-                            <button className="ant-opt-btn" onClick={() => {
-                            this.modifyUser(obj)
-                          }}>编辑</button>
-                            {
-                              getCookie("userName") === "SuperAdmin" ? (
-                                <button className="ant-opt-btn ant-opt-btn-normal"
-                                  onClick={() => { this.modifyPw(key)} } style={{ "marginLeft": "20px" }}>修改密码</button>
-                              ): (
+                    {
+                      title: '序号',
+                      dataIndex: 'key',
+                      width: 70,
+                      render: (key, i) => {
+                        return <span className="serialNum">{this.state.dataSource.indexOf(i) + 1}</span>
+                      }
+                    },
+                    {
+                      title: '用户账号',
+                      dataIndex: 'userAccount',
+                      width: 250
+                    },
+                    {
+                      title: '用户名称',
+                      dataIndex: 'userName',
+                      width: 250
+                    },
+                    {
+                      title: '电话号码',
+                      dataIndex: 'phone',
+                      width: 150
+                    },
+                    {
+                      title: '操作',
+                      dataIndex: 'userID',
+                      width: 200,
+                      minWidht: 200,
+                      render: (key, obj) => {
+                        if (obj.userAccount === "SuperAdmin") {
+                          return <></>
+                        } else {
+                          return (
+                            <>
+                              <button className="ant-opt-btn" onClick={() => {
+                                this.modifyUser(obj)
+                              }}>编辑</button>
+                              {
+                                getCookie("userName") === "SuperAdmin" ? (
+                                  <button className="ant-opt-btn ant-opt-btn-normal"
+                                    onClick={() => { this.modifyPw(key) }} style={{ "marginLeft": "20px" }}>修改密码</button>
+                                ) : (
                                   <></>
-                              )
-                            }
-                          </>
-                        )
+                                )
+                              }
+                            </>
+                          )
+                        }
                       }
                     }
-                  }
-                ]} />
-                
+                  ]} />
+
                 <Modal
-                  title="修改密码"
+                  title={this.state.title}
                   visible={this.state.isShow}
                   onCancel={this.onCancel}
                   footer={null}
                   width="460px"
                 >
-                {
-                  this.state.modalContent
-                }
+                  {
+                    this.state.modalContent
+                  }
                 </Modal>
               </div>
             </>
           ) :
-          <div className="error-page">
-            <img src={ img404 } alt="404"/>
-            <div className="error-msg">抱歉，您没有权限访问！</div>   
-          </div>
+            <div className="error-page">
+              <img src={img404} alt="404" />
+              <div className="error-msg">抱歉，您没有权限访问！</div>
+            </div>
         }
       </div>
     )

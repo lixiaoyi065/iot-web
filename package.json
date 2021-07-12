@@ -27,6 +27,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
     "react-window": "^1.8.6",
+    "tablex": "^1.18.23",
     "web-vitals": "^0.2.4",
     "ztree": "^3.5.24",
     "ztree-for-react": "^1.2.0"
