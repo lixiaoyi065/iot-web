@@ -91,12 +91,17 @@ class UserList extends PureComponent {
   //删除用户
   delUser = () => {
     if (this.state.selectedRowKeys.length > 0) {
-      DeleteUser(this.state.selectedRowKeys).then(res => {
-        if (res.code === 0) {
-          message.info("删除成功")
-          this.GetUserList("");
-        } else {
-          message.error("删除失败：" + res.msg)
+      Modal.confirm({
+        title: "确认删除用户吗？",
+        onOk: () => {
+          DeleteUser(this.state.selectedRowKeys).then(res => {
+            if (res.code === 0) {
+              message.info("删除成功")
+              this.GetUserList("");
+            } else {
+              message.error("删除失败：" + res.msg)
+            }
+          })
         }
       })
     } else {

@@ -5,8 +5,8 @@ import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
-// import EditableTable from 'components/common/DataTable'
-import EditableTable from 'components/common/Tablex'
+import EditableTable from 'components/common/DataTable'
+// import EditableTable from 'components/common/Tablex'
 
 import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
@@ -1242,27 +1242,27 @@ class RealTime extends PureComponent{
                 addressSearch={ this.addressSearch }
                 loading={this.state.tableLoading}
                 activeNodeType={activeNodeType}
-                // columns={this.tableColums(activeNodeType).map(el => {
-                //   return {
-                //     title: el.title,
-                //     dataIndex: el.dataIndex,
-                //     width: el.width,
-                //     ellipsis: {
-                //       showTitle: false,
-                //     },
-                //     editable: el.editable,
-                //     type: el.type || "",
-                //     onCell: (row, value, index) => {
-                //       return {
-                //         onClick: () => {
-                //           this.beginEdit(row)
-                //         },
-                //       }
-                //     },
-                //     // content: el.content,
-                //     // render: el.render
-                //   }
-                // })}
+                columns={this.tableColums(activeNodeType).map(el => {
+                  return {
+                    title: el.title,
+                    dataIndex: el.dataIndex,
+                    width: el.width,
+                    ellipsis: {
+                      showTitle: false,
+                    },
+                    editable: el.editable,
+                    type: el.type || "",
+                    onCell: (row, value, index) => {
+                      return {
+                        onClick: () => {
+                          this.beginEdit(row)
+                        },
+                      }
+                    },
+                    // content: el.content,
+                    // render: el.render
+                  }
+                })}
               />
             </div>
           </div>
