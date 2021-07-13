@@ -685,21 +685,23 @@ class RealTime extends PureComponent{
             //清除定时器,关闭加载中
             if (val.data.status === 2 || val.data.status === 3) {
               clearInterval(timer)
-              
+
               //保存失败
-              if (val.data.message !== "保存成功") {
+              if (val.data.message !== "保存完成" && val.data.message !== "保存成功") {
                 message.info(val.data.message)
                 this.setState({loading: false})
                 return
               }
-              message.info(val.data.message)
-              $("div").removeClass("effective-editor")
-              $("td").removeClass("effective-editor")
-              // console.log(val)
         
-              this.setState({modifyTagsList: []},()=>{
+              this.setState((state) => {
+                return {
+                  modifyTagsList: [],
+                  gist: [...state.dataSource]
+                }
+              }, () => {
                 this.setState({loading: false})
               })
+              
               if (val.data.resultData !== null) {
                 let { dataTypes, tree } = val.data.resultData
                 if (dataTypes !== null) {
@@ -714,7 +716,6 @@ class RealTime extends PureComponent{
                   type: this.state.activeNodeType
                 })
               }
-              // console.log(this.state.modifyTagsList)
             }
           })
         }, 1000)
@@ -731,6 +732,8 @@ class RealTime extends PureComponent{
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType
     })
+    $("div").removeClass("effective-editor")
+    $("td").removeClass("effective-editor")
     //重置查询
     this.searchRef.current.refs.formRef.setFieldsValue({
       dataType: "不限",
