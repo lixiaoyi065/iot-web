@@ -127,7 +127,8 @@ const EditableCell = ({
     try {
       record[dataIndex] = e
       if (Number(activeNodeType) === 2) {
-        if (e === '二进制变量') {
+        let types = ['二进制变量', '日期', '时间', '日期时间', '字符串']
+        if (types.includes(e)) {
           record['min'] = ''
           record['max'] = ''
         }
@@ -278,7 +279,8 @@ class EditableTable extends React.Component {
           min.parentElement.classList.add('effective-editor')
           max.parentElement.classList.add('effective-editor')
           if (nodeType === 2) {
-            if (state.dataSource[i].dataType === '二进制变量') {
+            let types = ['二进制变量', '日期', '时间', '日期时间', '字符串']
+            if (types.includes(state.dataSource[i].dataType)) {
               state.dataSource[i].min = ''
               state.dataSource[i].max = ''
               min.innerHTML = ''
