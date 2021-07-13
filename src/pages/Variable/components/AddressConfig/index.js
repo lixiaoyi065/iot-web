@@ -317,7 +317,7 @@ export default class config extends PureComponent {
       } else {
         if (row.dataType === '二进制变量') {  
           let bitReg = /^[M]([0-9]{1,})([.]{1})([0-7]{1})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBX){1})([0-9]{1,})([.]{1})([0-7]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBX){1})([0-9]{1,})([.]{1})([0-7]{1,})$/ // DB号匹配正则
           let IReg = /^[I]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输入匹配正则
           let QReg = /^[Q]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输出匹配正则
           if (bitReg.test(address)) {
@@ -515,7 +515,41 @@ export default class config extends PureComponent {
             formData.showList = [1,4,7]
           }
 
-        } else if (popupData.dataType === '文本变量8位字符集' || popupData.dataType === '文本变量16位字符集') {
+        } else if (popupData.dataType === '文本变量8位字符集') {
+          let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
+          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
+          let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
+          let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
+
+          if (bitReg.test(address)) {
+            let arr =  address.match(bitReg) 
+            formData.dataArea = '位'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (dbReg.test(address)) {
+            let arr =  address.match(dbReg) 
+            console.log(arr)
+            formData.dataArea = 'DB'
+            formData.DBNum = arr[2]
+            formData.addressOffset = arr[6]
+            formData.len = popupData.dataLen
+            formData.showList = [1,3,4,6]
+          } else if (IReg.test(address)) {
+            let arr =  address.match(IReg) 
+            formData.dataArea = '输入'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          } else if (QReg.test(address)) {
+            let arr =  address.match(QReg) 
+            formData.dataArea = '输出'
+            formData.addressOffset = arr[2]
+            formData.len = popupData.dataLen
+            formData.showList = [1,4,6]
+          }
+          
+        }  else if (popupData.dataType === '文本变量16位字符集') {
           let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
           let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
@@ -2197,7 +2231,13 @@ export default class config extends PureComponent {
           }
         }
       } else if (arrayEqual(addressData.showList, [1,3,4,6])) {
-        popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBW${addressData.addressOffset}`
+        if (popupData.dataType === '文本变量8位字符集') {
+          popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBB${addressData.addressOffset}`
+        } else if (popupData.dataType === '文本变量16位字符集') {
+          popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBW${addressData.addressOffset}`
+        } else {
+          popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.DBW${addressData.addressOffset}`
+        }
       } else if (arrayEqual(addressData.showList, [1,4,6,7])) {
         if (popupData.model === 'S7-200Smart') {
           if (addressData.dataArea === 'M') {
