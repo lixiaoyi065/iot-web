@@ -685,7 +685,8 @@ class RealTime extends PureComponent{
             //清除定时器,关闭加载中
             if (val.data.status === 2 || val.data.status === 3) {
               clearInterval(timer)
-              console.log(val)
+              
+              //保存失败
               if (val.data.message !== "保存成功") {
                 message.info(val.data.message)
                 this.setState({loading: false})
@@ -693,6 +694,7 @@ class RealTime extends PureComponent{
               }
               message.info(val.data.message)
               $("div").removeClass("effective-editor")
+              $("td").removeClass("effective-editor")
               // console.log(val)
         
               this.setState({modifyTagsList: []},()=>{

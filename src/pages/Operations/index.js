@@ -27,7 +27,7 @@ class OperationsPane extends PureComponent {
           nodeID: data.id || "",
           verificationCode: data.verificationCode || "",
           name: data.name || "",
-          copyText: `项目名称：${data.name||""},节点ID：${data.id},节点ID：${data.verificationCode||""}`
+          copyText: `项目名称：${data.name||""},节点ID：${data.id},验证码：${data.verificationCode||""}`
         })
         refForm.current.setFieldsValue({
           verificationCode: data.verificationCode || "",
@@ -75,7 +75,7 @@ class OperationsPane extends PureComponent {
 
     this.setState({
       copyText: `项目名称：${editName === "name" ? e.target.value : name},节点ID：${nodeID},
-                  节点ID：${editName === "verificationCode" ? e.target.value : verificationCode}`,
+                  验证码：${editName === "verificationCode" ? e.target.value : verificationCode}`,
       isSaved: formVal.name === name && formVal.verificationCode === verificationCode
     })
   }
