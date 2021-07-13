@@ -512,7 +512,8 @@ class RealTime extends PureComponent{
     })
   }
 
-  handleSave = (dataIndex, val, row, flag = true,isAddress= false) => {
+  handleSave = (dataIndex, val, row, flag = true, isAddress = false) => {
+    console.log([...this.state.modifyTagsList])
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
@@ -684,9 +685,13 @@ class RealTime extends PureComponent{
             //清除定时器,关闭加载中
             if (val.data.status === 2 || val.data.status === 3) {
               clearInterval(timer)
-              if(val.data.message){
+              console.log(val)
+              if (val.data.message !== "保存成功") {
                 message.info(val.data.message)
+                this.setState({loading: false})
+                return
               }
+              message.info(val.data.message)
               $("div").removeClass("effective-editor")
               // console.log(val)
         
@@ -712,7 +717,6 @@ class RealTime extends PureComponent{
           })
         }, 1000)
       }else{
-        console.log(this.state.modifyTagsList)
         message.error(res.msg)
         this.setState({loading: false})
       }
