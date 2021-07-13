@@ -968,10 +968,15 @@ class RealTime extends PureComponent{
   }
 
   wholeImportFileFun = (formdata) => {
-    document.getElementById('wholeImport').value=null
+    document.getElementById('wholeImport').value = null
+    console.log({
+      nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
+      type: this.state.activeNodeType !== '' ? this.state.activeNodeType : -1,
+      formData: formdata
+    })
     WholeImportTags({
       nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
-      type: this.state.activeNodeType || -1,
+      type: this.state.activeNodeType !== '' ? this.state.activeNodeType : -1,
       formData: formdata
     }).then(res => {
       if (res.code === 0) {
@@ -991,12 +996,12 @@ class RealTime extends PureComponent{
                 // console.log(result.tags)
                 return {
                   loading: false,
-                  // count: mes.data.message === "导入成功" ? result.total : state.count,
-                  // gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
-                  // dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
-                  // treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
-                  // dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
-                  // modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项
+                  count: mes.data.message === "导入成功" ? result.total : state.count,
+                  gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
+                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
+                  dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
+                  modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项
                 }
               })
               PubSub.publish("changeTags", true)
