@@ -126,7 +126,7 @@ const EditableCell = ({
   const selectChange = (e, id) => {
     try {
       record[dataIndex] = e
-      if (Number(activeNodeType) === 2) {
+      if (Number(activeNodeType) === 2 || Number(activeNodeType) === 0 ) {
         let types = ['二进制变量', '日期', '时间', '日期时间', '字符串']
         if (types.includes(e)) {
           record['min'] = ''
@@ -274,11 +274,12 @@ class EditableTable extends React.Component {
     this.setState(state => {
       for (let i = 0; i < state.dataSource.length; i++) {
         if (state.dataSource[i].key === row.key) {
-          let min = document.querySelector(`#min${row.key} div`)
-          let max = document.querySelector(`#max${row.key} div`)
-          min.parentElement.classList.add('effective-editor')
-          max.parentElement.classList.add('effective-editor')
-          if (nodeType === 2) {
+          if (nodeType === 2 || nodeType === 0) {
+            let min = document.querySelector(`#min${row.key} div`)
+            let max = document.querySelector(`#max${row.key} div`)
+            min.parentElement.classList.add('effective-editor')
+            max.parentElement.classList.add('effective-editor')
+
             let types = ['二进制变量', '日期', '时间', '日期时间', '字符串']
             if (types.includes(state.dataSource[i].dataType)) {
               state.dataSource[i].min = ''

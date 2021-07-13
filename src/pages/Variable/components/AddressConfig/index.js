@@ -707,7 +707,7 @@ export default class config extends PureComponent {
         let CSReg = /^(CS)([0-9]{1,})$/ // 计数器（触点）（CS）正则
         let CCReg = /^(CC)([0-9]{1,})$/  // 计数器（线圈）（CC）正则
         let DReg =  /^[D]([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 数据寄存器（D）正则
-        let WReg = /^[W]([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 链接寄存器（W）正则
+        let WReg = /^[W]([0-9a-f]{1,})([.]{1})([0-9A-F]{1})$/  // 链接寄存器（W）正则
         let TNReg = /^(TN)([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 定时器（当前值）（TN）正则
         let CNReg = /^(CN)([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 计数器（当前值）（CN）正则
   
@@ -755,7 +755,7 @@ export default class config extends PureComponent {
         } else if (WReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(WReg) 
           formData.dataArea = '链接寄存器（W）'
-          formData.address = parseInt(arr[1])
+          formData.address = arr[1]
           formData.bit = arr[3]
           formData.showList = [1,2,3]
         } else if (TNReg.test(popupData.dataValue)) {
@@ -782,7 +782,7 @@ export default class config extends PureComponent {
   
       } else if (popupData.dataType === '字符串') {
         let DReg =  /^[D]([0-9]{1,})$/  // 数据寄存器（D）正则
-        let WReg = /^[W]([0-9]{1,})$/  // 链接寄存器（W）正则
+        let WReg = /^[W]([0-9a-f]{1,})$/  // 链接寄存器（W）正则
         let TNReg = /^(TN)([0-9]{1,})$/  // 定时器（当前值）（TN）正则
         let CNReg = /^(CN)([0-9]{1,})$/  // 计数器（当前值）（CN）正则
   
@@ -820,7 +820,7 @@ export default class config extends PureComponent {
         }
       } else {
         let DReg =  /^[D]([0-9]{1,})$/  // 数据寄存器（D）正则
-        let WReg = /^[W]([0-9]{1,})$/  // 链接寄存器（W）正则
+        let WReg = /^[W]([0-9a-f]{1,})$/  // 链接寄存器（W）正则
         let TNReg = /^(TN)([0-9]{1,})$/  // 定时器（当前值）（TN）正则
         let CNReg = /^(CN)([0-9]{1,})$/  // 计数器（当前值）（CN）正则
   
@@ -2099,23 +2099,7 @@ export default class config extends PureComponent {
   }
 
   blurData = (e, prop, protocal)=>{
-    if (prop === 'address' && protocal === 'MC3E_Binary_Ethernet') {
-      // MC3E_Binary_Ethernet协议 输入寄存器(x) 与 输出寄存器（Y）偏移地址只能输入16进制位数
-      if (this.state.formData.dataArea === '输入寄存器（X）' || this.state.formData.dataArea === '输出寄存器（Y）' ) {
-        // 不能填写能被16进制整除的数
-        if(Number(e.target.value) !== 0 && Number(e.target.value) % 16 === 0) {
-          e.target.value = '1'
-          message.warning('地址格式不正确，请重新输入十六进制地址')
-          this.addressForm.current.setFieldsValue({address: '1'})
-        }
-      }
-      
-    
-    if (prop === 'address' && protocal === 'MCA1E_Binary_Etherent') {
-      
-    }
 
-    }
     console.log(e, prop, protocal)
   }
 
@@ -2697,8 +2681,12 @@ export default class config extends PureComponent {
                 ) : <></>
               }{
                 items && items.includes(2) ? 
-                <Form.Item label="偏移地址" name="address" rules={[{required: true, message: "必填"}]}>
-                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MC3E_Binary_Ethernet')} }/>
+                <Form.Item label="偏移地址" name="address"  rules={formData.dataArea === '输入寄存器（X）' || formData.dataArea === '输出寄存器（Y）' 
+                    ? [{ required: true, message: "必填" }, { pattern: /^[0-7]*$/, message: "只能输入8进制位数" }]
+                    : (formData.dataArea === '链接寄存器（W）' 
+                    ? [{ required: true, message: "必填" }, { pattern: /^[0-9a-f]*$/, message: "只能输入16进制位数" }]
+                    : [{ required: true, message: "必填" },{pattern: /^[0-9]*$/, message: "只能输入数字"}])}>
+                  <Input autoComplete="off" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MC3E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }{
                 items && items.includes(3) ? 
@@ -2759,8 +2747,12 @@ export default class config extends PureComponent {
                 ) : <></>
               }{
                 items && items.includes(2) ? 
-                <Form.Item label="偏移地址" name="address" rules={[{required: true, message: "必填"}]}>
-                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MCA1E_Binary_Ethernet')} }/>
+                <Form.Item label="偏移地址" name="address" rules={formData.dataArea === '输入寄存器（X）' || formData.dataArea === '输出寄存器（Y）' 
+                ? [{ required: true, message: "必填" }, { pattern: /^[0-7]*$/, message: "只能输入8进制位数" }]
+                : (formData.dataArea === '链接寄存器（W）' 
+                ? [{ required: true, message: "必填" }, { pattern: /^[0-9a-f]*$/, message: "只能输入16进制位数" }]
+                : [{ required: true, message: "必填" },{pattern: /^[0-9]*$/, message: "只能输入数字"}])}>
+                  <Input autoComplete="off" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MCA1E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
               }{
                 items && items.includes(3) ? 
