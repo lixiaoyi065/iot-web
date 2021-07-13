@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Button, Select, Dropdown } from 'antd'
+import { debounce } from "lodash";
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import './index.less'
 
@@ -80,7 +81,7 @@ class Search extends PureComponent {
           <Button className="ant-btn-opt-sm ant-btn-opt-primary" onClick={this.props.addTags} disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>
             <img className="btn-icon" src={addOpt} alt="" />
           </Button>
-          <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={this.props.delTags} disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>
+          <Button className="ant-btn-opt-sm ant-btn-opt-danger" onClick={debounce(this.props.delTags, 500)} disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>
             <img className="btn-icon" src={delOpt} alt="" />
           </Button>
           {

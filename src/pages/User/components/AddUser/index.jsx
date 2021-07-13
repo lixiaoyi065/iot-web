@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import {Form, Input, Button} from 'antd'
+import { debounce } from "lodash"
 import { LoadingOutlined } from '@ant-design/icons'
 
 export default class AddUserPane extends PureComponent{
@@ -17,7 +18,7 @@ export default class AddUserPane extends PureComponent{
   render() {
     return (
       <>
-        <Form ref={this.formRef} onFinish={this.props.onFinish} initialValues={{
+        <Form ref={this.formRef} onFinish={debounce(this.props.onFinish,500)} initialValues={{
           userID: "00000000-0000-0000-0000-000000000000",
           userAccount: "",
           userPassword: "",

@@ -46,7 +46,7 @@ class RealTime extends PureComponent{
     node: {},//当前显示的变量对象
     activeNode: "", //当前显示变量列表的节点ID
     activeNodeName: "",//当前显示变量列表的节点名称
-    activeNodeType: 0, //当前显示变量列表的节点类型
+    activeNodeType: "", //当前显示变量列表的节点类型
     tableDataTypes: [],
     modifyTagsList: [],
     fileList: [],
@@ -156,7 +156,7 @@ class RealTime extends PureComponent{
         {
           key: "stopDevice",
           name: "停止",
-          disabled: state !== 1
+          disabled: state === 0
         },
         {
           key: "addGroupCurrent",
@@ -433,7 +433,7 @@ class RealTime extends PureComponent{
         }
       })
     } else if (e.key === "stopDevice") {
-      if (state !== 1) {
+      if (state === 0 ) {
         return
       }
       StopDevice(node.nodeID).then(res =>{
@@ -512,7 +512,8 @@ class RealTime extends PureComponent{
     })
   }
 
-  handleSave = (dataIndex, val, row, flag = true,isAddress= false) => {
+  handleSave = (dataIndex, val, row, flag = true, isAddress = false) => {
+    console.log([...this.state.modifyTagsList])
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
@@ -684,9 +685,13 @@ class RealTime extends PureComponent{
             //清除定时器,关闭加载中
             if (val.data.status === 2 || val.data.status === 3) {
               clearInterval(timer)
-              if(val.data.message){
+              console.log(val)
+              if (val.data.message !== "保存成功") {
                 message.info(val.data.message)
+                this.setState({loading: false})
+                return
               }
+              message.info(val.data.message)
               $("div").removeClass("effective-editor")
               // console.log(val)
         
@@ -712,7 +717,6 @@ class RealTime extends PureComponent{
           })
         }, 1000)
       }else{
-        console.log(this.state.modifyTagsList)
         message.error(res.msg)
         this.setState({loading: false})
       }
@@ -874,6 +878,9 @@ class RealTime extends PureComponent{
             message.error(res.msg)
           }
         })
+        this.setState({
+          selectedRowKeys: []
+        })
       }
     })
   }
@@ -965,10 +972,15 @@ class RealTime extends PureComponent{
   }
 
   wholeImportFileFun = (formdata) => {
-    document.getElementById('wholeImport').value=null
+    document.getElementById('wholeImport').value = null
+    console.log({
+      nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
+      type: this.state.activeNodeType !== '' ? this.state.activeNodeType : -1,
+      formData: formdata
+    })
     WholeImportTags({
       nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
-      type: this.state.activeNodeType || -1,
+      type: this.state.activeNodeType !== '' ? this.state.activeNodeType : -1,
       formData: formdata
     }).then(res => {
       if (res.code === 0) {
@@ -985,12 +997,12 @@ class RealTime extends PureComponent{
                   $(".effective-editor").removeClass("effective-editor")
                 }
                 // console.log(mes.data.message === "导入成功")
-                // console.log(result.tags)
+                console.log(this.state.activeNodeType === "")
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
                   gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
-                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? (this.state.activeNodeType === "" ? [] : result.tags) : state.dataSource,
                   treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
                   dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
                   modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项

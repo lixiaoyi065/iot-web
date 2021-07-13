@@ -381,7 +381,13 @@ class EditableTable extends React.Component {
     };
     const columns = this.state.columns.map((col, index) => {
       if (!col.editable) {
-        return col;
+        return {
+          ...col,
+          onHeaderCell: column => ({
+            width: column.width,
+            onResize: this.handleResize(index),
+          })
+        };
       }
       return {
         ...col,

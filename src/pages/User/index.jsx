@@ -100,6 +100,7 @@ class UserList extends PureComponent {
             if (res.code === 0) {
               message.info("删除成功")
               this.GetUserList("");
+              this.setState({selectedRowKeys: []})
             } else {
               message.error("删除失败：" + res.msg)
             }
