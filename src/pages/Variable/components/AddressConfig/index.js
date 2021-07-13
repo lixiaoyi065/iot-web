@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Select, Input, Button } from 'antd'
+import { Form, Select, Input, Button, message } from 'antd'
 import "./index.less"
 
 export default class config extends PureComponent {
@@ -2099,6 +2099,23 @@ export default class config extends PureComponent {
   }
 
   blurData = (e, prop, protocal)=>{
+    if (prop === 'address' && protocal === 'MC3E_Binary_Ethernet') {
+      // MC3E_Binary_Ethernet协议 输入寄存器(x) 与 输出寄存器（Y）偏移地址只能输入16进制位数
+      if (this.state.formData.dataArea === '输入寄存器（X）' || this.state.formData.dataArea === '输出寄存器（Y）' ) {
+        // 不能填写能被16进制整除的数
+        if(Number(e.target.value) !== 0 && Number(e.target.value) % 16 === 0) {
+          e.target.value = '1'
+          message.warning('地址格式不正确，请重新输入十六进制地址')
+          this.addressForm.current.setFieldsValue({address: '1'})
+        }
+      }
+      
+    
+    if (prop === 'address' && protocal === 'MCA1E_Binary_Etherent') {
+      
+    }
+
+    }
     console.log(e, prop, protocal)
   }
 

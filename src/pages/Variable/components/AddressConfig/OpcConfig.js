@@ -42,7 +42,6 @@ export default class config extends PureComponent {
 
   //组列表树数据处理
   dataProcess = (data = [], pos = "0-0") => {
-    // debugger
     let treeData = [];
     data.forEach((item) => {
       this.setState(state=> {

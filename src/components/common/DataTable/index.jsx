@@ -126,8 +126,54 @@ const EditableCell = ({
   const selectChange = (e, id) => {
     try {
       record[dataIndex] = e
+      if (Number(activeNodeType) === 2) {
+        if (e === '二进制变量') {
+          record['min'] = ''
+          record['max'] = ''
+        }
+        if (e === '有符号8位整型') {
+          record['min'] = '-128'
+          record['max'] = '127'
+        }
+        if (e === '无符号8位整型') {
+          record['min'] = '0'
+          record['max'] = '255'
+        }
+        if (e === '有符号16位整型') {
+          record['min'] = '-32768'
+          record['max'] = '32767'
+        } 
+        if (e === '无符号16位整型') {
+          record['min'] = '0'
+          record['max'] = '65535'
+        } 
+        if (e === '有符号32位整型') {
+          record['min'] = '-2147483648'
+          record['max'] = '2147483647'
+        } 
+        if (e === '无符号32位整型') {
+          record['min'] = '0'
+          record['max'] = '4294967295'
+        } 
+        if (e === '有符号64位整型') {
+          record['min'] = '-9223372036854775808'
+          record['max'] = '9223372036854775807'
+        } 
+        if (e === '无符号64位整型') {
+          record['min'] = '0'
+          record['max'] = '18446744073709551615'
+        } 
+        if (e === 'F32位浮点数IEEE754') {
+          record['min'] = '-3.402823E+38'
+          record['max'] = '3.402823E+38'
+        } 
+        if (e === 'F64位浮点数IEEE754') {
+          record['min'] = '-1.7976931348623157E+308'
+          record['max'] = '1.7976931348623157E+308'
+        } 
+      }
       toggleEdits()
-      handleSave(dataIndex, e, record, checkIsSame(e));
+      handleSave(dataIndex, e, record, checkIsSame(e), false, Number(activeNodeType));
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -181,8 +227,8 @@ const EditableCell = ({
     )
   }
 
-  return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)}
-    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""} ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
+  return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)} id={record && dataIndex + record.key}
+   className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}  ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
 };
 
@@ -220,10 +266,85 @@ class EditableTable extends React.Component {
     return null
   }
 
-  handleSave = (dataIndex, val, row, flag = true, isAddress= false) => {
+  handleSave = (dataIndex, val, row, flag = true, isAddress= false, nodeType) => {
+    /*  
+      nodeType： 内部变量 2 选择数据类型需要展示最大值和最小值
+     */
     this.setState(state => {
       for (let i = 0; i < state.dataSource.length; i++) {
         if (state.dataSource[i].key === row.key) {
+          let min = document.querySelector(`#min${row.key} div`)
+          let max = document.querySelector(`#max${row.key} div`)
+          min.parentElement.classList.add('effective-editor')
+          max.parentElement.classList.add('effective-editor')
+          if (nodeType === 2) {
+            if (state.dataSource[i].dataType === '二进制变量') {
+              state.dataSource[i].min = ''
+              state.dataSource[i].max = ''
+              min.innerHTML = ''
+              max.innerHTML = ''
+            }
+            if (state.dataSource[i].dataType === '有符号8位整型') {
+              state.dataSource[i].min = '-128'
+              state.dataSource[i].max = '127'
+              min.innerHTML = '-128'
+              max.innerHTML = '127'
+            }
+            if (state.dataSource[i].dataType === '无符号8位整型') {
+              state.dataSource[i].min = '0'
+              state.dataSource[i].max = '255'
+              min.innerHTML = '0'
+              max.innerHTML = '255'
+            }
+            if (state.dataSource[i].dataType === '有符号16位整型') {
+              state.dataSource[i].min = '-32768'
+              state.dataSource[i].max = '32767'
+              min.innerHTML = '-32768'
+              max.innerHTML = '32767'
+            }
+            if (state.dataSource[i].dataType === '无符号16位整型') {
+              state.dataSource[i].min = '0'
+              state.dataSource[i].max = '65535'
+              min.innerHTML = '0'
+              max.innerHTML = '65535'
+            }
+            if (state.dataSource[i].dataType === '有符号32位整型') {
+              state.dataSource[i].min = '-2147483648'
+              state.dataSource[i].max = '2147483647'
+              min.innerHTML = '-2147483648'
+              max.innerHTML = '2147483647'
+            }
+            if (state.dataSource[i].dataType === '无符号32位整型') {
+              state.dataSource[i].min = '0'
+              state.dataSource[i].max = '4294967295'
+              min.innerHTML = '0'
+              max.innerHTML = '4294967295'
+            }
+            if (state.dataSource[i].dataType === '有符号64位整型') {
+              state.dataSource[i].min = '-9223372036854775808'
+              state.dataSource[i].max = '9223372036854775807'
+              min.innerHTML = '-9223372036854775808'
+              max.innerHTML = '9223372036854775807'
+            }
+            if (state.dataSource[i].dataType === '无符号64位整型') {
+              state.dataSource[i].min = '0'
+              state.dataSource[i].max = '18446744073709551615'
+              min.innerHTML = '0'
+              max.innerHTML = '18446744073709551615'
+            }
+            if (state.dataSource[i].dataType === 'F32位浮点数IEEE754') {
+              state.dataSource[i].min = '-3.402823E+38'
+              state.dataSource[i].max = '3.402823E+38'
+              min.innerHTML = '-3.402823E+38'
+              max.innerHTML = '3.402823E+38'
+            }
+            if (state.dataSource[i].dataType === 'F64位浮点数IEEE754') {
+              state.dataSource[i].min = '-1.7976931348623157E+308'
+              state.dataSource[i].max = '1.7976931348623157E+308'
+              min.innerHTML = '-1.7976931348623157E+308'
+              max.innerHTML = '1.7976931348623157E+308'
+            }
+          }
           Object.assign(state.dataSource[i], row)
           return
         }
