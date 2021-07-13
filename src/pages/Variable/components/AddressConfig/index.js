@@ -707,7 +707,7 @@ export default class config extends PureComponent {
         let CSReg = /^(CS)([0-9]{1,})$/ // 计数器（触点）（CS）正则
         let CCReg = /^(CC)([0-9]{1,})$/  // 计数器（线圈）（CC）正则
         let DReg =  /^[D]([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 数据寄存器（D）正则
-        let WReg = /^[W]([0-9a-f]{1,})([.]{1})([0-9A-F]{1})$/  // 链接寄存器（W）正则
+        let WReg = /^[W]([0-9a-fA-f]{1,})([.]{1})([0-9a-fA-F]{1})$/  // 链接寄存器（W）正则
         let TNReg = /^(TN)([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 定时器（当前值）（TN）正则
         let CNReg = /^(CN)([0-9]{1,})([.]{1})([0-9A-F]{1})$/  // 计数器（当前值）（CN）正则
   
@@ -782,7 +782,7 @@ export default class config extends PureComponent {
   
       } else if (popupData.dataType === '字符串') {
         let DReg =  /^[D]([0-9]{1,})$/  // 数据寄存器（D）正则
-        let WReg = /^[W]([0-9a-f]{1,})$/  // 链接寄存器（W）正则
+        let WReg = /^[W]([0-9a-fA-F]{1,})$/  // 链接寄存器（W）正则
         let TNReg = /^(TN)([0-9]{1,})$/  // 定时器（当前值）（TN）正则
         let CNReg = /^(CN)([0-9]{1,})$/  // 计数器（当前值）（CN）正则
   
@@ -820,7 +820,7 @@ export default class config extends PureComponent {
         }
       } else {
         let DReg =  /^[D]([0-9]{1,})$/  // 数据寄存器（D）正则
-        let WReg = /^[W]([0-9a-f]{1,})$/  // 链接寄存器（W）正则
+        let WReg = /^[W]([0-9a-fA-f]{1,})$/  // 链接寄存器（W）正则
         let TNReg = /^(TN)([0-9]{1,})$/  // 定时器（当前值）（TN）正则
         let CNReg = /^(CN)([0-9]{1,})$/  // 计数器（当前值）（CN）正则
   
@@ -2684,7 +2684,7 @@ export default class config extends PureComponent {
                 <Form.Item label="偏移地址" name="address"  rules={formData.dataArea === '输入寄存器（X）' || formData.dataArea === '输出寄存器（Y）' 
                     ? [{ required: true, message: "必填" }, { pattern: /^[0-7]*$/, message: "只能输入8进制位数" }]
                     : (formData.dataArea === '链接寄存器（W）' 
-                    ? [{ required: true, message: "必填" }, { pattern: /^[0-9a-f]*$/, message: "只能输入16进制位数" }]
+                    ? [{ required: true, message: "必填" }, { pattern: /^[0-9a-fA-F]*$/, message: "只能输入16进制位数" }]
                     : [{ required: true, message: "必填" },{pattern: /^[0-9]*$/, message: "只能输入数字"}])}>
                   <Input autoComplete="off" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MC3E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
@@ -2750,7 +2750,7 @@ export default class config extends PureComponent {
                 <Form.Item label="偏移地址" name="address" rules={formData.dataArea === '输入寄存器（X）' || formData.dataArea === '输出寄存器（Y）' 
                 ? [{ required: true, message: "必填" }, { pattern: /^[0-7]*$/, message: "只能输入8进制位数" }]
                 : (formData.dataArea === '链接寄存器（W）' 
-                ? [{ required: true, message: "必填" }, { pattern: /^[0-9a-f]*$/, message: "只能输入16进制位数" }]
+                ? [{ required: true, message: "必填" }, { pattern: /^[0-9a-fA-F]*$/, message: "只能输入16进制位数" }]
                 : [{ required: true, message: "必填" },{pattern: /^[0-9]*$/, message: "只能输入数字"}])}>
                   <Input autoComplete="off" min="0" onBlur={ (e)=>{this.blurData(e, 'address', 'MCA1E_Binary_Ethernet')} }/>
                 </Form.Item> : <></>
