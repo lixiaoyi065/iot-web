@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table } from 'antd';
 import { Resizable } from 'react-resizable';
+import ResizeObserver from 'rc-resize-observer';
 
 import '../DataTable/index.less'
 
@@ -30,6 +31,8 @@ export default class EditableTable extends React.Component {
     this.state = {
       height: 0,
       columns: this.props.columns,
+      tableWidth: 0,
+      tableHeight: 0
     }
   }
 
@@ -72,15 +75,21 @@ export default class EditableTable extends React.Component {
    
     return (
       <>
-        <div className="table-contain" ref={ this.ref }>
-          <Table
-            rowSelection={this.props.rowSelection}
-            rowClassName={() => 'editable-row'}
-            components={components}
-            dataSource={dataSource}
-            columns={columns}
-            pagination={ false } scroll={{y: this.state.height }}
-          />
+        <div className="table-contain" ref={this.ref}>
+          <ResizeObserver
+            onResize={({ width, height }) => {
+              this.setState({ tableWidth: width, tableHeight: height - 43 })
+            }}
+          >
+            <Table
+              rowSelection={this.props.rowSelection}
+              rowClassName={() => 'editable-row'}
+              components={components}
+              dataSource={dataSource}
+              columns={columns}
+              pagination={ false } scroll={{y: this.state.tableHeight }}
+            />
+          </ResizeObserver>
         </div>
         <div className="paging">
           {

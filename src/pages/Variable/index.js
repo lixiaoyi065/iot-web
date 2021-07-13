@@ -991,12 +991,12 @@ class RealTime extends PureComponent{
                 // console.log(result.tags)
                 return {
                   loading: false,
-                  count: mes.data.message === "导入成功" ? result.total : state.count,
-                  gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
-                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
-                  treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
-                  dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
-                  modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项
+                  // count: mes.data.message === "导入成功" ? result.total : state.count,
+                  // gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
+                  // dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  // treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
+                  // dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
+                  // modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项
                 }
               })
               PubSub.publish("changeTags", true)
