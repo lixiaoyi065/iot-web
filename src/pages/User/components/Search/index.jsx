@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Button } from 'antd'
+import { debounce } from "lodash";
 import './index.less'
 
 import searchLogo from 'assets/img/common/search.png'
@@ -23,7 +24,7 @@ class Search extends PureComponent {
         </Form>
         <div className="option-area" onClick={ this.props.optionClick }>
           <Button type="primary" onClick={this.props.addUser}>添加</Button>
-          <Button className="ant-button-normal" onClick={ this.props.delUser } style={{ margin: 0 }}>删除</Button>
+          <Button className="ant-button-normal" onClick={ debounce(this.props.delUser,  500) } style={{ margin: 0 }}>删除</Button>
         </div>
       </div>
     )
