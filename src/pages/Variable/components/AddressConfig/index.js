@@ -360,7 +360,7 @@ export default class config extends PureComponent {
           }
         } else if (popupData.dataType === '有符号8位整型' || popupData.dataType === '无符号8位整型') {
           let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
 
@@ -393,7 +393,7 @@ export default class config extends PureComponent {
 
         } else if (popupData.dataType === '有符号16位整型' || popupData.dataType === '无符号16位整型') {
           let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
 
@@ -426,7 +426,7 @@ export default class config extends PureComponent {
 
         } else if (popupData.dataType === '有符号32位整型' || popupData.dataType === '无符号32位整型' || popupData.dataType === 'F32位浮点数IEEE754' || popupData.dataType === '定时器') {
           let bitReg = /^(MD)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBD){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBD){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(ID)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QD)([0-9]{1,})$/ // 输出匹配正则
 
@@ -459,7 +459,7 @@ export default class config extends PureComponent {
 
         } else if (popupData.dataType === '有符号64位整型' || popupData.dataType === '无符号64位整型' || popupData.dataType === 'F64位浮点数IEEE754' || popupData.dataType === '日期'|| popupData.dataType === '时间'|| popupData.dataType === '日期时间') {
           let bitReg = /^(MB|MD|MW)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW|DBD){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBB|DBW|DBD){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IB|IW|ID)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QB|QW|QD)([0-9]{1,})$/ // 输出匹配正则
 
@@ -517,7 +517,7 @@ export default class config extends PureComponent {
 
         } else if (popupData.dataType === '文本变量8位字符集') {
           let bitReg = /^(MB)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBB){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IB)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QB)([0-9]{1,})$/ // 输出匹配正则
 
@@ -551,7 +551,7 @@ export default class config extends PureComponent {
           
         }  else if (popupData.dataType === '文本变量16位字符集') {
           let bitReg = /^(MW)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBW){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IW)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QW)([0-9]{1,})$/ // 输出匹配正则
 
@@ -585,7 +585,7 @@ export default class config extends PureComponent {
 
         } else if (popupData.dataType === '字符串' || popupData.dataType === '宽字符串') {
           let bitReg = /^(MB|MW)([0-9]{1,})$/     // 位匹配正则
-          let dbReg = /^(DB)([1-9]{1,})([.]{1})((DBB|DBW){1})([0-9]{1,})$/ // DB号匹配正则
+          let dbReg = /^(DB)([1-9]{1}[0-9]{0,})([.]{1})((DBB|DBW){1})([0-9]{1,})$/ // DB号匹配正则
           let IReg = /^(IB|IW)([0-9]{1,})$/ // 输入匹配正则
           let QReg = /^(QB|QW)([0-9]{1,})$/ // 输出匹配正则
           
