@@ -46,7 +46,7 @@ class RealTime extends PureComponent{
     node: {},//当前显示的变量对象
     activeNode: "", //当前显示变量列表的节点ID
     activeNodeName: "",//当前显示变量列表的节点名称
-    activeNodeType: 0, //当前显示变量列表的节点类型
+    activeNodeType: "", //当前显示变量列表的节点类型
     tableDataTypes: [],
     modifyTagsList: [],
     fileList: [],
@@ -997,12 +997,12 @@ class RealTime extends PureComponent{
                   $(".effective-editor").removeClass("effective-editor")
                 }
                 // console.log(mes.data.message === "导入成功")
-                // console.log(result.tags)
+                console.log(this.state.activeNodeType === "")
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
                   gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
-                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? (this.state.activeNodeType === "" ? [] : result.tags) : state.dataSource,
                   treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
                   dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
                   modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项

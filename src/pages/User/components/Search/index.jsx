@@ -15,8 +15,8 @@ class Search extends PureComponent {
           onFinish={this.props.searchForm}
           onFinishFailed={this.onFinishFailed}
         >
-          <Form.Item name="argKeyWord" label="账号/用户名" colon={false}>
-            <Input placeholder="请输入关键字" style={{ width: '240px' }} autoComplete="off"/>
+          <Form.Item name="argKeyWord" colon={false}>
+            <Input placeholder="请输入账号、用户名、电话关键字" style={{ width: '280px' }} autoComplete="off"/>
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submint" className="btn-submint"><img className="btn-icon" src={searchLogo} alt="" />查询</Button>
