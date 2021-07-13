@@ -6,15 +6,17 @@ import {
   JsonHubProtocol,
   LogLevel
 } from '@microsoft/signalr';
+import PubSub from "pubsub-js";
 
 import DataTable from 'components/common/Table'
 import ZTree from 'components/common/Ztree'
 import Search from './components/Search'
 
-import { GetTreeStructure } from 'api/variable'
+import { GetTreeStructure, GetDeviceStatus} from 'api/variable'
 import { EnterPage, LeavePage, InitTags, QueryTags, GetNextPageTags } from 'api/realTime'
 
 let connection = null, getTime = null;
+let deviceStatusTimer = null;
 class RealTime extends PureComponent{
   constructor (props) {
     super(props);
@@ -31,6 +33,7 @@ class RealTime extends PureComponent{
       selectNodeList:[]
     }
   }
+  searchRef = React.createRef();
 
   componentDidMount() {
     let token = getCookie("accessToken")
@@ -50,6 +53,11 @@ class RealTime extends PureComponent{
       }
       this.setState({ treeData: res.data, allNodeId: allcheck })
     })
+    this.getDeviceStatus();
+
+    deviceStatusTimer = setInterval(() => {
+      this.getDeviceStatus();
+    }, 1000)
 
     connection = new HubConnectionBuilder()
       .withUrl("/api/iotTagHub", { accessTokenFactory: () => token })
@@ -66,20 +74,27 @@ class RealTime extends PureComponent{
     };
     start() 
     connection.on('receiveTagValue', res => {
+      console.log("------",res)
       this.setState(state => {
         for (let i in res) {
-          state.dataSource.map(item => {
+          state.dataSource.forEach(item => {
             if (item.key === i) {
               item.value = res[i]
             }
-            return item
           })
         }
+        console.log(state.dataSource[0])
         return {
-          dataSource: JSON.parse(JSON.stringify(state.dataSource))
+          dataSource: state.dataSource
         }
       })
     });
+  }
+
+  getDeviceStatus = () =>{
+    GetDeviceStatus().then(res => {
+      PubSub.publish("deviceStatus", res.data)
+    })
   }
 
   componentWillUnmount() {
@@ -102,6 +117,11 @@ class RealTime extends PureComponent{
     )
   }
   allCheck = () => {
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
     let nodesList = [];
     this.state.treeData.forEach(item => {
       nodesList.push({
@@ -141,10 +161,20 @@ class RealTime extends PureComponent{
     }
   }
   allUnCheck = () => {
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
     this.setState({checkedKeys: [], selectNodeList: []})
     this.getList([])
   }
   onCheck = (checkedKeysValue, nodes) => {
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
     let nodesList = []
     nodes.checkedNodes.forEach(item => {
       nodesList.push({
@@ -159,9 +189,8 @@ class RealTime extends PureComponent{
   getList = (nodesList) => {
     InitTags(nodesList).then(res => {
       if (res.code === 0) {
-        // console.log(res.data.tagValues)
         this.setState({dataSource: res.data.tagValues, count: res.data.total, dataTypes: res.data.dataTypes}, () => {
-          this.getDateTime()
+          // this.getDateTime()
         })
       } else {
         message.error(res.msg)
@@ -195,6 +224,7 @@ class RealTime extends PureComponent{
   }
 
   render() {
+    console.log(this.state.dataSource)
     return (
       <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
         <div className="leftContent">
@@ -219,7 +249,7 @@ class RealTime extends PureComponent{
           <span className="arrowLeft" onClick={this.toggleLeft}></span>
         </div>
         <div className="tableList">
-          <Search onFinish={this.search} dataTypes={ this.state.dataTypes }/>
+          <Search onFinish={this.search} dataTypes={ this.state.dataTypes } ref={this.searchRef}/>
           <div className="tableContain">
             <DataTable
               dataSource={this.state.dataSource}
@@ -251,30 +281,6 @@ class RealTime extends PureComponent{
                 ellipsis: true
               },
               {
-                title: '最大值',
-                dataIndex: 'max',
-                width: 100,
-                ellipsis: true
-              },
-              {
-                title: '最小值',
-                dataIndex: 'min',
-                width: 100,
-                ellipsis: true
-              },
-              {
-                title: '字符长度',
-                dataIndex: 'stringLength',
-                width: 100,
-                ellipsis: true
-              },
-              {
-                title: '缩放比',
-                dataIndex: ' zoom',
-                width: 100,
-                ellipsis: true
-              },
-              {
                 title: '变量值',
                 dataIndex: 'value',
                 width: 100,
@@ -284,7 +290,12 @@ class RealTime extends PureComponent{
                 title: '时间戳',
                 dataIndex: 'time',
                 width: 180,
-                ellipsis: true
+                ellipsis: true,
+                render() {
+                  getTime = setInterval(() => {
+                    return getNowFormatDate()
+                  }, 1000)
+                }
               }
             ] }/>
           </div>

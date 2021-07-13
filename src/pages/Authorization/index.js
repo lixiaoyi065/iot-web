@@ -64,6 +64,7 @@ class AuthorizationPane extends PureComponent{
     e.preventDefault();
     const formdata = new FormData();
     formdata.append('files', e.target.files[0]);
+    console.log(formdata)
     UploadAuthFile({
       formData: formdata
     }).then(res => {

@@ -16,7 +16,6 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props)
     // 设置时间为负数, 取消设置的 cookie
     setCookie('login', '', -1)
     setCookie('accessToken', '', -1)
@@ -64,7 +63,7 @@ class Login extends Component {
     return (
       <div className="login">
         <div className="login-pane">
-          <Form className="card" onFinish={this.onFinish}>
+          <Form className="card" onFinish={this.onFinish} initialValues={{user: "SuperAdmin", password: "SYC888888"}}>
             <div className="card-head">盛云圈IOT平台</div>
             <Form.Item name="user" className="card-item" rules={[{
               required: true,

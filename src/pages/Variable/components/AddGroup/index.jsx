@@ -22,26 +22,27 @@ class AddGroups extends PureComponent {
 
   componentDidMount() {
     const list = [];
-    //获取设备列表
-    GetTreeStructure().then(res => {
-      res.data.forEach(el => {
-        if (el.nodeName === "内部变量") {
-          this.setState({
-            internalVariable: el.nodeID,
-          })
-          this.formRef.current.setFieldsValue({ deviceId: el.nodeID })
-        }
-        list.push({
-          nodeID: el.nodeID,
-          nodeName: el.nodeName
-        })
-      })
-      this.setState({ euqList: list })
-    })
 
     if (this.props.node) {
       this.setState({ initialValues: this.props.node, hidden: true })
       this.formRef.current.setFieldsValue(this.props.node);
+    } else {
+      //获取设备列表
+      GetTreeStructure().then(res => {
+        res.data.forEach(el => {
+          if (el.nodeName === "内部变量") {
+            this.setState({
+              internalVariable: el.nodeID,
+            })
+            this.formRef.current.setFieldsValue({ deviceId: el.nodeID })
+          }
+          list.push({
+            nodeID: el.nodeID,
+            nodeName: el.nodeName
+          })
+        })
+        this.setState({ euqList: list })
+      })
     }
   }
   componentWillUnmount() {

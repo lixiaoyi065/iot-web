@@ -40,6 +40,14 @@ class OperationsPane extends PureComponent {
   }
 
   onProjectFinish = (res) => {
+    console.log(res)
+    if (res.verificationCode === "") {
+      message.error("请输入验证码")
+      return
+    } else if (res.name === "") {
+      message.error("请输入项目名称")
+      return
+    }
     if (!this.state.isSaved) {
       PutRemote({
         "id": this.state.nodeID,

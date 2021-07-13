@@ -10,6 +10,7 @@ class Search extends PureComponent {
       <div className="search-contain">
         <Form
           layout="inline"
+          ref="formRef"
           onFinish={this.props.onFinish}
         >
           <Form.Item

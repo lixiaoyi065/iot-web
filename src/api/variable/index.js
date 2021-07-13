@@ -111,6 +111,16 @@ export function ImportFile(data) {
     contentType: false, //不设置Content-Type请求头
   })
 }
+//整体导入
+export function WholeImportTags(data) {
+  return axios({
+    url: `/VariableManage/WholeImportTags?nodeId=${data.nodeId}&type=${data.type}`,
+    method: 'post',
+    data: data.formData,
+    processData: false, //不处理发送的数据
+    contentType: false, //不设置Content-Type请求头
+  })
+}
 
 //获取导入变量的任务状态
 export function GetImportTagsTaskProgress(id) {

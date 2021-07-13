@@ -6,7 +6,7 @@ import {getCookie, setCookie} from 'utils'
 const service = axios.create({
   // baseURL: "/api",
   baseURL: "http://localhost:3000/api1/api",
-  timeout: 5000,
+  timeout: 50000,
   async: true,
   //允许跨域
   crossDomain: true, 
@@ -57,8 +57,10 @@ service.interceptors.response.use(
         default:
           break;
       }
+      return Promise.reject(error.response.data)
     }
-    return Promise.reject(error.response.data)
+    
+    return Promise.reject(error)
   }
 )
 

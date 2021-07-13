@@ -37,7 +37,7 @@ class ZTree extends PureComponent {
   //数据处理
   node = (data) => {
     let nodeStatus = 0;
-    this.state.deviceStatus   && this.state.deviceStatus.forEach(item => {
+    this.state.deviceStatus && this.state.deviceStatus.forEach(item => {
       if (item.id === data.nodeID) {
         nodeStatus = item.status
       }
@@ -63,7 +63,7 @@ class ZTree extends PureComponent {
           }
           <span>{data.nodeName}</span>
           <Dropdown trigger={["click"]} overlay={() => {
-            return this.props.optionDeviceMenu(data, data.children.length)
+            return this.props.optionDeviceMenu(data, data.children.length, nodeData.nodeStatus)
           }} placement="bottomCenter" arrow>
             <span className="ant-tree-title-operationNode" onClick={(e) => {
               e.stopPropagation();
@@ -157,7 +157,7 @@ class ZTree extends PureComponent {
 
   render() {
     return (
-      <>
+      <div className="normal-tree">
         {
           this.props.title ? (
             <div className="title">
@@ -182,7 +182,7 @@ class ZTree extends PureComponent {
             <Tree
               ref="tree"
               blockNode
-              draggable
+              draggable={this.props.move}
               className={this.props.move ? "moveNode" : ""}
               showIcon={false}
               onSelect={this.onSelect}
@@ -199,7 +199,7 @@ class ZTree extends PureComponent {
           ) : <></>
         }
 
-      </>
+      </div>
     )
   }
 };

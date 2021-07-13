@@ -14,9 +14,13 @@ export function GetAuthState() {
   })
 }
 
-export function UploadAuthFile() {
+export function UploadAuthFile(data) {
+  console.log(data)
   return axios({
     url: "/AuthorizationManage/UploadAuthFile",
-    method: "post"
+    data: data.formData,
+    method: "post",
+    processData: false, //不处理发送的数据
+    contentType: false, //不设置Content-Type请求头  
   })
 }

@@ -1,6 +1,7 @@
 import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Table, Input, Form, Select, Button } from 'antd';
 import { Resizable } from 'react-resizable';
+import ResizeObserver from 'rc-resize-observer';
 import PubSub from 'pubsub-js'
 import "./index.less"
 
@@ -89,6 +90,7 @@ const EditableCell = ({
 
   const check = async (e) => {
     let val = e.target.value;
+    let isAddress = false
     try {
       toggleEdits()
       if (dataIndex === "name") {
@@ -104,6 +106,7 @@ const EditableCell = ({
         }).then(res => {
           if (res === false) {
             e.target.value = ''
+            isAddress = true
           }
         })
       } else if (dataIndex === "desc") {
@@ -114,7 +117,7 @@ const EditableCell = ({
         verifyMax(val, record.dataType)
       }
       record[dataIndex] = e.target.value
-      handleSave(dataIndex, val, record, checkIsSame(val))
+      handleSave(dataIndex, val, record, checkIsSame(val), isAddress)
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -193,14 +196,16 @@ class EditableTable extends React.Component {
       gist: [],
       changeTags: false,
       columns: this.props.columns,
+      tableWidth: 0,
+      tableHeight: 0
     };
   }
 
   componentDidMount() {
     this.setState({ gist: this.props.gist })
-    setTimeout(() => {
-      this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
-    })
+    // setTimeout(() => {
+    //   this.setState({ height: this.ref.current ? this.ref.current.getBoundingClientRect().height - 50 : 400 })
+    // })
     PubSub.subscribe("changeTags", (msg, data) => {
       this.setState({ changeTags: data })
     })
@@ -215,7 +220,7 @@ class EditableTable extends React.Component {
     return null
   }
 
-  handleSave = (dataIndex, val, row, flag = true) => {
+  handleSave = (dataIndex, val, row, flag = true, isAddress= false) => {
     this.setState(state => {
       for (let i = 0; i < state.dataSource.length; i++) {
         if (state.dataSource[i].key === row.key) {
@@ -228,7 +233,7 @@ class EditableTable extends React.Component {
       }
     })
 
-    this.props.handleSave(dataIndex, val, row, flag);
+    this.props.handleSave(dataIndex, val, row, flag, isAddress);
   };
   handleResize = index => (e, { size }) => {
     this.setState(({ columns }) => {
@@ -284,6 +289,11 @@ class EditableTable extends React.Component {
     return (
       <>
         <div className="table-contain" ref={this.ref}>
+          <ResizeObserver
+            onResize={({ width, height }) => {
+              this.setState({ tableWidth: width, tableHeight: height - 43 })
+            }}
+          >
           <Table
             rowSelection={this.props.rowSelection}
             components={components}
@@ -291,8 +301,9 @@ class EditableTable extends React.Component {
             dataSource={dataSource}
             columns={columns}
             loading={this.props.loading}
-            pagination={false} scroll={{ y: this.state.height }}
-          />
+            pagination={false} scroll={{ y: this.state.tableHeight }}
+            />
+          </ResizeObserver>
         </div>
         <div className="paging">
           {

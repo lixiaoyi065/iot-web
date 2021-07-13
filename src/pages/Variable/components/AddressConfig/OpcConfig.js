@@ -15,7 +15,8 @@ export default class config extends PureComponent {
     OPC_Tree: [],
     OPC_Table: [],
     selectedRowKeys: [],
-    selectedRows: []
+    selectedRows: [],
+    idx: 0
   }
 
   componentDidMount(){
@@ -33,17 +34,27 @@ export default class config extends PureComponent {
           OPC_Tree: this.dataProcess(res.data.tree),
           OPC_Table: this.tableDataProcess(res.data.table)
         })
+      } else {
+        message.error(res.msg)
       }
     })
   }
 
   //组列表树数据处理
-  dataProcess = (data=[])=>{
+  dataProcess = (data = [], pos = "0-0") => {
+    // debugger
     let treeData = [];
-    data.forEach(item=>{
-      treeData.push({
-        key: item.id,
-        title: item.name
+    data.forEach((item) => {
+      this.setState(state=> {
+        return {
+          idx: state.idx + 1
+        }
+      }, () => {
+        treeData.push({
+          key: Date.now() + this.state.idx,
+          nodeId: item.id,
+          title: item.name
+        })
       })
     })
     return treeData
@@ -52,7 +63,6 @@ export default class config extends PureComponent {
   tableDataProcess = ((data=[])=>{
     let tableData = [];
     data.forEach(item=>{
-      console.log(item.name)
       item.key = item.name
       tableData.push(item)
     })
@@ -72,20 +82,21 @@ export default class config extends PureComponent {
       return node;
     });
   }
-  loadData = ({ key, children })=>{
+  loadData = (node) => {
+    let { nodeId, children, key } = node
     return new Promise((resolve) => {
       if (children) {
         resolve();
         return;
       }
-      GetOPCUaNodes(key).then(res=>{
+      GetOPCUaNodes(nodeId).then(res=>{
         if(res.code === 0){
           this.setState({
-            OPC_Tree: this.updateTreeData(this.state.OPC_Tree, key, this.dataProcess(res.data.tree)),
+            OPC_Tree: this.updateTreeData(this.state.OPC_Tree, key, this.dataProcess(res.data.tree, node.pos)),
             OPC_Table: this.tableDataProcess(res.data.table)
           })
-        }else{
-          console.log(res)
+        } else {
+          message.error(res)
         }
         resolve();
       })
@@ -124,9 +135,8 @@ export default class config extends PureComponent {
   }
 
   onSelect=(key, row)=>{
-    GetOPCUaNodes(row.node.key).then(res=>{
+    GetOPCUaNodes(row.node.nodeId).then(res=>{
       if (res.code === 0) {
-        console.log(res.data)
         this.setState({
           OPC_Table: this.tableDataProcess(res.data.table)
         })
@@ -137,7 +147,6 @@ export default class config extends PureComponent {
   }
   rowSelect = (selectedRowKeys, selectedRows)=>{
     this.setState({ selectedRowKeys, selectedRows });
-    console.log("_----------", selectedRows)
   }
 
   render(){

@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Modal, message, Spin } from "antd"
 import PubSub from "pubsub-js";
+import { debounce } from "lodash";
 import $ from "jquery"
 
 import DrowDownMenu from 'components/common/DrowDownMenu'
@@ -20,7 +21,7 @@ import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,
   GetTreeStructure, GetDevice, DeleteDevice, DelGroup,
   InitTags, GetNextPageTags, QueryTags, SaveTags, ExportTags, DeleteTags,
-  GetSaveTagsTaskProgress, ImportFile, GetImportTagsTaskProgress, GetAddressEditInfo,
+  GetSaveTagsTaskProgress, ImportFile, WholeImportTags, GetImportTagsTaskProgress, GetAddressEditInfo,
   SortTreeNode, TestOPCUaConnect, CloseOPCUaWindows,
   GetDeviceStatus,StartDevice,StopDevice
 } from 'api/variable'
@@ -54,9 +55,7 @@ class RealTime extends PureComponent{
     pageIndex: 0, //当前页面
     selectedKeys: [],
     opcConfigVisible: false,
-    opcConfigContent: "",
-    preTime: 0,
-    nowTime: ""
+    opcConfigContent: ""
   }
   searchRef = React.createRef();
   componentDidMount() {
@@ -71,7 +70,7 @@ class RealTime extends PureComponent{
     this.getDeviceStatus();
     deviceStatusTimer = setInterval(() => {
       this.getDeviceStatus();
-    }, 5000)
+    }, 1000)
   }
   componentWillUnmount() {
     clearInterval(deviceStatusTimer)
@@ -110,7 +109,10 @@ class RealTime extends PureComponent{
         {
           key: "addGroup",
           name: "添加分组",
-      }, {
+        }, {
+          key: "allImport",
+          name: "整体导入"
+        }, {
           key: "allExport",
           name: "整体导出"
         }
@@ -128,6 +130,10 @@ class RealTime extends PureComponent{
         {
           key: "overallExport",
           name: '整体导出',
+        },
+        {
+          key: "addGroupCurrent",
+          name: "添加分组",
         }
       ]}
       onClick={(e) => {
@@ -139,16 +145,22 @@ class RealTime extends PureComponent{
     )
   }
   //操作设备菜单
-  optionDeviceMenu = (el, length)=> {
+  optionDeviceMenu = (el, length, state = -1) => {
     return (
       <DrowDownMenu lists={[
         {
           key: "startDevice",
           name: "启用",
+          disabled: state === 1
         },
         {
           key: "stopDevice",
           name: "停止",
+          disabled: state !== 1
+        },
+        {
+          key: "addGroupCurrent",
+          name: "添加分组",
         },
         {
           key: "modifyDevice",
@@ -166,7 +178,7 @@ class RealTime extends PureComponent{
       onClick={(e) => {
         // console.log(el)
         e.domEvent.stopPropagation();
-        this.menuClick(e, el, length)
+        this.menuClick(e, el, length, state)
       }}
     />
     )
@@ -292,7 +304,7 @@ class RealTime extends PureComponent{
       })
     }
   }
-
+    
   delDevice = (id) => {
     DeleteDevice(id).then(res=>{
       if(res.code === 0){
@@ -304,14 +316,14 @@ class RealTime extends PureComponent{
     })
   }
 
-  menuClick = (e, node, length)=>{
+  menuClick = (e, node, length, state = -1)=>{
     if (e.key === "addDevice") {
       this.setState({
         visible: true, 
         title: "新增设备", 
         modalContent: <AddEqu key={ new Date()}
           onCancel={this.handleCancel}
-          onFinish={this.onAddDeviceFinish}
+          onFinish={debounce(this.onAddDeviceFinish, 500)}
           connetTest={this.connetTest} />
       })
     } else if (e.key === "modifyDevice") {
@@ -323,7 +335,7 @@ class RealTime extends PureComponent{
             key={`modifyDevice + ${node.nodeID}`}
             node={res.data}
             onCancel={this.handleCancel}
-            onFinish={this.onAddDeviceFinish}
+            onFinish={debounce(this.onAddDeviceFinish, 500)}
             connetTest={ this.connetTest } />
         })
       })
@@ -342,6 +354,21 @@ class RealTime extends PureComponent{
       }).then(res => {
         downFile(res, "变量总列表.xls");
       })
+    } else if (e.key === "allImport") {
+      if (this.state.modifyTagsList.length > 0) {
+        Modal.confirm({
+          title: "当前存在未保存的变量，继续导入将丢失，是否继续",
+          okText: "继续",
+          cancelText: "取消",
+          onOk: () => {
+            //还原编辑的数据
+            // this.setState({dataSource: this.state.gist})
+            document.getElementById("wholeImport").click();
+          }
+        })
+      }else{
+        document.getElementById("wholeImport").click();
+      }
     } else if (e.key === "overallExport") {
       ExportTags({
         nodeId: node.nodeID,
@@ -355,7 +382,23 @@ class RealTime extends PureComponent{
         title: "新增分组", 
         modalContent: <AddGroupPane key={new Date()}
           onCancel={this.handleCancel} 
-          onFinish={this.onAddGroupFinish}/>
+          onFinish={debounce(this.onAddGroupFinish, 500)}/>
+      })
+    } else if (e.key === "addGroupCurrent") {
+      //在设备菜单中添加分组
+      console.log(node)
+      this.setState({
+        visible: true, 
+        title: "编辑分组", 
+        modalContent: <AddGroupPane
+          key={node.nodeID} node={{
+            deviceId: node.nodeID,
+            groupId: "00000000-0000-0000-0000-000000000000",
+            type: node.nodeType,
+            name: ""
+          }}
+          onCancel={this.handleCancel}
+          onFinish={debounce(this.onAddGroupFinish,500)} />
       })
     } else if (e.key === "modifyGroup") {
       console.log(node)
@@ -365,7 +408,7 @@ class RealTime extends PureComponent{
         modalContent: <AddGroupPane
           key={node.groupId} node={node}
           onCancel={this.handleCancel}
-          onFinish={this.onAddGroupFinish} />
+          onFinish={debounce(this.onAddGroupFinish, 500)} />
       })
     } else if (e.key === "delGroup") {
       this.confirm('节点下有变量存在，删除将会跟随变量一起删除，无法恢复，是否继续?',()=>{
@@ -379,6 +422,9 @@ class RealTime extends PureComponent{
         })
       })
     } else if (e.key === "startDevice") {
+      if (state === 1) {
+        return
+      }
       StartDevice(node.nodeID).then(res =>{
         if (res.code === 0) {
           message.info("启动成功")
@@ -387,6 +433,9 @@ class RealTime extends PureComponent{
         }
       })
     } else if (e.key === "stopDevice") {
+      if (state !== 1) {
+        return
+      }
       StopDevice(node.nodeID).then(res =>{
         if (res.code === 0) {
           message.info("停止成功")
@@ -463,11 +512,12 @@ class RealTime extends PureComponent{
     })
   }
 
-  handleSave = (dataIndex, val, row, flag = true) => {
+  handleSave = (dataIndex, val, row, flag = true,isAddress= false) => {
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
      * 3、不存在在加入
+     * 4、isAddress 变量地址规则不符合需要清空地址td内容
      */
 
     let index = -1;
@@ -481,6 +531,10 @@ class RealTime extends PureComponent{
         return false
       }
     })
+
+    if (isAddress) {
+      isHas = false
+    }
 
     this.setState(state => {
       if (isHas) {
@@ -711,104 +765,115 @@ class RealTime extends PureComponent{
   }
   //删除变量
   delTags = () => {
-    let phyDel = [], //物理删除
-      dataDel = []; //数据库删除
-    // console.log(this.state.selectedRowKeys)
-    this.state.selectedRowKeys.forEach((item, i) => {
-      if (item.length !== 36) {
-        phyDel.push(item)
-      } else {
-        dataDel.push(item)
-      }
-    })
-    if (dataDel.length === 0 ) {
-      if (phyDel.length > 0) {
-        this.setState(state => {
-          let targetObj = [...state.dataSource]
-          let gist = [...state.gist]
-          let modify = [...state.modifyTagsList]
-          phyDel.forEach((id)=>{
-            for (let i = 0; i < targetObj.length;i++){ 
-              if (targetObj[i].key === id) {
-                targetObj.splice(i, 1);
-                break;
-              }
-            }
-            //移除modifyTagsList中删除的变量
-            for (let i = 0; i < modify.length; i++){
-              if (modify[i].key === id) {
-                modify.splice(i, 1);
-                break;
-              }
-            }
-          })
-          
-          targetObj.forEach((item,index) => {
-            item.no = index+1
-          })
-          return {
-            dataSource: [...targetObj],
-            gist: [...gist],
-            modifyTagsList: modify,
-            count: state.count - phyDel.length
-          }
-        })
-      }
-      return ;
+    if (this.state.selectedRowKeys.length === 0) {
+      message.error("请选择要删除的变量")
+      return
     }
-    DeleteTags({
-      ids: dataDel,
-      type: this.state.activeNodeType
-    }).then(res => {
-      if (res.code === 0) {
-        message.info("删除成功")
-        this.setState((state) => {
-          let targetObj = [...state.dataSource]
-          let gist = [...state.gist]
-          let modify = [...state.modifyTagsList]
-          res.data.forEach((id) => {
-            for (let i = 0; i < targetObj.length;i++){ 
-              if (targetObj[i].key === id) {
-                targetObj.splice(i, 1);
-                gist.splice(i, 1);
-                break;
-              }
-            }
-            //移除modifyTagsList中删除的变量
-            for (let i = 0; i < modify.length; i++){
-              if (modify[i].key === id) {
-                modify.splice(i, 1);
-                break;
-              }
-            }
-          })
-          phyDel.forEach((id)=>{
-            for (let i = 0; i < targetObj.length;i++){ 
-              if (targetObj[i].key === id) {
-                targetObj.splice(i, 1);
-                break;
-              }
-            }
-            //移除modifyTagsList中删除的变量
-            for (let i = 0; i < modify.length; i++){
-              if (modify[i].key === id) {
-                modify.splice(i, 1);
-                break;
-              }
-            }
-          })
-          targetObj.forEach((item,index) => {
-            item.no = index+1
-          })
-          return {
-            dataSource: [...targetObj],
-            gist: [...gist],
-            modifyTagsList: modify,
-            count: state.count - res.data.length - phyDel.length
+    Modal.confirm({
+      title: "确定要删除变量吗",
+      okText: "确定",
+      cancelText: "取消",
+      onOk: () => {
+        let phyDel = [], //物理删除
+        dataDel = []; //数据库删除
+        // console.log(this.state.selectedRowKeys)
+        this.state.selectedRowKeys.forEach((item, i) => {
+          if (item.length !== 36) {
+            phyDel.push(item)
+          } else {
+            dataDel.push(item)
           }
         })
-      } else {
-        message.error(res.msg)
+        if (dataDel.length === 0 ) {
+          if (phyDel.length > 0) {
+            this.setState(state => {
+              let targetObj = [...state.dataSource]
+              let gist = [...state.gist]
+              let modify = [...state.modifyTagsList]
+              phyDel.forEach((id)=>{
+                for (let i = 0; i < targetObj.length;i++){ 
+                  if (targetObj[i].key === id) {
+                    targetObj.splice(i, 1);
+                    break;
+                  }
+                }
+                //移除modifyTagsList中删除的变量
+                for (let i = 0; i < modify.length; i++){
+                  if (modify[i].key === id) {
+                    modify.splice(i, 1);
+                    break;
+                  }
+                }
+              })
+              
+              targetObj.forEach((item,index) => {
+                item.no = index+1
+              })
+              return {
+                dataSource: [...targetObj],
+                gist: [...gist],
+                modifyTagsList: modify,
+                count: state.count - phyDel.length
+              }
+            })
+          }
+          return ;
+        }
+        DeleteTags({
+          ids: dataDel,
+          type: this.state.activeNodeType
+        }).then(res => {
+          if (res.code === 0) {
+            message.info("删除成功")
+            this.setState((state) => {
+              let targetObj = [...state.dataSource]
+              let gist = [...state.gist]
+              let modify = [...state.modifyTagsList]
+              res.data.forEach((id) => {
+                for (let i = 0; i < targetObj.length;i++){ 
+                  if (targetObj[i].key === id) {
+                    targetObj.splice(i, 1);
+                    gist.splice(i, 1);
+                    break;
+                  }
+                }
+                //移除modifyTagsList中删除的变量
+                for (let i = 0; i < modify.length; i++){
+                  if (modify[i].key === id) {
+                    modify.splice(i, 1);
+                    break;
+                  }
+                }
+              })
+              phyDel.forEach((id)=>{
+                for (let i = 0; i < targetObj.length;i++){ 
+                  if (targetObj[i].key === id) {
+                    targetObj.splice(i, 1);
+                    break;
+                  }
+                }
+                //移除modifyTagsList中删除的变量
+                for (let i = 0; i < modify.length; i++){
+                  if (modify[i].key === id) {
+                    modify.splice(i, 1);
+                    break;
+                  }
+                }
+              })
+              targetObj.forEach((item,index) => {
+                item.no = index+1
+              })
+              return {
+                dataSource: [...targetObj],
+                gist: [...gist],
+                modifyTagsList: modify,
+                count: state.count - res.data.length - phyDel.length
+              }
+            })
+          } else {
+            message.error(res.msg)
+          }
+        })
       }
     })
   }
@@ -886,6 +951,61 @@ class RealTime extends PureComponent{
     this.importFileFun(formdata);
   }
 
+  //整体导入
+  wholeImport = (e) => {
+    e.preventDefault();
+    //重置查询
+    this.searchRef.current.refs.formRef.setFieldsValue({
+      dataType: "不限",
+      key: "",
+    })
+    const formdata = new FormData();
+    formdata.append('files', e.target.files[0]);
+    this.wholeImportFileFun(formdata)
+  }
+
+  wholeImportFileFun = (formdata) => {
+    document.getElementById('wholeImport').value=null
+    WholeImportTags({
+      nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
+      type: this.state.activeNodeType || -1,
+      formData: formdata
+    }).then(res => {
+      if (res.code === 0) {
+        this.setState({loading: true})
+        getProcessTimer = setInterval(() => {
+          GetImportTagsTaskProgress(res.data).then(mes => {
+            console.log(mes)
+            let result = mes.data.resultData
+            if ( mes.data.status === 2 ||  mes.data.status === 3) {
+              message.info(mes.data.message)
+              
+              this.setState(state => {
+                if (mes.data.message === "导入成功") {
+                  $(".effective-editor").removeClass("effective-editor")
+                }
+                // console.log(mes.data.message === "导入成功")
+                // console.log(result.tags)
+                return {
+                  loading: false,
+                  count: mes.data.message === "导入成功" ? result.total : state.count,
+                  gist: mes.data.message === "导入成功" && result.tags !== null ? JSON.parse(JSON.stringify([...result.tags])) : state.gist,
+                  dataSource: mes.data.message === "导入成功" && result.tags !== null ? result.tags : state.dataSource,
+                  treeData: mes.data.message === "导入成功" && result.tree !== null ? result.tree : state.treeData,
+                  dataTypes: mes.data.message === "导入成功" && result.dataTypes !== null ? result.dataTypes : state.dataTypes,
+                  modifyTagsList: mes.data.message === "导入成功" ? [] : JSON.parse(JSON.stringify(state.modifyTagsList)) //导入成功，清空编辑项
+                }
+              })
+              PubSub.publish("changeTags", true)
+              clearInterval(getProcessTimer)
+              PubSub.publish("changeTags", false)
+            }
+          })
+        },1000)
+      }
+    })
+  }
+
   importFileFun = (formdata) => {
     document.getElementById('importFile').value=null
     ImportFile({
@@ -927,22 +1047,13 @@ class RealTime extends PureComponent{
     })
   }
 
-  throttle = (func, delay) => {
-    return ((...rest) => {
-      let now = Date.now()
-      if (now - this.state.preTime >= delay) {
-        this.setState({
-          preTime: Date.now()
-        }, () => {
-          func(...rest);
-        })
-      }
-    })
-  }
-
   addressSearch = (value, event, row, codeLen) => {
     console.log(value)
-    this.throttle(this.addressCommit, 1000)(value, event, row, codeLen)
+    let id = document.getElementById(`address${row.id}`)
+    if (id) {
+      id.blur();
+    }
+    this.addressCommit(value, event, row, codeLen)
   }
 
   addressCommit = (value, event, row, codeLen) => {
@@ -957,7 +1068,7 @@ class RealTime extends PureComponent{
             <OpcConfig data={data} row={row} node={this.state.node}
               key={new Date()}
               onCancel={this.opcConfigCancel}
-              onFinish={this.OpcConfigCommit}/>
+              onFinish={debounce(this.OpcConfigCommit,500)}/>
           ),
           opcConfigVisible: true,
           title: "选择"+ data.protocolName +"地址"
@@ -970,7 +1081,7 @@ class RealTime extends PureComponent{
               addressValue={value}
               codeLen={codeLen}
               onCancel={this.handleCancel}
-              onFinish={this.addressFinish}/>
+              onFinish={debounce(this.addressFinish, 500)}/>
           ),
           visible: true,
           title: "选择"+ data.protocolName +"地址"
@@ -1174,6 +1285,8 @@ class RealTime extends PureComponent{
     
     return (
       <div className={`antProPageContainer ${ collasped ? 'foldToLeft' : "" }`}>
+        <input type="file" className="upload-file" name="file" onChange={this.wholeImport} id="wholeImport"
+        accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
         <Spin spinning={this.state.loading}>
           <div className="leftContent">
             <div className="fullContain">
@@ -1239,14 +1352,14 @@ class RealTime extends PureComponent{
                   return record.id
                 }}
                 handleSave={this.handleSave}
-                addressSearch={ this.addressSearch }
+                addressSearch={ debounce(this.addressSearch,500) }
                 loading={this.state.tableLoading}
                 activeNodeType={activeNodeType}
                 columns={this.tableColums(activeNodeType).map(el => {
                   return {
                     title: el.title,
                     dataIndex: el.dataIndex,
-                    width: el.width,
+                    width: el.width || 150,
                     ellipsis: {
                       showTitle: false,
                     },
