@@ -73,6 +73,7 @@ class RealTime extends PureComponent{
     };
     start() 
     connection.on('receiveTagValue', res => {
+      console.log(res)
       this.setState(state => {
         for (let i in res) {
           state.dataSource.map(item => {
@@ -186,6 +187,7 @@ class RealTime extends PureComponent{
   }
   getList = (nodesList) => {
     InitTags(nodesList).then(res => {
+      console.log(res)
       if (res.code === 0) {
         this.setState({dataSource: res.data.tagValues, count: res.data.total, dataTypes: res.data.dataTypes}, () => {
           this.getDateTime()
@@ -221,7 +223,6 @@ class RealTime extends PureComponent{
   }
 
   render() {
-    console.log(this.state.dataSource)
     return (
       <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
         <div className="leftContent">
