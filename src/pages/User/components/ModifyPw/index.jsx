@@ -1,11 +1,12 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Button } from 'antd'
+import { debounce } from "lodash"
 
 export default class ModifyPassWord extends PureComponent{
  
   render() {
     return (
-      <Form onFinish={this.props.onFinish}>
+      <Form onFinish={debounce(this.props.onFinish,500)}>
         <Form.Item label="新密码" name="userPassword">
           <Input.Password placeholder="请输入新密码"/>
         </Form.Item>

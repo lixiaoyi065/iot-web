@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Form, Input, Button } from 'antd'
-import { debounce } from "lodash";
+import { debounce } from "lodash"
 import './index.less'
 
 import searchLogo from 'assets/img/common/search.png'
