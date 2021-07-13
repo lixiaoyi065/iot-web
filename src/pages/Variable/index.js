@@ -523,30 +523,29 @@ class RealTime extends PureComponent{
 
     let index = -1;
     //判断是否已经存在
-    let isHas = this.state.modifyTagsList.some((item, i) => {
+    this.state.modifyTagsList.forEach((item, idx) => {
       if (item.key === row.key) {
-        index = i;
-        return true
-      }else {
-        index = -1;
-        return false
+        index = idx
       }
     })
 
-    if (isAddress) {
-      isHas = false
-    }
-
     this.setState(state => {
-      if (isHas) {
+      if (index >= 0) {
         if (isFit(state.gist, row)) {//新旧对象一致,modifyTags移除该对象
           state.modifyTagsList.splice(index, 1)
         } else {
-          state.modifyTagsList[index][dataIndex] = val
+          if (isAddress) {
+            state.modifyTagsList[index].address = ""
+          } else {
+            state.modifyTagsList[index][dataIndex] = val
+          }
         }
       } else if (!flag) { //完善点击输入框，没有输入时的bug
         return
-      }else {
+      } else {
+        if (isAddress) {
+          row.address = ""
+        }
         //否则添加
         state.modifyTagsList.push(row)
       }
