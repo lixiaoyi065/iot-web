@@ -1211,19 +1211,26 @@ class RealTime extends PureComponent{
     };
 
     const sameParent = isSameParent(dragNode, dropNode);
-    if (sameParent && dragNode.fatherNodeID === "00000000-0000-0000-0000-000000000000"){
+    console.log("1111111",info)
+    if (sameParent && dragNode.fatherNodeID === "00000000-0000-0000-0000-000000000000") {
+      //第一层级拖拽
       if (!info.dropToGap) {
         return
       } else {
         this.dropEvent(info, dropNode)
       }
-    }else if (sameParent && !dropNode.dragOverGapBottom) {
+    } else if (sameParent && !dropNode.dragOverGapBottom) {
+      //第二层级拖拽
       this.dropEvent(info, dropNode)
     } else if (dragNode.fatherNodeID === dropNode.key) {
+      this.dropEvent(info, dropNode, true)
     }
   };
 
-  dropEvent = (info, dropNode) => {
+  dropEvent = (info, dropNode, flag = false) => {
+    /**
+     * flag: 第二层子节点拖动到当前层级的第一位
+     */
     let newNodeList = []; //新的节点排序
     const dragKey = info.dragNode.key;
 
@@ -1246,13 +1253,27 @@ class RealTime extends PureComponent{
     };
     const data = [...this.state.treeData];
     // 找到当前拖动的对象
-    let dragObj; 
+    let dragObj;
+    
     loop(data, dragKey, (item, index, arr) => {
       arr.splice(index, 1);
       dragObj = item;
     });
 
-    if (!info.dropToGap) {
+    if (flag) {
+      //第一层级移动到顶部
+      loop(data, dragObj.fatherNodeID, (item) => {
+        item.children.unshift(dragObj)
+      });
+      return
+    }
+
+    if (info.dropToGap && info.dropPosition <= 0) {
+      //第一层级移动到顶部
+      loop(data, dragObj.fatherNodeID, (item) => {
+        item.unshift(dragObj)
+      });
+    }else if (!info.dropToGap) {
       // Drop on the content
       loop(data, dragObj.fatherNodeID, (item) => {
         item.children = item.children || [];
