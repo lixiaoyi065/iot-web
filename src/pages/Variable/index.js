@@ -156,7 +156,7 @@ class RealTime extends PureComponent{
         {
           key: "stopDevice",
           name: "停止",
-          disabled: state !== 1
+          disabled: state === 0
         },
         {
           key: "addGroupCurrent",
@@ -433,7 +433,7 @@ class RealTime extends PureComponent{
         }
       })
     } else if (e.key === "stopDevice") {
-      if (state !== 1) {
+      if (state === 0 ) {
         return
       }
       StopDevice(node.nodeID).then(res =>{
