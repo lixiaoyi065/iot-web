@@ -1458,6 +1458,7 @@ export default class config extends PureComponent {
         let HRReg = /^(H)([0-9]{1,})$/
         let ARReg = /^(A)([0-9]{1,})$/
         let DMReg = /^(D)([0-9]{1,})$/
+        let TIMReg = /^(T)([0-9]{1,})$/
         let ECBReg = /^(E)([0-9]{1,})$/
         let E0Reg = /^(E00_)([0-9]{1,})$/
         let E1Reg = /^(E01_)([0-9]{1,})$/
@@ -1483,6 +1484,17 @@ export default class config extends PureComponent {
         let E16Reg = /^(E16_)([0-9]{1,})$/
         let E17Reg = /^(E17_)([0-9]{1,})$/
         let E18Reg = /^(E18_)([0-9]{1,})$/
+        
+        if (popupData.dataType === '无符号16位整型') {
+          if (TIMReg.test(popupData.dataValue)) {
+            let arr = popupData.dataValue.match(TIMReg) 
+            formData.dataArea = 'TIM/CNT(PV)'
+            formData.address = parseInt(arr[2])
+            formData.showList = [1,2]
+          } else {
+            return
+          }
+        }
   
         if (CIOReg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(CIOReg) 
@@ -1647,7 +1659,6 @@ export default class config extends PureComponent {
   
       }
     }
-
 
     this.setState(state=> {
       return {
@@ -2518,7 +2529,7 @@ export default class config extends PureComponent {
     console.log(formData)
     let items = formData.showList || []; 
     let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754', '字符串']
-    let binaryarea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)','DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
+    let binaryarea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)', 'TIM/CNT(PV)', 'DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
     'EM bank E','EM bank F','EM bank 10','EM bank 11','EM bank 12','EM bank 13','EM bank 14','EM bank 15','EM bank 16','EM bank 17','EM bank 18']
     console.log(popupData.protocolName, items)
     return (
@@ -2800,7 +2811,11 @@ export default class config extends PureComponent {
                   <Form.Item label="数据区域" name="dataArea">
                     <Select onChange={(e)=>{this.changeFins_TCPData(e,'dataArea', type)}} >
                       {
+                        popupData.dataType === '无符号16位整型' ?
                         binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)').map((item,index) => {
+                          return <Select.Option value={item} key={item+index}>{item}</Select.Option>
+                        }) :
+                        binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)' && f !== 'TIM/CNT(PV)' ).map((item,index) => {
                           return <Select.Option value={item} key={item+index}>{item}</Select.Option>
                         })
                       }
