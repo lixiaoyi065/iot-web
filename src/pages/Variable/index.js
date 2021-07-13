@@ -874,6 +874,9 @@ class RealTime extends PureComponent{
             message.error(res.msg)
           }
         })
+        this.setState({
+          selectedRowKeys: []
+        })
       }
     })
   }
