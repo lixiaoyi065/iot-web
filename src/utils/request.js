@@ -4,8 +4,8 @@ import {getCookie, setCookie} from 'utils'
 // import { Route, Redirect } from 'react-router-dom'
 
 const service = axios.create({
-  // baseURL: "/api",
-  baseURL: "http://localhost:3000/api1/api",
+  baseURL: "/api",
+  // baseURL: "http://localhost:3000/api1/api",
   timeout: 50000,
   async: true,
   //允许跨域

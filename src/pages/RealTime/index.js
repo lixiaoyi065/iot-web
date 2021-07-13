@@ -15,8 +15,7 @@ import Search from './components/Search'
 import { GetTreeStructure, GetDeviceStatus} from 'api/variable'
 import { EnterPage, LeavePage, InitTags, QueryTags, GetNextPageTags } from 'api/realTime'
 
-let connection = null, getTime = null;
-let deviceStatusTimer = null;
+let connection = null, getTime = null, deviceStatusTimer= null;
 class RealTime extends PureComponent{
   constructor (props) {
     super(props);
@@ -30,7 +29,7 @@ class RealTime extends PureComponent{
       dataSource: [],
       pageIndex: 1,
       count: 0,
-      selectNodeList:[]
+      selectNodeList: []
     }
   }
   searchRef = React.createRef();
@@ -69,23 +68,23 @@ class RealTime extends PureComponent{
         await connection.start();
       } catch (err) {
         console.log(err);
-        setTimeout(start, 5000);
+        setTimeout(start, 1000);
       }
     };
     start() 
     connection.on('receiveTagValue', res => {
-      console.log("------",res)
       this.setState(state => {
         for (let i in res) {
-          state.dataSource.forEach(item => {
+          state.dataSource.map(item => {
+            console.log(item)
             if (item.key === i) {
-              item.value = res[i]
+              item.value = res[i] + ""
             }
+            return item
           })
         }
-        console.log(state.dataSource[0])
         return {
-          dataSource: state.dataSource
+          dataSource: JSON.parse(JSON.stringify(state.dataSource))
         }
       })
     });
@@ -150,7 +149,6 @@ class RealTime extends PureComponent{
             item.time = getNowFormatDate()
           })
 
-          // console.log(state.dataSource)
           return {  
             dataSource: JSON.parse(JSON.stringify(state.dataSource))
           }
@@ -190,7 +188,7 @@ class RealTime extends PureComponent{
     InitTags(nodesList).then(res => {
       if (res.code === 0) {
         this.setState({dataSource: res.data.tagValues, count: res.data.total, dataTypes: res.data.dataTypes}, () => {
-          // this.getDateTime()
+          this.getDateTime()
         })
       } else {
         message.error(res.msg)
@@ -220,7 +218,6 @@ class RealTime extends PureComponent{
     })
   }
   onSelect = (selectRows, row) => {
-    console.log(selectRows, row)
   }
 
   render() {
@@ -290,12 +287,7 @@ class RealTime extends PureComponent{
                 title: '时间戳',
                 dataIndex: 'time',
                 width: 180,
-                ellipsis: true,
-                render() {
-                  getTime = setInterval(() => {
-                    return getNowFormatDate()
-                  }, 1000)
-                }
+                ellipsis: true
               }
             ] }/>
           </div>
