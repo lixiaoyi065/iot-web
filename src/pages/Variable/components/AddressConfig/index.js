@@ -284,9 +284,9 @@ export default class config extends PureComponent {
             formData.dataArea = 'V'
             formData.len = popupData.dataLen
             formData.addressOffset = arr[2]
-            if (arr[4] === 'VB') {
+            if (arr[1] === 'VB') {
               formData.addressType = '字节'
-            } else if (arr[4] === 'VW') {
+            } else if (arr[1] === 'VW') {
               formData.addressType = '字'
             }
             formData.showList = [1,4,6,7]
