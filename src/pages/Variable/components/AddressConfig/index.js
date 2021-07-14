@@ -2647,7 +2647,7 @@ export default class config extends PureComponent {
               }{
                 items && items.includes(4) ?
                 <Form.Item label="地址偏移量" name="addressOffset" rules={[{required: true, message: "必填"}]}>
-                  <Input autoComplete="off" type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'addressOffset', 'S7_TCP')} }/>
+                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'addressOffset', 'S7_TCP')} }/>
                 </Form.Item> : <></>
               }{
                 items.includes(5) ?
