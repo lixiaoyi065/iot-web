@@ -2437,7 +2437,7 @@ export default class config extends PureComponent {
           popupData.dataValue = `H${addressData.address}`
         } else if (addressData.dataArea === 'AR') {
           popupData.dataValue = `A${addressData.address}`
-        } else if (addressData.dataArea === 'TIM/CNT(Complettion Flag)') {
+        } else if (addressData.dataArea === 'TIM/CNT(Complettion Flag)' || addressData.dataArea === 'TIM/CNT(PV)') {
           popupData.dataValue = `T${addressData.address}`
         } else if (addressData.dataArea === 'DM') {
           popupData.dataValue = `D${addressData.address}`
@@ -2579,9 +2579,13 @@ export default class config extends PureComponent {
     console.log(formData)
     let items = formData.showList || []; 
     let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754', '字符串']
-    let binaryarea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)', 'TIM/CNT(PV)', 'DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
+    let allArea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)', 'TIM/CNT(PV)', 'DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
     'EM bank E','EM bank F','EM bank 10','EM bank 11','EM bank 12','EM bank 13','EM bank 14','EM bank 15','EM bank 16','EM bank 17','EM bank 18']
+    let binaryarea = allArea.filter(f => f !== 'TIM/CNT(PV)')
+    let bitArea = allArea.filter(f => f !== 'TIM/CNT(Complettion Flag)')
+    let otherArea = allArea.filter(f => f !== 'TIM/CNT(Complettion Flag)').filter(f => f !== 'TIM/CNT(PV)')
     console.log(popupData.protocolName, items)
+
     return (
       <Form onFinish={this.onFinish} ref={this.addressForm} initialValues={this.state.formData}>
         <div className="form-table">
@@ -2862,10 +2866,10 @@ export default class config extends PureComponent {
                     <Select onChange={(e)=>{this.changeFins_TCPData(e,'dataArea', type)}} >
                       {
                         popupData.dataType === '无符号16位整型' ?
-                        binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)').map((item,index) => {
+                        bitArea.map((item,index) => {
                           return <Select.Option value={item} key={item+index}>{item}</Select.Option>
                         }) :
-                        binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)' && f !== 'TIM/CNT(PV)' ).map((item,index) => {
+                        otherArea.filter(f => f !== 'TIM/CNT(PV)').map((item,index) => {
                           return <Select.Option value={item} key={item+index}>{item}</Select.Option>
                         })
                       }
