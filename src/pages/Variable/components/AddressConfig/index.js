@@ -2222,12 +2222,22 @@ export default class config extends PureComponent {
             popupData.dataValue = `QB${addressData.addressOffset}`
           }
         } else {
-          if (addressData.dataArea === '位') {
-            popupData.dataValue = `MW${addressData.addressOffset}`
-          } else if (addressData.dataArea === '输入') {
-            popupData.dataValue = `IW${addressData.addressOffset}`
-          } else if (addressData.dataArea === '输出') {
-            popupData.dataValue = `QW${addressData.addressOffset}`
+          if (popupData.dataType === '文本变量8位字符集') {
+            if (addressData.dataArea === '位') {
+              popupData.dataValue = `MB${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输入') {
+              popupData.dataValue = `IB${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输出') {
+              popupData.dataValue = `QB${addressData.addressOffset}`
+            }
+          } else {
+            if (addressData.dataArea === '位') {
+              popupData.dataValue = `MW${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输入') {
+              popupData.dataValue = `IW${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输出') {
+              popupData.dataValue = `QW${addressData.addressOffset}`
+            }
           }
         }
       } else if (arrayEqual(addressData.showList, [1,3,4,6])) {
