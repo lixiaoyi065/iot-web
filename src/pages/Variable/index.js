@@ -225,14 +225,14 @@ class RealTime extends PureComponent{
   }
 
   //添加设备提交函数
-  onAddDeviceFinish = val => {
+  onAddDeviceFinish = (val, sortOrder) => {
     const list = ["id", "name", "desc", "nodeType", "protocolName", "supplier", "model"]
     //数据二次处理
     const equObj = { params: {} }
     for (let key in val) {
       if (list.indexOf(key) < 0) {
         if (key === "StrByteOrder1") {
-          equObj.params.StrByteOrder = val[key] ? "True" : "False"
+          equObj.params.StrByteOrder = sortOrder ? 'True' : 'False'
         } else {
           equObj.params[key] = val[key]
         }

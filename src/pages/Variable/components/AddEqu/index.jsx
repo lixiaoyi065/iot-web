@@ -57,6 +57,7 @@ export default class addDevice extends PureComponent {
       StrByteOrder: "1234"
     },//初始化表单数据
     userPane: false,
+    StrByteOrder: false
   }
   //判断是否显示某个属性
   isShowFormItem = item => {
@@ -97,6 +98,9 @@ export default class addDevice extends PureComponent {
         if (i === "StrByteOrder") {
           if (node.protocolName === "Fins_TCP" || node.protocolName === "MCA1E_Binary_Ethernet" || node.protocolName === "MC3E_Binary_Ethernet") {
             initValue.StrByteOrder1 = node.params[i] === "True" ? true : false
+            this.setState({
+              StrByteOrder: node.params[i] === "True" ? true : false
+            })
             console.log(initValue.StrByteOrder1)
           } else {
             initValue.StrByteOrder = node.params[i]
@@ -130,12 +134,21 @@ export default class addDevice extends PureComponent {
     })
   }
 
+  toggleReserve(e) {
+    this.setState({
+      StrByteOrder: e.target.checked
+    })
+    console.log(this.state)
+  }
+
   render() {
     const { protocolNames, suppliers, modelLists, initialValues, activeProto, edit } = this.state
     return (
       <Form
         ref={this.formRef}
-        onFinish={this.props.onFinish}
+        onFinish={(e)=>{
+          this.props.onFinish(e, this.state.StrByteOrder)
+        }}
         initialValues={initialValues}
       >
         <div className="form-table">
@@ -431,7 +444,7 @@ export default class addDevice extends PureComponent {
                 this.state.activeProto === "Fins_TCP" || this.state.activeProto === "MCA1E_Binary_Ethernet" || this.state.activeProto === "MC3E_Binary_Ethernet" ?
                   (
                     <Form.Item valuePropName="checked" name="StrByteOrder1" className="form-block">
-                      <Checkbox>字符串字节反转</Checkbox>
+                      <Checkbox checked={this.state.StrByteOrder}  onChange={(e) => {this.toggleReserve(e)}} >字符串字节反转</Checkbox>
                       <Tooltip placement="top" title="报文默认以1234顺序解析，勾选后字符串字节反转，以2143顺序解析">
                         <QuestionCircleOutlined />
                       </Tooltip>
