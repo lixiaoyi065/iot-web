@@ -389,7 +389,7 @@ class RealTime extends PureComponent{
       console.log(node)
       this.setState({
         visible: true, 
-        title: "编辑分组", 
+        title: "新增分组", 
         modalContent: <AddGroupPane
           key={node.nodeID} node={{
             deviceId: node.nodeID,

@@ -151,7 +151,8 @@ class PageHeader extends PureComponent {
           })}
           <div className="divider"></div>
           <label className="equ-tags">
-            <span className={`iot-status ${this.state.status === 1 ? 'iot-status-normal' : (this.state.status === 2 ? 'iot-status-danger' : 'iot-status-disable')}`}></span>
+            {/* <span className={`iot-status ${this.state.status === 1 ? 'iot-status-normal' : (this.state.status === 2 ? 'iot-status-danger' : 'iot-status-disable')}`}></span> */}
+            <img src={this.props.equ} className="header-equ" alt="equ"  />
             <span className="equ-name">{this.state.currentEqu}</span>
             {<Dropdown overlay={this.menu} trigger={['click']} placement="bottomCenter" arrow>
               <div className="equ-option"></div>
