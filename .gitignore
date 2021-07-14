@@ -1,3 +1,7 @@
 node_modules
 .svn
 iot-web.zip
+build/asset-manifest.json
+build/index.html
+build/index.html
+build/asset-manifest.json

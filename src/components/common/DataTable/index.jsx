@@ -181,7 +181,7 @@ const EditableCell = ({
   }
 
   let childNode = children;
-
+    console.log(children)
   if (record && record.editable) {
     childNode = record && record[dataIndex]
 

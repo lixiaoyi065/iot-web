@@ -1,20 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import Table from "tablex";
 import { Input, Form, Select, Button } from 'antd'
-import { addressVerify, descVerify, nameVerify, verifyMax, verifyMin } from './verify'
-import PubSub from 'pubsub-js'
 
 import './index.less'
-const EditableContext = React.createContext(null);
-const { Option } = Select;
 
+import { addressVerify, descVerify, nameVerify, verifyMax, verifyMin } from './verify'
 
 class Demo extends React.Component {
   constructor(props) {
     super(props)
     this.tableRef = React.createRef()
-    this.form = React.createRef()
-
     const columns = (() => {
       let { activeNodeType } = props
       let columArr = [
@@ -26,13 +21,6 @@ class Demo extends React.Component {
         },{
           title: '变量名',
           dataIndex: 'name',
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
           editor: (value, row, index, onchange, ref) => {
             return (
               <Input
@@ -54,13 +42,6 @@ class Demo extends React.Component {
         }, {
           title: '变量描述',
           dataIndex: 'desc',
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
           editor: (value, row, index, onchange, ref) => {
             return (
               <Input
@@ -96,7 +77,7 @@ class Demo extends React.Component {
           },
           editor: (value, row, index, onchange, ref) => {
             return (
-              <Select defaultValue={value} onChange={ e=>{this.onChange(e, row, "dataType")}}>
+              <Select defaultValue={value}>
                 {
                   this.props.tableDataTypes.map(item=>{
                     return <Select.Option key={item}>{ item }</Select.Option>
@@ -113,13 +94,13 @@ class Demo extends React.Component {
         columArr.push({
           title: '最大值',
           dataIndex: 'max',
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
+          // onCell: (row) => {
+          //   return {
+          //     onClick: () => {
+          //       this.beginEdit(row)
+          //     },
+          //   }
+          // },
           editor: (value, row, index, onchange, ref) => {
             return (
               <Input
@@ -143,30 +124,30 @@ class Demo extends React.Component {
           title: '最小值',
           dataIndex: 'min',
           width: 100,
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
-          editor: (value, row, index, onchange, ref) => {
-            return (
-              <Input
-                defaultValue={value}
-                ref={this.cellRef}
-                onBlur={e => {
-                  this.onBlur(e, row, "min")
-                }}
-                onChange={e =>
-                  onchange([
-                    { 'column-min': e.target.value, id: row.id},
-                    { id: 'min', address: e.target.value },
-                  ])
-                }
-              />
-            )
-          },
+          // onCell: (row) => {
+          //   return {
+          //     onClick: () => {
+          //       this.beginEdit(row)
+          //     },
+          //   }
+          // },
+          // editor: (value, row, index, onchange, ref) => {
+          //   return (
+          //     <Input
+          //       defaultValue={value}
+          //       ref={this.cellRef}
+          //       onBlur={e => {
+          //         this.onBlur(e, row, "min")
+          //       }}
+          //       onChange={e =>
+          //         onchange([
+          //           { 'column-min': e.target.value, id: row.id},
+          //           { id: 'min', address: e.target.value },
+          //         ])
+          //       }
+          //     />
+          //   )
+          // },
           editable: true,
         })
       } else if (activeNodeType === 3 || activeNodeType === 4) {
@@ -174,93 +155,16 @@ class Demo extends React.Component {
         columArr.push({
           title: '变量地址',
           dataIndex: 'address',
-          render: (row, data) => {
-            // console.log(row, data)
-            return (
-              <>
-                <div className="editable-cell-input-group">
-                  <div className="editable-cell-value-wrap">
-                    {row}
-                  </div>
-                  <Button className="edit-cell-btn" onClick={(event) => { this.props.addressSearch(row, event, row, row['stringLength']) }}>···</Button>
-                </div>
-              </>
-            )
-          },
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
-          editor: (value, row, index, onchange, ref) => {
-            return (
-              <Input.Search id={"address" + row.key} autoComplete='off' enterButton="···" onPressEnter={false}
-                defaultValue={value} onBlur={e => {
-                  this.onBlur(e, row, "address")
-                }}
-                onSearch={(val, event) => { this.props.addressSearch(value, event, row, row['stringLength']) }} />
-            )
-          },
           editable: true,
         },
         {
           title: '字符长度',
           dataIndex: 'stringLength',
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
-          editor: (value, row, index, onchange, ref) => {
-            return (
-              <Input
-                defaultValue={value}
-                ref={this.cellRef}
-                onBlur={e => {
-                  this.onBlur(e, row, "stringLength")
-                }}
-                onChange={e =>
-                  onchange([
-                    { 'column-stringLength': e.target.value, id: row.id},
-                    { id: 'stringLength', address: e.target.value },
-                  ])
-                }
-              />
-            )
-          },
           editable: true,
         },
         {
           title: '缩放比',
           dataIndex: 'zoom',
-          onCell: (row) => {
-            return {
-              onClick: () => {
-                this.beginEdit(row)
-              },
-            }
-          },
-          editor: (value, row, index, onchange, ref) => {
-            return (
-              <Input
-                defaultValue={value}
-                ref={this.cellRef}
-                onBlur={e => {
-                  this.onBlur(e, row, "zoom")
-                }}
-                onChange={e =>
-                  onchange([
-                    { 'column-zoom': e.target.value, id: row.id},
-                    { id: 'zoom', address: e.target.value },
-                  ])
-                }
-              />
-            )
-          },
           editable: true,
         })
       }
@@ -273,17 +177,15 @@ class Demo extends React.Component {
       loading: false,
       expandedRowKeys: [],
       modified: "",
-      reset: false,
       dataSource: []
     }
   }
 
   beginEdit(row) {
-    console.log("-------------------")
     let arr = []
     arr.push(row.key)
     console.log(this.tableRef.current.api)
-    this.tableRef.current.api.edit(arr)
+    this.tableRef.current.api.editRows(arr)
     this.setState({
       modified: row.key
     })
@@ -294,33 +196,13 @@ class Demo extends React.Component {
     return null
   }
   onEditSave(changedRows, newData, type) {
-    // console.log('onEditSave:', newData)
+    console.log('onEditSave:', newData)
     this.setState({
       dataSource: newData,
     })
   }
   componentDidMount() {
-    
-  }
-
-  // onEditComplete(modified) {
-  //   console.log('onEditComplete:', modified)
-  // }
-
-  onChange = (e, row, dataIndex) => {
-    let val = e
-    let { activeNodeType, activeNode } = this.props
-    this.setState(state => {
-      for (let i = 0; i < state.dataSource.length;i++){
-        if (state.dataSource[i].key === row.key) {
-          state.dataSource[i][dataIndex] = val
-          return
-        }
-      }
-      return {
-        dataSource: state.dataSource
-      }
-    })
+    //this.refs.tableRef.api.edit()
   }
 
   //失去焦点事件
@@ -364,8 +246,7 @@ class Demo extends React.Component {
     }
 
     //完成编辑，将input渲染成div
-    this.tableRef.current.api.completeEdit()
-    console.log(this)
+    // this.tableRef.current.api.completeEdit()
     // this.props.handleSave(dataIndex, val, row);
   }
 
@@ -374,22 +255,8 @@ class Demo extends React.Component {
     this.props.onSelectChange(rowArr)
   }
 
-  EditableRow = (row) => {
-    let { rowProps } = row
-
-    return (
-      <Form ref={this.form} className={rowProps.className} style={rowProps.style}>
-        { rowProps.children }
-      </Form>
-    )
-  };
-
   render() {
     let { columns, dataSource } = this.state
-    const components = {
-      row: this.EditableRow
-    }
-   
     return (
       <>
         <div className="table-contain">
@@ -403,10 +270,8 @@ class Demo extends React.Component {
               checkOnSelect: true,
               selectOnCheck: true,
             }}
-            components={components}
-            isAppend={true}
             // editAll={true}
-            editorNoBorder={true} 
+            // editorNoBorder={true}
             allowSaveEmpty={true}
             alwaysValidate={false}
             validateTrigger="onChange"

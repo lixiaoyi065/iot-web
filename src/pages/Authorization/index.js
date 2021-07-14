@@ -21,8 +21,8 @@ class AuthorizationPane extends PureComponent{
   //获取产品序列号
   getSerialNumber = (show = true) => {
     GetSerialNumber().then(res => {
+      console.log(res)
       if (res.code === 0) {
-        console.log(res.data)
         this.setState({nodeID: res.data})
         if (show) {
           message.info("已生成")
@@ -41,6 +41,7 @@ class AuthorizationPane extends PureComponent{
   //更新授权状态
   upDateState = (show = true) => {
     GetAuthState().then(res => {
+      console.log("GetAuthState:====", res)
       if (res.code === 0) {
         if (show) {
           message.info("刷新成功")
