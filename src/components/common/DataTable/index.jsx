@@ -181,7 +181,6 @@ const EditableCell = ({
   }
 
   let childNode = children;
-    console.log(children)
   if (record && record.editable) {
     childNode = record && record[dataIndex]
 
@@ -372,7 +371,6 @@ class EditableTable extends React.Component {
 
   render() {
     const { dataSource } = this.state;
-    // console.log(dataSource,this.props.gist)
     const components = {
       header: {
         cell: ResizeableTitle,

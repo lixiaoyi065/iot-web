@@ -467,10 +467,12 @@ class RealTime extends PureComponent{
   //初始加载变量列表
   initTagList = (tags, info = null) => {
     //重置查询
-    this.searchRef.current.refs.formRef.setFieldsValue({
-      dataType: "不限",
-      key: "",
-    })
+    if (this.searchRef.current) {
+      this.searchRef.current.refs.formRef.setFieldsValue({
+        dataType: "不限",
+        key: "",
+      })
+    }
     // let nodeName = info.node.nodeType === 1 ? info.selectedNodes[0].title : info.selectedNodes[0].title.props.children[0].props.children
     if (info) {
       this.setState({
@@ -651,30 +653,35 @@ class RealTime extends PureComponent{
 
   //保存变量列表
   saveList = () => {
-    // console.log(this.state.modifyTagsList)
-    console.log(this.state.modifyTagsList)
-    if(this.state.modifyTagsList.length === 0){
+    let { dataSource, gist } = this.state;
+    let modifyDb = [], modifyPhy = [];
+    dataSource.forEach((item, index) => {
+      if (index <= gist.length-1) {
+        for (let val in item) {
+          if (item[val] !== gist[index][val]) {
+            modifyDb.push(item)
+            return
+          }
+        }
+      } else {
+        let obj = JSON.parse(JSON.stringify(item))
+        obj.key = "00000000-0000-0000-0000-000000000000"
+        modifyPhy.push(obj)
+      }
+    })
+
+    if (modifyDb.length === 0 && modifyPhy.length === 0) {
       message.warning("当前没有更改的内容")
       return;
     }
-    // if (!this.state.canSubmit.canSubmit) {
-    //   // console.log(this.state.canSubmit.message)
-    //   message.error(this.state.canSubmit.message)
-    //   return;
-    // }
-    console.log("---------------")
-    let modifyList = []
-    deepClone(this.state.modifyTagsList).map(item => {
-      item.key = item.id
-      modifyList.push(item)
-      return "";
-    })
-    this.setState({loading: true})
+
+    this.setState({ loading: true })
+
     SaveTags({
       nodeId: this.state.activeNode,
       type: this.state.activeNodeType,
       dataTypes: [],
-      tags: modifyList,
+      tags: [...modifyDb, ...modifyPhy],
       total: 0
     }).then(res => {
       if (res.code === 0) {
@@ -691,10 +698,11 @@ class RealTime extends PureComponent{
                 this.setState({loading: false})
                 return
               }
+              console.log(res.data)
         
               this.setState((state) => {
                 return {
-                  modifyTagsList: [],
+                  // modifyTagsList: [],
                   gist: [...state.dataSource]
                 }
               }, () => {
@@ -769,7 +777,7 @@ class RealTime extends PureComponent{
     }, () => {
       $(`#dataType${count+1}`).parent().parent().addClass("effective-editor")
     })
-    PubSub.publish("modifyTags", [...this.state.modifyTagsList, tagObj])
+    // PubSub.publish("modifyTags", [...this.state.modifyTagsList, tagObj])
   }
   //删除变量
   delTags = () => {
@@ -1064,7 +1072,6 @@ class RealTime extends PureComponent{
   }
 
   addressSearch = (value, event, row, codeLen) => {
-    console.log(value)
     let id = document.getElementById(`address${row.id}`)
     if (id) {
       id.blur();
@@ -1128,7 +1135,7 @@ class RealTime extends PureComponent{
       let currentObj = JSON.parse(JSON.stringify(state.dataSource[row.no - 1]))
 
       //第一条替换点击的那条，其余追加到表格后面
-      Object.assign(state.dataSource[row.no - 1], selectRows[0], {key: row.no-1})
+      Object.assign(state.dataSource[row.no - 1], selectRows[0], { key: row.key, no: row.no, id: row.id})
       
       //查找编辑列表中是否存在第一条记录，存在则覆盖，不存在则追加
       if (state.modifyTagsList.length === 0) {
@@ -1147,7 +1154,7 @@ class RealTime extends PureComponent{
       return {
         dataSource: [...state.dataSource, ...selectRows],
         count: state.count + selectRows.length,
-        modifyTagsList: [...state.modifyTagsList, ...selectRows],
+        // modifyTagsList: [...state.modifyTagsList, ...selectRows],
         canSubmit: {
           canSubmit: true,
           message: ""
