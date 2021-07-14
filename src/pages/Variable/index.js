@@ -7,7 +7,7 @@ import $ from "jquery"
 import DrowDownMenu from 'components/common/DrowDownMenu'
 import ZTree from 'components/common/Ztree'
 import EditableTable from 'components/common/DataTable'
-// import EditableTable from 'components/common/Tablex'
+// import EditableTable from 'components/common/ETable'
 
 import AddEqu from './components/AddEqu'
 import AddGroupPane from './components/AddGroup'
