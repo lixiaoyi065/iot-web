@@ -1057,6 +1057,7 @@ export default class config extends PureComponent {
         let E6Reg = /^(E06_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let E7Reg = /^(E07_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let E8Reg = /^(E08_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
+        let E9Reg = /^(E09_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let EAReg = /^(E0A_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let EBReg = /^(E0B_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let ECReg = /^(E0C_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
@@ -1168,7 +1169,13 @@ export default class config extends PureComponent {
           formData.address = parseInt(arr[2])
           formData.bit = arr[4]
           formData.showList = [1,2,3]
-        } else if (EAReg.test(popupData.dataValue)) {
+        } else if (E9Reg.test(popupData.dataValue)) {
+          let arr = popupData.dataValue.match(E9Reg) 
+          formData.dataArea = 'EM bank 9'
+          formData.address = parseInt(arr[2])
+          formData.bit = arr[4]
+          formData.showList = [1,2,3]
+        }else if (EAReg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(EAReg) 
           formData.dataArea = 'EM bank A'
           formData.address = parseInt(arr[2])
@@ -1282,6 +1289,7 @@ export default class config extends PureComponent {
         let E6Reg = /^(E06_)([0-9]{1,})$/
         let E7Reg = /^(E07_)([0-9]{1,})$/
         let E8Reg = /^(E08_)([0-9]{1,})$/
+        let E9Reg = /^(E09_)([0-9]{1,})$/
         let EAReg = /^(E0A_)([0-9]{1,})$/
         let EBReg = /^(E0B_)([0-9]{1,})$/
         let ECReg = /^(E0C_)([0-9]{1,})$/
@@ -1385,6 +1393,12 @@ export default class config extends PureComponent {
         } else if (E8Reg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(E8Reg) 
           formData.dataArea = 'EM bank 8'
+          formData.address = parseInt(arr[2])
+          formData.len = popupData.dataLen
+          formData.showList = [1,2,4]
+        } else if (E9Reg.test(popupData.dataValue)) {
+          let arr = popupData.dataValue.match(E9Reg) 
+          formData.dataArea = 'EM bank 9'
           formData.address = parseInt(arr[2])
           formData.len = popupData.dataLen
           formData.showList = [1,2,4]
@@ -1503,6 +1517,7 @@ export default class config extends PureComponent {
         let E6Reg = /^(E06_)([0-9]{1,})$/
         let E7Reg = /^(E07_)([0-9]{1,})$/
         let E8Reg = /^(E08_)([0-9]{1,})$/
+        let E9Reg = /^(E09_)([0-9]{1,})$/
         let EAReg = /^(E0A_)([0-9]{1,})$/
         let EBReg = /^(E0B_)([0-9]{1,})$/
         let ECReg = /^(E0C_)([0-9]{1,})$/
@@ -1604,6 +1619,12 @@ export default class config extends PureComponent {
         } else if (E8Reg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(E8Reg) 
           formData.dataArea = 'EM bank 8'
+          formData.address = parseInt(arr[2])
+          formData.len = popupData.dataLen
+          formData.showList = [1,2]
+        } else if (E9Reg.test(popupData.dataValue)) {
+          let arr = popupData.dataValue.match(E9Reg) 
+          formData.dataArea = 'EM bank 9'
           formData.address = parseInt(arr[2])
           formData.len = popupData.dataLen
           formData.showList = [1,2]
