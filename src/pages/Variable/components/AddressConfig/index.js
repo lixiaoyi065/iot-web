@@ -1057,6 +1057,7 @@ export default class config extends PureComponent {
         let E6Reg = /^(E06_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let E7Reg = /^(E07_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let E8Reg = /^(E08_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
+        let E9Reg = /^(E09_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let EAReg = /^(E0A_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let EBReg = /^(E0B_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
         let ECReg = /^(E0C_)([0-9]{1,})([.]{1})([0-9]|(1[0-5]))$/
@@ -1168,7 +1169,13 @@ export default class config extends PureComponent {
           formData.address = parseInt(arr[2])
           formData.bit = arr[4]
           formData.showList = [1,2,3]
-        } else if (EAReg.test(popupData.dataValue)) {
+        } else if (E9Reg.test(popupData.dataValue)) {
+          let arr = popupData.dataValue.match(E9Reg) 
+          formData.dataArea = 'EM bank 9'
+          formData.address = parseInt(arr[2])
+          formData.bit = arr[4]
+          formData.showList = [1,2,3]
+        }else if (EAReg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(EAReg) 
           formData.dataArea = 'EM bank A'
           formData.address = parseInt(arr[2])
@@ -1282,6 +1289,7 @@ export default class config extends PureComponent {
         let E6Reg = /^(E06_)([0-9]{1,})$/
         let E7Reg = /^(E07_)([0-9]{1,})$/
         let E8Reg = /^(E08_)([0-9]{1,})$/
+        let E9Reg = /^(E09_)([0-9]{1,})$/
         let EAReg = /^(E0A_)([0-9]{1,})$/
         let EBReg = /^(E0B_)([0-9]{1,})$/
         let ECReg = /^(E0C_)([0-9]{1,})$/
@@ -1385,6 +1393,12 @@ export default class config extends PureComponent {
         } else if (E8Reg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(E8Reg) 
           formData.dataArea = 'EM bank 8'
+          formData.address = parseInt(arr[2])
+          formData.len = popupData.dataLen
+          formData.showList = [1,2,4]
+        } else if (E9Reg.test(popupData.dataValue)) {
+          let arr = popupData.dataValue.match(E9Reg) 
+          formData.dataArea = 'EM bank 9'
           formData.address = parseInt(arr[2])
           formData.len = popupData.dataLen
           formData.showList = [1,2,4]
@@ -1503,6 +1517,7 @@ export default class config extends PureComponent {
         let E6Reg = /^(E06_)([0-9]{1,})$/
         let E7Reg = /^(E07_)([0-9]{1,})$/
         let E8Reg = /^(E08_)([0-9]{1,})$/
+        let E9Reg = /^(E09_)([0-9]{1,})$/
         let EAReg = /^(E0A_)([0-9]{1,})$/
         let EBReg = /^(E0B_)([0-9]{1,})$/
         let ECReg = /^(E0C_)([0-9]{1,})$/
@@ -1604,6 +1619,12 @@ export default class config extends PureComponent {
         } else if (E8Reg.test(popupData.dataValue)) {
           let arr = popupData.dataValue.match(E8Reg) 
           formData.dataArea = 'EM bank 8'
+          formData.address = parseInt(arr[2])
+          formData.len = popupData.dataLen
+          formData.showList = [1,2]
+        } else if (E9Reg.test(popupData.dataValue)) {
+          let arr = popupData.dataValue.match(E9Reg) 
+          formData.dataArea = 'EM bank 9'
           formData.address = parseInt(arr[2])
           formData.len = popupData.dataLen
           formData.showList = [1,2]
@@ -2222,12 +2243,22 @@ export default class config extends PureComponent {
             popupData.dataValue = `QB${addressData.addressOffset}`
           }
         } else {
-          if (addressData.dataArea === '位') {
-            popupData.dataValue = `MW${addressData.addressOffset}`
-          } else if (addressData.dataArea === '输入') {
-            popupData.dataValue = `IW${addressData.addressOffset}`
-          } else if (addressData.dataArea === '输出') {
-            popupData.dataValue = `QW${addressData.addressOffset}`
+          if (popupData.dataType === '文本变量8位字符集') {
+            if (addressData.dataArea === '位') {
+              popupData.dataValue = `MB${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输入') {
+              popupData.dataValue = `IB${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输出') {
+              popupData.dataValue = `QB${addressData.addressOffset}`
+            }
+          } else {
+            if (addressData.dataArea === '位') {
+              popupData.dataValue = `MW${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输入') {
+              popupData.dataValue = `IW${addressData.addressOffset}`
+            } else if (addressData.dataArea === '输出') {
+              popupData.dataValue = `QW${addressData.addressOffset}`
+            }
           }
         }
       } else if (arrayEqual(addressData.showList, [1,3,4,6])) {
@@ -2427,7 +2458,7 @@ export default class config extends PureComponent {
           popupData.dataValue = `H${addressData.address}`
         } else if (addressData.dataArea === 'AR') {
           popupData.dataValue = `A${addressData.address}`
-        } else if (addressData.dataArea === 'TIM/CNT(Complettion Flag)') {
+        } else if (addressData.dataArea === 'TIM/CNT(Complettion Flag)' || addressData.dataArea === 'TIM/CNT(PV)') {
           popupData.dataValue = `T${addressData.address}`
         } else if (addressData.dataArea === 'DM') {
           popupData.dataValue = `D${addressData.address}`
@@ -2569,9 +2600,13 @@ export default class config extends PureComponent {
     console.log(formData)
     let items = formData.showList || []; 
     let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754', '字符串']
-    let binaryarea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)', 'TIM/CNT(PV)', 'DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
+    let allArea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)', 'TIM/CNT(PV)', 'DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
     'EM bank E','EM bank F','EM bank 10','EM bank 11','EM bank 12','EM bank 13','EM bank 14','EM bank 15','EM bank 16','EM bank 17','EM bank 18']
+    let binaryarea = allArea.filter(f => f !== 'TIM/CNT(PV)')
+    let bitArea = allArea.filter(f => f !== 'TIM/CNT(Complettion Flag)')
+    let otherArea = allArea.filter(f => f !== 'TIM/CNT(Complettion Flag)').filter(f => f !== 'TIM/CNT(PV)')
     console.log(popupData.protocolName, items)
+
     return (
       <Form onFinish={this.onFinish} ref={this.addressForm} initialValues={this.state.formData}>
         <div className="form-table">
@@ -2612,7 +2647,7 @@ export default class config extends PureComponent {
               }{
                 items && items.includes(4) ?
                 <Form.Item label="地址偏移量" name="addressOffset" rules={[{required: true, message: "必填"}]}>
-                  <Input autoComplete="off" type="number" min="1" onBlur={ (e)=>{this.blurData(e, 'addressOffset', 'S7_TCP')} }/>
+                  <Input autoComplete="off" type="number" min="0" onBlur={ (e)=>{this.blurData(e, 'addressOffset', 'S7_TCP')} }/>
                 </Form.Item> : <></>
               }{
                 items.includes(5) ?
@@ -2852,10 +2887,10 @@ export default class config extends PureComponent {
                     <Select onChange={(e)=>{this.changeFins_TCPData(e,'dataArea', type)}} >
                       {
                         popupData.dataType === '无符号16位整型' ?
-                        binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)').map((item,index) => {
+                        bitArea.map((item,index) => {
                           return <Select.Option value={item} key={item+index}>{item}</Select.Option>
                         }) :
-                        binaryarea.filter(f => f !== 'TIM/CNT(Complettion Flag)' && f !== 'TIM/CNT(PV)' ).map((item,index) => {
+                        otherArea.filter(f => f !== 'TIM/CNT(PV)').map((item,index) => {
                           return <Select.Option value={item} key={item+index}>{item}</Select.Option>
                         })
                       }
