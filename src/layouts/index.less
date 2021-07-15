@@ -13,7 +13,7 @@
   height: 100%;
 }
 
-.ant-btn{
+.ant-btn {
   line-height: 22px;
 }
 
@@ -81,15 +81,16 @@
     cursor: pointer;
     z-index: 9;
 
-    &:hover{
+    &:hover {
       background: url(~assets/img/common/arrow-left_active.png) no-repeat;
       background-size: 100%;
     }
   }
 }
-.foldToLeft{
-  .leftContent{
-    .arrowLeft{
+
+.foldToLeft {
+  .leftContent {
+    .arrowLeft {
       position: absolute;
       padding: 0;
       right: -20px;
@@ -102,7 +103,7 @@
       cursor: pointer;
       z-index: 9;
 
-      &:hover{
+      &:hover {
         background: url(~assets/img/common/arrow-right_active.png) no-repeat;
         background-size: 100%;
       }
@@ -132,6 +133,7 @@
 }
 
 .table-contain {
+  position: relative;
   flex: 1;
   width: 100%;
   overflow: hidden;
@@ -228,12 +230,13 @@
     width: 250px;
   }
 
-  .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+  .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
     content: none;
   }
 }
-.ant-modal-body{
-  .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+
+.ant-modal-body {
+  .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
     content: none;
   }
 }
@@ -407,7 +410,7 @@
   width: 40px;
 }
 
-.ant-table-selection{ 
+.ant-table-selection {
   // width: 50px;
   width: 100%;
   padding-left: 9px;
@@ -451,7 +454,7 @@
 .ant-table-container,
 .ant-table-body {
   height: 100%;
-  
+
   .ant-checkbox-inner {
     position: relative;
     left: -1px;
@@ -586,21 +589,22 @@
       border-color: #DCECFD;
     }
 
-    .ant-form-item-label{
+    .ant-form-item-label {
       display: inline-block;
       width: 69px;
       color: #6F7374;
     }
-    .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before{
+
+    .ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
       content: "";
     }
-    
-    .ant-form-item-control-input-content{
+
+    .ant-form-item-control-input-content {
       font-size: 14px;
       font-weight: 500;
     }
 
-    .saved{
+    .saved {
       background: #DCECFD;
       color: #76B8FC;
       cursor: not-allowed;

@@ -7,8 +7,9 @@ import './index.less'
 
 const { Content } = Layout;
 
-let Variable = Load(() => import('pages/Variable/index')),
-RealTime = Load(() => import('pages/RealTime')),
+let Variable = Load(() => import('pages/Variable/index'))
+let Variable2 = Load(() => import('pages/Variable/index2')),
+RealTime = Load(() => import('pages/RealTime/index2')),
 Operations = Load(() => import('pages/Operations')),
 Authorization = Load(() => import('pages/Authorization')),
 User = Load(() => import('pages/User')),
@@ -26,6 +27,7 @@ class BasicLayout extends PureComponent {
           <Content className="site-layout-background">
             <Switch>
               <Route path="/index/variable" component={Variable}/>
+              <Route path="/index/variable2" component={Variable2}/>
               <Route path="/index/realTime" component={RealTime}/>
               <Route path="/index/operations" component={Operations}/>
               <Route path="/index/authorization" component={Authorization} />

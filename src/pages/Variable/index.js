@@ -15,7 +15,7 @@ import Search from './components/Search'
 import AddressConfig from './components/AddressConfig'
 import OpcConfig from './components/AddressConfig/OpcConfig'
 
-import { downFile, deepClone, isFit } from "utils";
+import { downFile, isFit } from "utils";
 
 import {
   AddDevice, ModifyDevice, AddGroup, ModifyGroup,

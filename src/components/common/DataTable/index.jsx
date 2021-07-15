@@ -60,6 +60,7 @@ const EditableCell = ({
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
+  console.log("------------", editing)
   useEffect(() => {
     if (editing && type !== "select") {
       inputRef.current.focus();
@@ -77,7 +78,7 @@ const EditableCell = ({
             return isSame = gist[i][dataIndex] !== val
           }
         }
-      } 
+      }
     }
     return isSame
   }
@@ -127,7 +128,7 @@ const EditableCell = ({
   const selectChange = (e, id) => {
     try {
       record[dataIndex] = e
-      if (Number(activeNodeType) === 2 || Number(activeNodeType) === 0 ) {
+      if (Number(activeNodeType) === 2 || Number(activeNodeType) === 0) {
         let types = ['二进制变量', '日期', '时间', '日期时间', '字符串']
         if (types.includes(e)) {
           record['min'] = ''
@@ -144,35 +145,35 @@ const EditableCell = ({
         if (e === '有符号16位整型') {
           record['min'] = '-32768'
           record['max'] = '32767'
-        } 
+        }
         if (e === '无符号16位整型') {
           record['min'] = '0'
           record['max'] = '65535'
-        } 
+        }
         if (e === '有符号32位整型') {
           record['min'] = '-2147483648'
           record['max'] = '2147483647'
-        } 
+        }
         if (e === '无符号32位整型') {
           record['min'] = '0'
           record['max'] = '4294967295'
-        } 
+        }
         if (e === '有符号64位整型') {
           record['min'] = '-9223372036854775808'
           record['max'] = '9223372036854775807'
-        } 
+        }
         if (e === '无符号64位整型') {
           record['min'] = '0'
           record['max'] = '18446744073709551615'
-        } 
+        }
         if (e === 'F32位浮点数IEEE754') {
           record['min'] = '-3.402823E+38'
           record['max'] = '3.402823E+38'
-        } 
+        }
         if (e === 'F64位浮点数IEEE754') {
           record['min'] = '-1.7976931348623157E+308'
           record['max'] = '1.7976931348623157E+308'
-        } 
+        }
       }
       toggleEdits()
       handleSave(dataIndex, e, record, checkIsSame(e), false, Number(activeNodeType));
@@ -229,7 +230,7 @@ const EditableCell = ({
   }
 
   return <td {...restProps} title={record && record[dataIndex]} key={record && (dataIndex + record.key)} id={record && dataIndex + record.key}
-   className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}  ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
+    className={`ant-table-cell ant-table-cell-ellipsis ${record && record.editable ? "editable" : ""}  ${checkIsSame(record && record[dataIndex]) ? "effective-editor" : ""}
     `}>{childNode}</td>;
 };
 
@@ -273,7 +274,7 @@ class EditableTable extends React.PureComponent {
     return null
   }
 
-  handleSave = (dataIndex, val, row, flag = true, isAddress= false, nodeType) => {
+  handleSave = (dataIndex, val, row, flag = true, isAddress = false, nodeType) => {
     /*  
       nodeType： 内部变量 2 选择数据类型需要展示最大值和最小值
      */
@@ -429,14 +430,14 @@ class EditableTable extends React.PureComponent {
               this.setState({ tableWidth: width, tableHeight: height - 43 })
             }}
           >
-          <Table
-            rowSelection={this.props.rowSelection}
-            components={components}
-            rowClassName={() => 'editable-row'}
-            dataSource={dataSource}
-            columns={columns}
-            loading={this.props.loading}
-            pagination={false} scroll={{ y: this.state.tableHeight }}
+            <Table
+              rowSelection={this.props.rowSelection}
+              components={components}
+              rowClassName={() => 'editable-row'}
+              dataSource={dataSource}
+              columns={columns}
+              loading={this.props.loading}
+              pagination={false} scroll={{ y: this.state.tableHeight }}
             />
           </ResizeObserver>
         </div>
