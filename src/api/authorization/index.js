@@ -15,7 +15,6 @@ export function GetAuthState() {
 }
 
 export function UploadAuthFile(data) {
-  console.log(data)
   return axios({
     url: "/AuthorizationManage/UploadAuthFile",
     data: data.formData,

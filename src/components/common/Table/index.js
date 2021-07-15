@@ -43,7 +43,6 @@ export default class EditableTable extends React.Component {
   }
 
   handleResize = index => (e, { size }) => {
-    console.log(size)
     this.setState(({ columns }) => {
       const nextColumns = [...columns];
       nextColumns[index] = {
@@ -86,6 +85,7 @@ export default class EditableTable extends React.Component {
               rowClassName={() => 'editable-row'}
               components={components}
               dataSource={dataSource}
+              ellipsis={true}
               columns={columns}
               pagination={ false } scroll={{y: this.state.tableHeight }}
             />

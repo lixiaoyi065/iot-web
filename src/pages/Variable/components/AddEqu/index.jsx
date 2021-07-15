@@ -81,7 +81,6 @@ export default class addDevice extends PureComponent {
   }
 
   componentDidMount() {
-    console.log(this.props)
     if (this.props.node) {
       // 将传过来的设备数据进行处理
       const node = this.props.node,
@@ -101,7 +100,6 @@ export default class addDevice extends PureComponent {
             this.setState({
               StrByteOrder: node.params[i] === "True" ? true : false
             })
-            console.log(initValue.StrByteOrder1)
           } else {
             initValue.StrByteOrder = node.params[i]
           }
@@ -138,7 +136,6 @@ export default class addDevice extends PureComponent {
     this.setState({
       StrByteOrder: e.target.checked
     })
-    console.log(this.state)
   }
 
   render() {

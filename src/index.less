@@ -38,8 +38,14 @@ body {
   }
 
   .equ-name {
+    display: inline-block;
+    max-width: 200px;
+    word-break: keep-all;
+    white-space: nowrap;
     vertical-align: middle;
     padding-right: 11px;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   .equ-option {
@@ -193,7 +199,7 @@ body {
     }
 
     .btn-icon {
-      margin: 0;
+      margin: -2px 0 0;
     }
   }
 

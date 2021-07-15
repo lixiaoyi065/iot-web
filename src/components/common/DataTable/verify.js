@@ -16,7 +16,6 @@ export function addressVerify(value, obj) {
       resolve(false)
     } else {
        await VerifyAddress(obj).then(res => {
-        console.log(res)
         if (res.code !== 0) {
           message.error(res.msg)
           PubSub.publish("canSubmit", {
@@ -38,7 +37,6 @@ export function addressVerify(value, obj) {
 
 //描述校验
 export function descVerify(value) {
-  console.log("描述校验")
   //(/^[\u4E00-\u9FA5A-Za-z0-9_.%&',;=?$\x22]+$/).test(value) && 
   if (value.length > 48) {
     message.error("变量描述文本过长，请重新输入，不超过48个英文字符、24个汉字")
@@ -52,7 +50,6 @@ export function descVerify(value) {
 
 //变量名校验
 export function nameVerify(value, dataSource, record, dataIndex, activeNodeType) {
-  console.log("变量名校验")
   if (!isRepeat(dataSource, record.key, dataIndex, value)) {
     if (value === "") {
       message.error("变量名不可为空，请重新输入");

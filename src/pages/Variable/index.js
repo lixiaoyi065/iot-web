@@ -88,7 +88,6 @@ class RealTime extends PureComponent{
   //获取整棵设备列表树结构
   getTreeStructure = () => {
     GetTreeStructure().then(res => {
-      // console.log("设备树：",res.data)
       this.setState({treeData: res.data})
     })
   }
@@ -137,7 +136,7 @@ class RealTime extends PureComponent{
         }
       ]}
       onClick={(e) => {
-        // console.log(el)
+        // 
         e.domEvent.stopPropagation();
         this.menuClick(e, el)
       }}
@@ -176,7 +175,7 @@ class RealTime extends PureComponent{
         }
       ]}
       onClick={(e) => {
-        // console.log(el)
+        // 
         e.domEvent.stopPropagation();
         this.menuClick(e, el, length, state)
       }}
@@ -386,7 +385,6 @@ class RealTime extends PureComponent{
       })
     } else if (e.key === "addGroupCurrent") {
       //在设备菜单中添加分组
-      console.log(node)
       this.setState({
         visible: true, 
         title: "新增分组", 
@@ -401,7 +399,6 @@ class RealTime extends PureComponent{
           onFinish={debounce(this.onAddGroupFinish,500)} />
       })
     } else if (e.key === "modifyGroup") {
-      console.log(node)
       this.setState({
         visible: true, 
         title: "编辑分组", 
@@ -448,7 +445,6 @@ class RealTime extends PureComponent{
   //点击节点触发函数
   onSelect = (res, info) => {
     this.setState({selectedKeys: [info.node.key]})
-    // console.log(this.state.modifyTagsList)
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
@@ -473,12 +469,10 @@ class RealTime extends PureComponent{
         key: "",
       })
     }
-    // let nodeName = info.node.nodeType === 1 ? info.selectedNodes[0].title : info.selectedNodes[0].title.props.children[0].props.children
     if (info) {
       this.setState({
         tableLoading: true,
         activeNode: info.node.key,
-        // activeNodeName: nodeName,
         activeNodeType: info.node.nodeType,
         node: info.node
       })      
@@ -515,7 +509,6 @@ class RealTime extends PureComponent{
   }
 
   handleSave = (dataIndex, val, row, flag = true, isAddress = false) => {
-    console.log([...this.state.modifyTagsList])
     /**
      * 1、判断在modifyTags中存在，
      * 2、存在判断 新、旧（gist中对比）对象是否有一致，一致则在modifyTags中移除该对象
@@ -620,7 +613,6 @@ class RealTime extends PureComponent{
           total: state.total + res.data.length,
         }
       }, () => {
-        // console.log(this.state.gist)
       })
     })
   }
@@ -698,7 +690,6 @@ class RealTime extends PureComponent{
                 this.setState({loading: false})
                 return
               }
-              console.log(res.data)
         
               this.setState((state) => {
                 return {
@@ -792,7 +783,6 @@ class RealTime extends PureComponent{
       onOk: () => {
         let phyDel = [], //物理删除
         dataDel = []; //数据库删除
-        // console.log(this.state.selectedRowKeys)
         this.state.selectedRowKeys.forEach((item, i) => {
           if (item.length !== 36) {
             phyDel.push(item)
@@ -985,11 +975,6 @@ class RealTime extends PureComponent{
 
   wholeImportFileFun = (formdata) => {
     document.getElementById('wholeImport').value = null
-    console.log({
-      nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
-      type: this.state.activeNodeType !== '' ? this.state.activeNodeType : -1,
-      formData: formdata
-    })
     WholeImportTags({
       nodeId: this.state.activeNode || "00000000-0000-0000-0000-000000000000",
       type: this.state.activeNodeType !== '' ? this.state.activeNodeType : -1,
@@ -999,7 +984,6 @@ class RealTime extends PureComponent{
         this.setState({loading: true})
         getProcessTimer = setInterval(() => {
           GetImportTagsTaskProgress(res.data).then(mes => {
-            console.log(mes)
             let result = mes.data.resultData
             if ( mes.data.status === 2 ||  mes.data.status === 3) {
               message.info(mes.data.message)
@@ -1008,8 +992,6 @@ class RealTime extends PureComponent{
                 if (mes.data.message === "导入成功") {
                   $(".effective-editor").removeClass("effective-editor")
                 }
-                // console.log(mes.data.message === "导入成功")
-                console.log(this.state.activeNodeType === "")
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
@@ -1049,8 +1031,6 @@ class RealTime extends PureComponent{
                 if (mes.data.message === "导入成功") {
                   $(".effective-editor").removeClass("effective-editor")
                 }
-                // console.log(mes.data.message === "导入成功")
-                // console.log(result.tags)
                 return {
                   loading: false,
                   count: mes.data.message === "导入成功" ? result.total : state.count,
@@ -1165,7 +1145,6 @@ class RealTime extends PureComponent{
   addressFinish = (res, row) => {
     this.setState(state => {
       let rowIndex = 0;
-      console.log(res, row)
       state.dataSource.forEach((item, index)=>{
         if(item.key === row.key){
           rowIndex = index
@@ -1175,7 +1154,6 @@ class RealTime extends PureComponent{
         }
       })
       let isEdit = false;
-      console.log(state.dataSource[rowIndex])
       //判断当前记录是否被编辑了
       state.gist.forEach(item=>{
         if(item.key === state.dataSource[rowIndex].key){
@@ -1190,7 +1168,6 @@ class RealTime extends PureComponent{
 
       if(isEdit){
         if (state.modifyTagsList.length === 0) {
-          // console.log(state.dataSource[row.no -1])
           state.modifyTagsList.push(state.dataSource[rowIndex])
         }else {
           state.modifyTagsList.forEach(mod => {
@@ -1222,7 +1199,6 @@ class RealTime extends PureComponent{
     };
 
     const sameParent = isSameParent(dragNode, dropNode);
-    console.log("1111111",info)
     if (sameParent && dragNode.fatherNodeID === "00000000-0000-0000-0000-000000000000") {
       //第一层级拖拽
       if (!info.dropToGap) {
@@ -1342,6 +1318,7 @@ class RealTime extends PureComponent{
                       className: "optAdd",
                       placement: "bottomCenter"
                     }}
+                    key="ztree"
                     move={true}
                     option={ true }
                     nodeDatas={ treeData}
@@ -1416,8 +1393,6 @@ class RealTime extends PureComponent{
                         },
                       }
                     },
-                    // content: el.content,
-                    // render: el.render
                   }
                 })}
               />

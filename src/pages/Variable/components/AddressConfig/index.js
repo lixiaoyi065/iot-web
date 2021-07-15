@@ -50,7 +50,6 @@ export default class config extends PureComponent {
     let { row, addressValue, codeLen, data } = this.props
     let { formData, popupData } = this.state,
     address = addressValue
-    console.log(this.props.row, addressValue)
     // let initValue = {}
 
     // initValue.dataValue = address
@@ -67,32 +66,6 @@ export default class config extends PureComponent {
       ([0-9]|(1[0-5])) 1-15 位整数
     */
     //设置初始默认值
-    // if (address.trim() === '') {
-    //   if (popupData.protocolName === 'S7_TCP') {
-    //     if (row.dataType === '二进制变量') {
-    //       initValue.dataArea = '位'
-    //       initValue = {
-    //         dataArea: '位',
-    //         letter: 'M',
-    //         lettlesValue: 0,
-    //         DBNum: 1,
-    //         addressOffset: 1,
-    //         bit: 0,
-    //         len: 1,
-    //         addressType: '字节'
-    //       }
-    //     }
-    //   }
-
-    //   console.log(initValue)
-    //   this.setState(state=> {
-    //     return {
-    //       formData: initValue
-    //     }
-    //   })
-    //   this.addressForm.current.setFieldsValue(initValue)
-    //   return
-    // }
     if (popupData.protocolName === 'S7_TCP') {
       // 1: 数据区域  2. 寄存器字母块（M/DBX/I/Q/MB/DBB/IB/QB/MW/DBW/IW/QW/MD/DBD/ID/QD） 3.  DB号  4. 地址偏移量   5. 位   6. 长度   7.  地址类型 
       if (popupData.model === 'S7-200Smart') {  //S7_TCP S7-200Smart型号
@@ -321,16 +294,13 @@ export default class config extends PureComponent {
           let IReg = /^[I]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输入匹配正则
           let QReg = /^[Q]([0-9]{1,})([.]{1})([0-7]{1})$/ // 输出匹配正则
           if (bitReg.test(address)) {
-            console.log("-------------1")
             let arr =  address.match(bitReg) 
             formData.dataArea = '位'
             formData.letters = 'M'
             formData.lettlesValue = arr[1]
             formData.bit = arr[3]
             formData.showList = [1, 2, 5]
-            console.log(formData)
           } else if (dbReg.test(address)) {
-            console.log("-------------2")
             let arr =  address.match(dbReg) 
             formData.dataArea = 'DB'
             formData.DBNum = arr[2]
@@ -338,9 +308,7 @@ export default class config extends PureComponent {
             formData.lettlesValue = arr[6]
             formData.bit = arr[8]
             formData.showList = [1,2,3,5]
-            console.log(formData)
           } else if (IReg.test(address)) {
-            console.log("-------------3")
             let arr =  address.match(IReg) 
             formData.dataArea = '输入'
             formData.letters = 'I'
@@ -348,7 +316,6 @@ export default class config extends PureComponent {
             formData.bit = arr[3]
             formData.showList = [1,2,5]
           } else if (QReg.test(address)) {
-            console.log("-------------4")
             let arr =  address.match(QReg) 
             formData.dataArea = '输出'
             formData.letters = 'Q'
@@ -477,7 +444,6 @@ export default class config extends PureComponent {
             formData.showList = [1,4,7]
           } else if (dbReg.test(address)) {
             let arr =  address.match(dbReg) 
-            console.log(arr)
             formData.dataArea = 'DB'
             formData.DBNum = arr[2]
             formData.addressOffset = arr[6]
@@ -529,7 +495,6 @@ export default class config extends PureComponent {
             formData.showList = [1,4,6]
           } else if (dbReg.test(address)) {
             let arr =  address.match(dbReg) 
-            console.log(arr)
             formData.dataArea = 'DB'
             formData.DBNum = arr[2]
             formData.addressOffset = arr[6]
@@ -563,7 +528,6 @@ export default class config extends PureComponent {
             formData.showList = [1,4,6]
           } else if (dbReg.test(address)) {
             let arr =  address.match(dbReg) 
-            console.log(arr)
             formData.dataArea = 'DB'
             formData.DBNum = arr[2]
             formData.addressOffset = arr[6]
@@ -666,7 +630,6 @@ export default class config extends PureComponent {
           formData.showList = [1,2]
         } else if (IReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(IReg) 
-          console.log(arr)
           formData.dataArea = '输入寄存器'
           formData.address = parseInt(arr[1])
           formData.bit = arr[3]
@@ -822,7 +785,6 @@ export default class config extends PureComponent {
   
         if (DReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(DReg)
-          console.log(arr) 
           formData.dataArea = '数据寄存器（D）'
           formData.address = arr[1]
           formData.len = popupData.dataLen
@@ -860,7 +822,6 @@ export default class config extends PureComponent {
   
         if (DReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(DReg)
-          console.log(arr) 
           formData.dataArea = '数据寄存器（D）'
           formData.address = arr[1]
           formData.showList = [1,2]
@@ -945,7 +906,6 @@ export default class config extends PureComponent {
           formData.showList = [1,2,3]
         } else if (TNReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(TNReg) 
-          console.log(arr)
           formData.dataArea = '定时器（当前值）（TN）'
           formData.address = parseInt(arr[2])
           formData.bit = arr[4]
@@ -983,7 +943,6 @@ export default class config extends PureComponent {
           formData.showList = [1,2,4]
         } else if (TNReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(TNReg) 
-          console.log(arr)
           formData.dataArea = '定时器（当前值）（TN）'
           formData.address = parseInt(arr[2])
           formData.len = popupData.dataLen
@@ -1019,7 +978,6 @@ export default class config extends PureComponent {
           formData.showList = [1,2]
         } else if (TNReg.test(popupData.dataValue)) {
           let arr =  popupData.dataValue.match(TNReg) 
-          console.log(arr)
           formData.dataArea = '定时器（当前值）（TN）'
           formData.address = parseInt(arr[2])
           formData.showList = [1,2]
@@ -1770,8 +1728,6 @@ export default class config extends PureComponent {
           formData.showList = formData.showList.length === 0 ?  [1,4,6,7] : formData.showList
         }
       }
-      console.log(formData.showList, formData, popupData.dataType)
-      // this.renderS7_TCPHTML(formData.showList, formData, popupData.dataType)
       this.setState(state=>{
         return {
           formData,
@@ -1967,7 +1923,6 @@ export default class config extends PureComponent {
             obj.letters = 'M'
             obj.showList = [1,2,5]
           } else if (e === 'DB') {
-            console.log("........")
             obj.letters = 'DBX'
             obj.showList = [1,2,3,5]
           } else if (e === '输入') {
@@ -2032,7 +1987,6 @@ export default class config extends PureComponent {
               obj.showList = [1,4,7]
             } else if (e === 'DB') {
               obj.showList = [1,3,4,7]
-              console.log(obj)
             } else if (e === '输入') {
               obj.showList = [1,4,7]
             } else if (e === '输出') {
@@ -2165,8 +2119,6 @@ export default class config extends PureComponent {
   }
 
   blurData = (e, prop, protocal)=>{
-
-    console.log(e, prop, protocal)
   }
 
   arrayEqual = (arr1, arr2)=> {
@@ -2184,7 +2136,6 @@ export default class config extends PureComponent {
     let { popupData } = this.state
     // 协议名称： S7_TCP   Modbus_TCP  OPC_DA  OPC_UA  MC3E_Binary_Ethernet  MCA1E_Binary_Ethernet  Fins_TCP
     let addressData = JSON.parse(JSON.stringify(Object.assign(this.state.formData, val)))
-    console.log(addressData)
     if (popupData.protocolName === 'S7_TCP') {
       // 1: 数据区域  2. 寄存器字母块（M/DBX/I/Q/MB/DBB/IB/QB/MW/DBW/IW/QW/MD/DBD/ID/QD） 3.  DB号  4. 地址偏移量   5. 位   6. 长度   7.  地址类型 
       /* 根据showList中的代码块  处理生成的变量 */
@@ -2198,7 +2149,6 @@ export default class config extends PureComponent {
         popupData.dataValue = `${addressData.dataArea + addressData.DBNum}.${addressData.letters + addressData.lettlesValue}`
       } else if (arrayEqual(addressData.showList, [1,4,7])) {
         if (addressData.dataArea === '位') {
-          console.log(addressData.addressType === "字")
           if (addressData.addressType === '字节') {
             popupData.dataValue = `MB${addressData.addressOffset}`
           } else if (addressData.addressType === '字') {
@@ -2583,7 +2533,6 @@ export default class config extends PureComponent {
         }
       }
     }
-    console.log(popupData.dataValue, addressData.dataArea)
     return ({
       address: popupData.dataValue,
       stringLength: addressData.len+""
@@ -2591,13 +2540,11 @@ export default class config extends PureComponent {
   }
 
   onFinish = (val) => {
-    console.log(val)
     this.props.onFinish(this.confirmPop(val), this.props.row);
   }
 
   render() {
     let {type, formData, popupData} = this.state
-    console.log(formData)
     let items = formData.showList || []; 
     let types = ['有符号8位整型','有符号16位整型','有符号32位整型','有符号64位整型','无符号8位整型','无符号16位整型','无符号32位整型','无符号64位整型','F32位浮点数IEEE754','F64位浮点数IEEE754', '字符串']
     let allArea = ['CIO','WR','HR','AR','TIM/CNT(Complettion Flag)', 'TIM/CNT(PV)', 'DM','EM current bank','EM bank 0','EM bank 1','EM bank 2','EM bank 3','EM bank 4','EM bank 5','EM bank 6','EM bank 7','EM bank 8','EM bank 9','EM bank A','EM bank B','EM bank C','EM bank D',
@@ -2605,7 +2552,6 @@ export default class config extends PureComponent {
     let binaryarea = allArea.filter(f => f !== 'TIM/CNT(PV)')
     let bitArea = allArea.filter(f => f !== 'TIM/CNT(Complettion Flag)')
     let otherArea = allArea.filter(f => f !== 'TIM/CNT(Complettion Flag)').filter(f => f !== 'TIM/CNT(PV)')
-    console.log(popupData.protocolName, items)
 
     return (
       <Form onFinish={this.onFinish} ref={this.addressForm} initialValues={this.state.formData}>

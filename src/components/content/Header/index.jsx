@@ -86,7 +86,6 @@ class PageHeader extends PureComponent {
         key: "restart",
         onClick() {
           RestartIoT().then(res => {
-            console.log(res)
             if (res.code === 0) {
               that.setState({
                 status: 1
@@ -103,7 +102,6 @@ class PageHeader extends PureComponent {
         key: "start",
         onClick() {
           StartIOT().then(res => {
-            console.log(res)
             if (res.code === 0) {
               that.setState({
                 status: 1
@@ -121,7 +119,6 @@ class PageHeader extends PureComponent {
         onClick() {
           StopIOT().then(res => {
             if (res.code === 0) {
-              console.log(res)
               that.setState({
                 status: 0
               }, () => {
@@ -153,7 +150,7 @@ class PageHeader extends PureComponent {
           <label className="equ-tags">
             {/* <span className={`iot-status ${this.state.status === 1 ? 'iot-status-normal' : (this.state.status === 2 ? 'iot-status-danger' : 'iot-status-disable')}`}></span> */}
             <img src={this.props.equ} className="header-equ" alt="equ"  />
-            <span className="equ-name">{this.state.currentEqu}</span>
+            <span className="equ-name" title={this.state.currentEqu}>{this.state.currentEqu}</span>
             {<Dropdown overlay={this.menu} trigger={['click']} placement="bottomCenter" arrow>
               <div className="equ-option"></div>
             </Dropdown>}

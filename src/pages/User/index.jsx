@@ -46,12 +46,10 @@ class UserList extends PureComponent {
 
   //查询
   search = (res) => {
-    console.log(res)
     this.GetUserList(res)
   }
   addUserForm = (res) => {
     AddUser(res).then(res => {
-      console.log(res)
       if (res.code === 0) {
         message.info("添加成功")
         this.GetUserList("");

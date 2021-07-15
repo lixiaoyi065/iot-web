@@ -2,6 +2,7 @@ import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Table, Input, Form, Select, Button } from 'antd';
 import { Resizable } from 'react-resizable';
 import ResizeObserver from 'rc-resize-observer';
+// import { debounce } from "lodash";
 import PubSub from 'pubsub-js'
 import "./index.less"
 
@@ -76,7 +77,7 @@ const EditableCell = ({
             return isSame = gist[i][dataIndex] !== val
           }
         }
-      }
+      } 
     }
     return isSame
   }
@@ -232,10 +233,11 @@ const EditableCell = ({
     `}>{childNode}</td>;
 };
 
-class EditableTable extends React.Component {
+class EditableTable extends React.PureComponent {
   constructor(props) {
     super(props);
     this.ref = React.createRef();
+    this.timeout = null;
     this.state = {
       height: 0,
       dataSource: [],
@@ -243,7 +245,8 @@ class EditableTable extends React.Component {
       changeTags: false,
       columns: this.props.columns,
       tableWidth: 0,
-      tableHeight: 0
+      tableHeight: 0,
+      preTime: props.preTime,
     };
   }
 
@@ -256,6 +259,10 @@ class EditableTable extends React.Component {
       this.setState({ changeTags: data })
     })
   }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return false 
+  // }
 
   componentWillUnmount() {
     PubSub.unsubscribe("changeTags")

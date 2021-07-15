@@ -1,0 +1,70 @@
+.ant-table-header{
+  overflow-y: scroll!important;
+}
+.virtual-table .ant-table-container:before,
+.virtual-table .ant-table-container:after {
+  display: none;
+}
+.virtual-table-cell {
+  box-sizing: border-box;
+  padding: 0 19px;
+  line-height: 43px;
+  border: 1px solid;
+  border: 0;
+  color: #252525;
+  border-bottom: 1px solid #f0f0f0;
+  background: #FFF;
+  overflow: hidden;
+
+  div{
+    word-break: keep-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+.virtual-table-cell-odd{
+  background: #f5f7fc;
+}
+.virtual-table-cell-even{
+  background: #fff;
+}
+
+[data-theme="dark"]  .virtual-table-cell {
+  box-sizing: border-box;
+  padding: 16px;
+  border-bottom: 1px solid #303030;
+  background: #141414;
+}
+.virtual-table .ant-table table {
+  visibility: visible;
+}
+
+.react-resizable {
+     
+  position: relative;
+  background-clip: padding-box;
+}
+.react-resizable-handle {
+     
+  position: absolute;
+  width: 10px;
+  height: 100%;
+  bottom: 0;
+  right: -5px;
+  cursor: col-resize;
+  z-index: 1;
+}
+
+.no-data{
+  position: relative;
+  color: #999;
+
+  &::before{
+    content: "暂无数据";
+    position: absolute;
+    left: 50%;
+    top: 50px;
+    transform: translateX(-50%);
+  }
+}

@@ -8,7 +8,7 @@ import {
 } from '@microsoft/signalr';
 import PubSub from "pubsub-js";
 
-import DataTable from 'components/common/Table'
+import DataTable from 'components/common/Table/index2.js'
 import ZTree from 'components/common/Ztree'
 import Search from './components/Search'
 
@@ -217,7 +217,12 @@ class RealTime extends PureComponent{
   }
   onSelect = (selectRows, row) => {
   }
-
+  render_ = (text, title, data) => {
+    if (title === '操作') {
+      return <span>修改</span>;
+    }
+    return <div>{text}</div>
+  }
   render() {
     return (
       <div className={`antProPageContainer ${ this.state.collasped ? 'foldToLeft' : "" }`}>
@@ -249,41 +254,37 @@ class RealTime extends PureComponent{
               dataSource={this.state.dataSource}
               loadMore={this.loadMore}
               count={this.state.count}
+              render={this.render_}
+              scroll={{y: 500,x: 1435}}
               columns={[
               {
                 title: '变量名',
                 dataIndex: 'name',
-                width: 150,
                 ellipsis: true
               },
               {
                 title: '变量描述',
                 dataIndex: 'desc',
-                width: 200,
                 ellipsis: true
               },
               {
                 title: '数据类型',
                 dataIndex: 'dataType',
-                width: 200,
                 ellipsis: true
               },
               {
                 title: '变量地址',
                 dataIndex: 'address',
-                width: 150,
                 ellipsis: true
               },
               {
                 title: '变量值',
                 dataIndex: 'value',
-                width: 100,
                 ellipsis: true
               },
               {
                 title: '时间戳',
                 dataIndex: 'time',
-                width: 180,
                 ellipsis: true
               }
             ] }/>

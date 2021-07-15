@@ -75,4 +75,14 @@
 .ant-table-thead > tr > th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before{
   background-color: rgba(255, 255, 255, 0.5);
   width: 2px;
+  height: 42px;
+}
+.ant-table-cell{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: keep-all;
+}
+.ant-table-selection-column{
+  text-overflow: unset;
 }

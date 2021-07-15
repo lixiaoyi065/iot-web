@@ -4,7 +4,7 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import project from "assets/img/operation/project.png";
 
 import { GetSerialNumber, GetAuthState, UploadAuthFile } from "api/authorization";
-import { converTime } from 'utils'
+import { converTime, getCookie } from 'utils'
 
 class AuthorizationPane extends PureComponent{
   state = {
@@ -21,7 +21,6 @@ class AuthorizationPane extends PureComponent{
   //获取产品序列号
   getSerialNumber = (show = true) => {
     GetSerialNumber().then(res => {
-      console.log(res)
       if (res.code === 0) {
         this.setState({nodeID: res.data})
         if (show) {
@@ -41,7 +40,6 @@ class AuthorizationPane extends PureComponent{
   //更新授权状态
   upDateState = (show = true) => {
     GetAuthState().then(res => {
-      console.log("GetAuthState:====", res)
       if (res.code === 0) {
         if (show) {
           message.info("刷新成功")
@@ -65,11 +63,9 @@ class AuthorizationPane extends PureComponent{
     e.preventDefault();
     const formdata = new FormData();
     formdata.append('files', e.target.files[0]);
-    console.log(formdata)
     UploadAuthFile({
       formData: formdata
     }).then(res => {
-      console.log(res)
       if (res.code === 0) {
         this.setState(state => {
           return {
@@ -80,7 +76,11 @@ class AuthorizationPane extends PureComponent{
           this.upDateState();
         })
       } else {
-        message.error(res.mag)
+        this.setState({
+          status: "未激活",
+          time: ""
+        })
+        message.error(res.msg)
       }
     })
   }
@@ -98,7 +98,9 @@ class AuthorizationPane extends PureComponent{
             <div className="form-item">
               <label className="form-item-label">节点ID:</label>
               <span className="form-item-val">{this.state.nodeID}</span>
-              <Button className="ant-btn-opt-normal" onClick={ this.getSerialNumber }>生成产品序列号</Button>
+              {
+                getCookie("userName") === "SuperAdmin" ? <Button className="ant-btn-opt-normal" onClick={ this.getSerialNumber }>生成产品序列号</Button> : <></>
+              }
               <CopyToClipboard onCopy={this.copySerialNumber} text={ this.state.nodeID }>
                 <Button className="ant-btn-opt-normal">复制产品序列号</Button>
               </CopyToClipboard>

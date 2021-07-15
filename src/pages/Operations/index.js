@@ -40,7 +40,6 @@ class OperationsPane extends PureComponent {
   }
 
   onProjectFinish = (res) => {
-    console.log(res)
     if (res.verificationCode === "") {
       message.error("请输入验证码")
       return
