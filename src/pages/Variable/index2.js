@@ -56,6 +56,7 @@ class RealTime extends PureComponent{
     opcConfigVisible: false,
     opcConfigContent: ""
   }
+  tableRef = React.createRef();
   searchRef = React.createRef();
   componentDidMount() {
     this.getTreeStructure();
@@ -443,20 +444,33 @@ class RealTime extends PureComponent{
   }
   //点击节点触发函数
   onSelect = (res, info) => {
+    let { dataSource, gist} = this.state
     this.setState({selectedKeys: [info.node.key]})
     let tags = {
       nodeId: info.node.key,
       type: info.node.nodeType
     }
+    let isEdit = false
+    dataSource.forEach((item, index) => {
+      if (index <= gist.length-1) {
+        for (let val in item) {
+          if (item[val] !== gist[index][val]) {
+            isEdit = true
+            return
+          }
+        }
+      } else {
+        isEdit = true
+      }
+    })
     //当前节点存在未保存的变量，提示是否继续下面的操作
-    if (this.state.modifyTagsList.length > 0) {
+    if (isEdit) {
       this.confirm('当前节点存在未保存的变量，是否继续？',()=>{
-        this.setState({modifyTagsList: []},()=>{
-          this.initTagList(tags,info)
-        })
+        this.initTagList(tags,info)
       })
     } else {
-      this.initTagList(tags,info)
+      this.initTagList(tags, info)
+      this.setState({selectedRowKeys: []})
     }
   }
   //初始加载变量列表
@@ -594,9 +608,38 @@ class RealTime extends PureComponent{
     })
   }
   //数据表格选中的项
-  onSelectChange = (selectedRowKeys) => {
-    this.setState({ selectedRowKeys });
-    // this.setState({selectedRowKeys: [selectedRowKeys, selectedRows.id]})
+  onSelectChange = (key) => {
+    if (key === "all") {
+      if (this.state.selectedRowKeys.length === 0) {
+        let allKeys = []
+        this.setState(state => {
+          state.dataSource.forEach(item => {
+            allKeys.push(item.key)
+          })
+
+          return {
+            selectedRowKeys: allKeys
+          }
+        })
+      } else {
+        this.setState({selectedRowKeys: []})
+      }
+    } else {
+      this.setState(state => {
+        let idx = state.selectedRowKeys.indexOf(key)
+        if ( idx < 0) {
+          return {
+            selectedRowKeys: [...state.selectedRowKeys, key]
+          }
+        } else {
+          state.selectedRowKeys.splice(idx, 1)
+
+          return {
+            selectedRowKeys: state.selectedRowKeys
+          }
+        }
+      });
+    }
   }
   //加载更多
   loadMore = () => {
@@ -890,21 +933,29 @@ class RealTime extends PureComponent{
   tableColums = (activeNodeType) => {
     let columArr = [
       {
+        title: '全选',
+        dataIndex: 'checkbox',
+        width: 0.1,
+        editable: false,
+      },{
         title: '序号',
         dataIndex: 'no',
-        width: 50,
+        width: 0.1,
         editable: false
       },{
         title: '变量名',
+        width: 0.2,
         dataIndex: 'name',
         editable: true,
       }, {
         title: '变量描述',
         dataIndex: 'desc',
+        width: 0.2,
         editable: true,
       }, {
         title: '数据类型',
         dataIndex: 'dataType',
+        width: 0.2,
         type: "select",
         content: this.state.tableDataTypes,
         editable: true,
@@ -915,12 +966,13 @@ class RealTime extends PureComponent{
       columArr.push({
         title: '最大值',
         dataIndex: 'max',
+        width: 0.2,
         editable: true,
       },
       {
         title: '最小值',
         dataIndex: 'min',
-        width: 100,
+        width: 0.2,
         editable: true,
       })
     } else if (activeNodeType === 3 || activeNodeType === 4) {
@@ -928,17 +980,20 @@ class RealTime extends PureComponent{
       columArr.push({
         title: '变量地址',
         dataIndex: 'address',
+        width: 0.2,
         editable: true,
         type: "input-group",
       },
       {
         title: '字符长度',
         dataIndex: 'stringLength',
+        width: 0.2,
         editable: true,
       },
       {
         title: '缩放比',
         dataIndex: 'zoom',
+        width: 0.2,
         editable: true,
       })
     }
@@ -1360,7 +1415,7 @@ class RealTime extends PureComponent{
             />
             <div className="tableContain">
               <EditableTable
-                
+                ref={ this.tableRef }
                 key={ this.state.activeNode }
                 pageIndex={this.state.pageIndex}
                 gist={gist}
@@ -1376,10 +1431,11 @@ class RealTime extends PureComponent{
                 rowKey={record => {
                   return record.id
                 }}
+                selectedRowKeys={this.state.selectedRowKeys}
+                onSelectChange={this.onSelectChange}
                 handleSave={this.handleSave}
                 addressSearch={ debounce(this.addressSearch,500) }
                 loading={this.state.tableLoading}
-                activeNodeType={activeNodeType}
                 columns={this.tableColums(activeNodeType).map(el => {
                   return {
                     title: el.title,
@@ -1415,7 +1471,7 @@ class RealTime extends PureComponent{
             }
           </Modal>
           <Modal
-            width="750px"
+            width="900px"
             bodyStyle={{padding: "30px 30px 20px"}}
             maskClosable={false}
             title={this.state.title}

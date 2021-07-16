@@ -59,7 +59,7 @@ module.exports = override(
       "@table-header-bg": "#4799ED",
       "@table-header-color": "#fff",
       "@table-selected-row-bg": "transparent",
-      "@table-row-hover-bg": "#E4EEFF",
+      "@table-row-hover-bg": "initial",
       "@table-border-radius-base": 0,
       "@table-selected-row-hover-bg": "initial",
 

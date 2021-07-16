@@ -237,7 +237,6 @@ class EditableTable extends React.Component {
         ...nextColumns[index],
         width: size.width,
       };
-      console.log(state.tableWidth, widthGroup[index])
       return {
         columns: nextColumns,
         tableWidth: state.tableWidth + size.width - widthGroup[index]
@@ -276,7 +275,6 @@ class EditableTable extends React.Component {
           columnCount={mergedColumns.length}
           columnWidth={(index) => {
             const { width } = mergedColumns[index];
-            console.log(width)
             this.setState(state => {
               return { cellWidth: [state.cellWidth, width] }
             })

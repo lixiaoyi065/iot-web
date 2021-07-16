@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
-import { Button, Tree, Table, message } from 'antd'
+import { Button, Table, Tree, message } from 'antd'
+// import Table from 'components/common/Table'
 import "./index.less"
 
 import { InitOPCUaWindows, GetOPCUaNodes } from 'api/variable'
@@ -107,7 +108,6 @@ export default class config extends PureComponent {
     {
       title: '',
       dataIndex: 'key',
-      width: "60px",
       ellipsis: true,
       render: (key, row, i)=>{
         return i+1
@@ -161,9 +161,11 @@ export default class config extends PureComponent {
             treeData={this.state.OPC_Tree} />
         </div>
         <div className="table-list">
-          <Table columns={this.columns}
+          <Table
+            key="opc_ua-table"  
+            columns={this.columns}
             pagination={false}
-            scroll={{ y: 463 }}
+            scroll={{ x: 500,y: 463 }}
             rowSelection={{
               columnWidth: "50px",
               selectedRowKeys: this.state.selectedRowKeys,

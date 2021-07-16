@@ -15,7 +15,7 @@ export function addressVerify(value, obj) {
       })
       resolve(false)
     } else {
-       await VerifyAddress(obj).then(res => {
+      await VerifyAddress(obj).then(res => {
         if (res.code !== 0) {
           message.error(res.msg)
           PubSub.publish("canSubmit", {

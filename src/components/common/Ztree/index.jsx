@@ -28,6 +28,10 @@ class ZTree extends PureComponent {
     })
   }
 
+  componentWillUnmount() {
+    PubSub.unsubscribe("deviceStatus")
+  }
+
   operationNode = (e, type) => {
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();

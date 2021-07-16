@@ -73,7 +73,7 @@ class Search extends PureComponent {
         </Form>
         <div className="option-area" onClick={this.props.optionClick}>
           <Button className="ant-button-normal"
-            onClick={this.props.saveList}
+            onClick={debounce(this.props.saveList, 500)}
             disabled={this.props.type === 1 || this.props.activeNode === "" ? true : false}>保存</Button>
           <Button type="primary" onClick={this.props.resetTags} style={{ margin: 0 }}
             disabled={this.props.activeNode === "" ? true : false}>重置</Button>

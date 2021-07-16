@@ -1,114 +1,190 @@
-.ant-table-header {
-  overflow-y: scroll !important;
-}
-
-.virtual-table .ant-table-container:before,
-.virtual-table .ant-table-container:after {
-  display: none;
-}
-
-.virtual-table-cell {
-  box-sizing: border-box;
-  padding: 0 19px;
-  line-height: 43px;
-  border: 1px solid;
-  border: 0;
-  color: #252525;
-  border-bottom: 1px solid #f0f0f0;
-  background: #FFF;
-  overflow: hidden;
-
-  .virtual-table-cell-item {
-    width: 100%;
-    height: 100%;
-    word-break: keep-all;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+.table-contain{
+  
+  .ant-table-header {
+    overflow-y: scroll !important;
+  }
+  .ant-checkbox{
+    left: 1px;
+  }
+  .virtual-table .ant-table-container:before,
+  .virtual-table .ant-table-container:after {
+    display: none;
+  }
+  
+  .virtual-table-cell {
+    box-sizing: border-box;
+    padding: 0 19px;
+    line-height: 43px;
+    border: 1px solid;
+    border: 0;
+    color: #252525;
+    border-bottom: 1px solid #f0f0f0;
+    background: #FFF;
     overflow: hidden;
-
-    .virtual-table-cell-select {
-      display: flex;
+  
+    .virtual-table-cell-item {
       width: 100%;
       height: 100%;
+      word-break: keep-all;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       overflow: hidden;
-
-      .table-cell-input {
-        flex: 1;
-        text-overflow: ellipsis;
+  
+      .virtual-table-cell-select {
+        display: flex;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
+  
+        .table-cell-input {
+          padding-right: 8px;
+          flex: 1;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+  
+        .addon-btn {
+          margin-top: 5px;
+          padding: 0 5px;
+          background: #fff;
+          height: 32px;
+          line-height: 24px;
+          border-radius: 4px;
+          background: #f5f7fc;
+          color: #666;
+          letter-spacing: 1px;
+          font-weight: bolder;
+          border: 1px solid #d3d3d3;
+          letter-spacing: 3px;
+          vertical-align: middle;
+          cursor: pointer;
+        }
       }
 
-      .addon-btn {
-        margin-top: 5px;
-        padding: 5px;
-        background-color: #fff;
-        height: 32px;
-        line-height: 32px;
-        border-radius: 4px;
-        background: #f5f7fc;
-        color: #666;
-        letter-spacing: 1px;
-        font-weight: bolder;
-        border: 1px solid #d3d3d3;
-        vertical-align: middle;
+      &.virtual-table-cell-edit{
+        cursor: pointer;
+
+        &:hover{
+          &::before{
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            right: 0px;
+            height: 32px;
+            border-radius: 3px;
+            border: 1px solid #4799ED;
+            z-index: 0;
+          }
+        }
       }
+
+      &.virtual-table-cell-select-edit{
+        cursor: pointer;
+        &:hover{
+          &::before{
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            right: 54px;
+            height: 32px;
+            border-radius: 3px;
+            border: 1px solid #4799ED;
+            z-index: 0;
+          }
+        }
+
+        .virtual-table-cell-select{
+          position: relative;
+          z-index: 1;
+        }
+      }
+
     }
   }
-}
-
-.virtual-table-cell-odd {
-  background: #f5f7fc;
-}
-
-.virtual-table-cell-even {
-  background: #fff;
-}
-
-[data-theme="dark"] .virtual-table-cell {
-  box-sizing: border-box;
-  padding: 16px;
-  border-bottom: 1px solid #303030;
-  background: #141414;
-}
-
-.virtual-table .ant-table table {
-  visibility: visible;
-}
-
-.react-resizable {
-
-  position: relative;
-  background-clip: padding-box;
-}
-
-.react-resizable-handle {
-
-  position: absolute;
-  width: 10px;
-  height: 100%;
-  bottom: 0;
-  right: -5px;
-  cursor: col-resize;
-  z-index: 1;
-}
-
-.no-data {
-  position: relative;
-  color: #999;
-
-  &::before {
-    content: "暂无数据";
-    position: absolute;
-    left: 50%;
-    top: 50px;
-    transform: translateX(-50%);
+  
+  .virtual-table-cell-odd {
+    background: #f5f7fc;
   }
-}
+  
+  .virtual-table-cell-even {
+    background: #fff;
+  }
+  
+  [data-theme="dark"] .virtual-table-cell {
+    box-sizing: border-box;
+    padding: 16px;
+    border-bottom: 1px solid #303030;
+    background: #141414;
+  }
+  
+  .virtual-table .ant-table table {
+    visibility: visible;
+  }
+  
+  .react-resizable {
+  
+    position: relative;
+    background-clip: padding-box;
+  }
+  
+  .react-resizable-handle {
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    bottom: 0;
+    right: -5px;
+    cursor: col-resize;
+    z-index: 1;
+  }
+  
+  .no-data {
+    position: relative;
+    color: #999;
+  
+    &::before {
+      content: "暂无数据";
+      position: absolute;
+      left: 50%;
+      top: 50px;
+      transform: translateX(-50%);
+    }
+  }
+  
+  .edit-input {
+    position: absolute;
+    z-index: 99;
+    margin-top: 6px;
+    padding: 0 10px;
+    background: #F5F8FE;
+    border: 1px solid #4799ED;
+    border-radius: 3px;
+  }
+  .edit-select{
+    position: absolute;
+    z-index: 99;
+    margin-top: 6px;
+    padding: 0;
+    background: #F5F8FE;
+    border: 1px solid #4799ED;
+    border-radius: 3px;
+    
+    .ant-select-selector{
+      padding: 0 9px;
+    }
+  }
 
-.edit-input {
-  position: absolute;
-  z-index: 99;
-  padding: 20px;
-  background: #F5F8FE;
-  border: 1px solid #4799ED;
+  .effective-editor {
+    color: #F5AB3A;
+    
+    .ant-input,
+    .ant-select-selection-item,
+    .editable-cell-value-wrap {
+      color: #F5AB3A;
+    }
+  }
+  .ant-pagination{
+    display: none;
+  }
 }

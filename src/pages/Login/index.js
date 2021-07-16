@@ -63,7 +63,7 @@ class Login extends Component {
     return (
       <div className="login">
         <div className="login-pane">
-          <Form className="card" onFinish={this.onFinish} initialValues={{user: "SuperAdmin", password: "SYC888888"}}>
+          <Form className="card" onFinish={this.onFinish} initialValues={{user: "", password: ""}}>
             <div className="card-head">盛云圈IOT平台</div>
             <Form.Item name="user" className="card-item" rules={[{
               required: true,

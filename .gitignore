@@ -5,4 +5,5 @@ build/asset-manifest.json
 build/index.html
 build/index.html
 build/asset-manifest.json
-build/*
+build
+build/static
