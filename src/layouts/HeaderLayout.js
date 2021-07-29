@@ -6,6 +6,6 @@ import Equ from "assets/img/index/equ.png"
 export default function PageHeader(){
   
   return (
-    <Header logo={Logo} equ={Equ} name="盛原成IOT平台"/>
+    <Header logo={Logo} equ={Equ} name="云萃SIOT"/>
   )
 }

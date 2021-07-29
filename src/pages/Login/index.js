@@ -8,6 +8,7 @@ import "./index.less"
 
 import user from 'assets/img/login/user.png'
 import password from 'assets/img/login/password.png'
+import logo from 'assets/img/login/logo.png'
 
 class Login extends Component {
   state = {
@@ -50,10 +51,12 @@ class Login extends Component {
             setCookie('userName', e.user, 1)
             this.jumpBack()
         } else {
+          message.destroy()
           message.error("用户名或密码不正确")
         }
       })
     } catch(err) {
+      message.destroy()
       this.setState({loading: false})
       message.error(err)
     }
@@ -63,8 +66,9 @@ class Login extends Component {
     return (
       <div className="login">
         <div className="login-pane">
+          <div className="card-logo"><img src={logo}/></div>
           <Form className="card" onFinish={this.onFinish} initialValues={{user: "", password: ""}}>
-            <div className="card-head">盛云圈IOT平台</div>
+            <div className="card-head">云萃SIOT</div>
             <Form.Item name="user" className="card-item" rules={[{
               required: true,
               message: "请输入用户名称"

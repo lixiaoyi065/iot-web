@@ -1,11 +1,11 @@
 import React from 'react';
 import { Input, Select, Checkbox, Button } from 'antd'
-import _, { debounce } from "lodash";
+import { debounce } from "lodash";
 import {VariableSizeGrid as Grid } from 'react-window';
 import ResizeObserver from 'rc-resize-observer';
 import {Resizable } from 'react-resizable';
 import { Table } from 'antd';
-import $, { Callbacks } from 'jquery'
+import $ from 'jquery'
 
 import { addressVerify, descVerify, nameVerify, verifyMax, verifyMin } from 'components/common/DataTable/verify'
 

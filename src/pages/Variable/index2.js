@@ -687,6 +687,7 @@ class RealTime extends PureComponent{
 
   //保存变量列表
   saveList = () => {
+    message.destroy()
     let { dataSource, gist } = this.state;
     let modifyDb = [], modifyPhy = [];
     dataSource.forEach((item, index) => {
@@ -814,6 +815,7 @@ class RealTime extends PureComponent{
   }
   //删除变量
   delTags = () => {
+    message.destroy()
     if (this.state.selectedRowKeys.length === 0) {
       message.error("请选择要删除的变量")
       return

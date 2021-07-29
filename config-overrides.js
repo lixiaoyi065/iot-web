@@ -1,6 +1,27 @@
 //配置具体的修改规则
-const { override, fixBabelImports, addLessLoader, addWebpackAlias, addWebpackExternals } = require('customize-cra');
+const { override, fixBabelImports, addLessLoader, addWebpackAlias, addWebpackExternals, addWebpackPlugin } = require('customize-cra');
 const path = require("path")
+const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin')
+
+/**
+ * @param target: 要遍历的对象
+ * @param name: 插件名
+ * @param callback: 回调函数，第一个参数为该插件对象
+ * @return null
+ */
+ function invade(target, name, callback) {
+  target.forEach(
+    item => {
+      if (item.constructor.name === name) {
+        callback(item)
+      }
+    }
+  )
+}
+
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
 
 module.exports = override(
   fixBabelImports('import', {
@@ -82,5 +103,54 @@ module.exports = override(
   addWebpackExternals({
     // 注意对应的在public/index.html引入jquery的远程文件地址
     "jQuery": "jQuery"
-  })
+  }),
+  (config) => {
+    if (process.env.NODE_ENV === "production") {
+      config.devtool = false;
+
+      config.output.chunkFilename = config.output.chunkFilename.replace('.chunk', '')
+
+      invade(config.optimization.minimizer, 'TerserPlugin', (e) => {
+        e.options.extractComments = false
+        e.options.terserOptions.compress.drop_console = true
+      })
+      invade(config.plugins, 'MiniCssExtractPlugin', (e) => {
+        e.options.chunkFilename = e.options.chunkFilename.replace('.chunk', '')
+      })
+
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          libs: {
+            name: 'chunk-libs',
+            test: /[\\/]node_modules[\\/]/,
+            priority: 10,
+            chunks: 'initial' // only package third parties that are initially dependent
+          },
+          commons: {
+            name: 'chunk-commons',
+            test: resolve('src/components'), // can customize your rules
+            minChunks: 3, //  minimum common number
+            priority: 5,
+            reuseExistingChunk: true
+          }
+        }
+      }
+
+      config.plugins.push(
+        new ScriptExtHtmlWebpackPlugin(
+        {
+          // `runtime` must same as runtimeChunk name. default is `runtime`
+          inline: /runtime\..*\.js$/
+        })
+      )
+
+      config.optimization.runtimeChunk = 'single'
+
+    }
+
+    // fs.writeFileSync(`./config-${process.env.NODE_ENV}.json`, JSON.stringify(config))
+
+    return config
+  }
 );

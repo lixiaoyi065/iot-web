@@ -3,7 +3,7 @@ import { Table } from 'antd';
 import { Resizable } from 'react-resizable';
 import ResizeObserver from 'rc-resize-observer';
 
-import '../DataTable/index.less'
+import './index.less'
 
 const ResizeableTitle = props => {
   const { onResize, width, ...restProps } = props;

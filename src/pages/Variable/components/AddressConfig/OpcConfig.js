@@ -96,7 +96,8 @@ export default class config extends PureComponent {
             OPC_Table: this.tableDataProcess(res.data.table)
           })
         } else {
-          message.error(res)
+          console.log(res)
+          message.error(res.msg)
         }
         resolve();
       })

@@ -20,6 +20,7 @@ class AuthorizationPane extends PureComponent{
   
   //获取产品序列号
   getSerialNumber = (show = true) => {
+    message.destroy()
     GetSerialNumber().then(res => {
       if (res.code === 0) {
         this.setState({nodeID: res.data})
@@ -34,18 +35,21 @@ class AuthorizationPane extends PureComponent{
 
   //复制产品序列号
   copySerialNumber = () => {
+    message.destroy()
     message.info("已复制到剪切板")
   }
 
   //更新授权状态
   upDateState = (show = true) => {
+    message.destroy()
     GetAuthState().then(res => {
+      console.log(res)
       if (res.code === 0) {
         if (show) {
           message.info("刷新成功")
         }
-        let time = res.data.hasExpirationTime ? converTime(res.data.expirationTime, 10, " ") + "到期" : ""
-        let status = res.data.hasExpirationTime ? "已激活" : "未激活"
+        let time = res.data.hasExpirationTime ? converTime(res.data.expirationTime, 10, " ") + "到期" : res.data.isAuthorization ? "永久授权" : ""
+        let status = res.data.isAuthorization ? "已激活" : "未激活"
         this.setState({status: status, time: time})
       } else {
         message.error("更新错误: "+res.msg)
@@ -60,12 +64,14 @@ class AuthorizationPane extends PureComponent{
   }
 
   importProps = (e) => {
+    message.destroy()
     e.preventDefault();
     const formdata = new FormData();
     formdata.append('files', e.target.files[0]);
     UploadAuthFile({
       formData: formdata
     }).then(res => {
+      console.log(res)
       if (res.code === 0) {
         this.setState(state => {
           return {
@@ -116,7 +122,7 @@ class AuthorizationPane extends PureComponent{
             </div>
             <div className="form-item">
               <Button type="primary" onClick={this.exportAuth}>导入授权文件</Button>
-              <div className="tip">*请请联系广州盛原成科技有限公司，获取授权文件，激活软件</div>
+              <div className="tip">*请联系广州盛原成科技有限公司，获取授权文件，激活软件</div>
             </div>
           </div>
         </div>

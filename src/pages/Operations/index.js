@@ -40,6 +40,7 @@ class OperationsPane extends PureComponent {
   }
 
   onProjectFinish = (res) => {
+    message.destroy()
     if (res.verificationCode === "") {
       message.error("请输入验证码")
       return
@@ -81,6 +82,7 @@ class OperationsPane extends PureComponent {
 
   //复制连接信息
   copySerialNumber = () => {
+    message.destroy()
     message.info("已复制到剪切板")
   }
 

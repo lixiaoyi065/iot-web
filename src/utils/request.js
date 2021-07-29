@@ -2,13 +2,15 @@ import { message } from 'antd'
 import axios from 'axios'
 import {getCookie, setCookie} from 'utils'
 
+console.log(process.env)
 const service = axios.create({
-  baseURL: "/api",
-  // baseURL: "http://localhost:3000/api1/api",
+  baseURL:  process.env.NODE_ENV === 'production'? "/api": "/api1/api",
   timeout: 50000,
   async: true,
   //允许跨域
-  crossDomain: true, 
+  crossDomain: true,
+  retry: 4,
+  retryDelay: 1000
 })
 
 service.interceptors.request.use(
@@ -42,7 +44,17 @@ service.interceptors.response.use(
     }
   },
   error => {
-    if (error.response) {
+    const { config, code, msg } = error
+    console.log(config, code, message)
+    //请求超时
+    if (code === 'ECONNABORTED' || msg === 'Network Error'){
+      message.error(`请求超时，将在${ config.retryDelay / 1000}秒后重试`)
+      return new Promise(resolve => {
+          setTimeout(async _ => {
+              resolve(await service.request(config))
+              }, config.retryDelay) // 设置发送间隔
+          })
+    }else if (error.response) {
       switch (error.response.status) {
         case 401:
           setCookie('login', '', -1)

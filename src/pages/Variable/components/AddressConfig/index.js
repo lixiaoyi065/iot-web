@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Form, Select, Input, Button, message } from 'antd'
+import { Form, Select, Input, Button } from 'antd'
 import "./index.less"
 
 export default class config extends PureComponent {

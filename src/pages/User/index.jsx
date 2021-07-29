@@ -88,6 +88,7 @@ class UserList extends PureComponent {
   }
   //删除用户
   delUser = () => {
+    message.destroy();
     if (this.state.selectedRowKeys.length > 0) {
       Modal.confirm({
         title: "确认删除用户吗？",
